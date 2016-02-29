@@ -3,11 +3,13 @@ from django.utils.html import mark_safe
 from django import forms
 from .models import Department
 from .models import FormTemplate, FormData
-from .models import FormTemplateOptions, FormSet
+from .models import FormTemplateOptions, FieldSet
 from .models import FieldTemplate, FieldTemplateOptions
 
 
 class FieldTemplateOptionsInlineForm(forms.ModelForm):
+
+
 
     def __init__(self, *args, **kwargs):
         super(FieldTemplateOptionsInlineForm, self).__init__(*args, **kwargs)
@@ -28,9 +30,9 @@ class FieldTemplateOptionsInline(admin.StackedInline):
             try:
                 parent_obj_id = request.resolver_match.args[0]
                 _field = FieldTemplate.objects.get(id=parent_obj_id)
-                kwargs["queryset"] = FormSet.objects.filter(form_template=_field.form_template)
+                kwargs["queryset"] = FieldSet.objects.filter(form_template=_field.form_template)
             except IndexError:
-                kwargs["queryset"] = FormSet.objects.none()
+                kwargs["queryset"] = FieldSet.objects.none()
         return super(
             FieldTemplateOptionsInline, self).formfield_for_foreignkey(db_field, request, **kwargs)
 
@@ -45,9 +47,9 @@ class FieldTemplateAdmin(admin.ModelAdmin):
     inlines = [FieldTemplateOptionsInline,]
 
 
-class FormSetInline(admin.TabularInline):
+class FieldSetInline(admin.TabularInline):
 
-    model = FormSet
+    model = FieldSet
     show_change_link = True
     extra = 1
 
@@ -60,10 +62,15 @@ class FormTemplateOptionsInline(admin.StackedInline):
 
 class FormTemplateAdmin(admin.ModelAdmin):
 
-    inlines = [FormTemplateOptionsInline, FormSetInline, FieldTemplateInline,]
+    inlines = [FormTemplateOptionsInline, FieldSetInline, FieldTemplateInline,]
+
+
+class FormDataAdmin(admin.ModelAdmin):
+
+    readonly_fields = ["form_template", "data"]
 
 
 admin.site.register(Department, DepartmentAdmin)
 admin.site.register(FieldTemplate, FieldTemplateAdmin)
 admin.site.register(FormTemplate, FormTemplateAdmin)
-admin.site.register(FormData)
+admin.site.register(FormData, FormDataAdmin)

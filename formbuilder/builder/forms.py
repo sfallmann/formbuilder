@@ -10,17 +10,18 @@ def create_field(f):
     _autocomplete = "off"
 
     if hasattr(f, 'fieldtemplateoptions'):
-        _options = f.fieldtemplateoptions
-
+        options = f.fieldtemplateoptions
         if _options.label:
-            _label = _options.label
+            _label = options.label
         else:
             _label = ""
 
-        _placeholder = _options.placeholder
+        _placeholder = options.placeholder
 
-        if _options.autocomplete:
+        if options.autocomplete:
             _autocomplete = "on"
+
+        _placeholder = options.placeholder
 
     _attrs={
         'id': f.name.lower(),

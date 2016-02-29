@@ -1,11 +1,4 @@
-<<<<<<< HEAD
 Django==1.9
 Pillow==3.1.1
 psycopg2==2.6.1
-=======
-Django==1.9.2
-django-braces==1.8.1
-psycopg2==2.6.1
-six==1.10.0
->>>>>>> fa07aeb8f3c6cab5dbbed23d5eedf386894d07ab
 wheel==0.29.0

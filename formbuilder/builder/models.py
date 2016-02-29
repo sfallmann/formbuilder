@@ -114,10 +114,10 @@ class FormTemplateOptions(models.Model):
     )
 
 
-class FormSet(models.Model):
+class FieldSet(models.Model):
     form_template = models.ForeignKey(
         FormTemplate,
-        related_name="formsets",
+        related_name="fieldsets",
         on_delete=models.CASCADE,
     )
     name = models.CharField(
@@ -147,7 +147,6 @@ class FieldTemplate(models.Model):
     field_type = models.CharField(
         max_length=20, choices=FIELD_TYPE_CHOICES, default=input_types.TEXT)
     max_length = models.PositiveIntegerField(default=20, null=True)
-
     class Meta:
         unique_together = (("name", "form_template"),)
 
@@ -182,8 +181,8 @@ class FieldTemplateOptions(models.Model):
         max_length=50,
         blank=True,
     )
-    formset = models.ForeignKey(
-        FormSet,
+    fieldset = models.ForeignKey(
+        FieldSet,
         related_name="field_template_options",
         blank=True,
         null=True,
@@ -191,6 +190,7 @@ class FieldTemplateOptions(models.Model):
     )
     autocomplete = models.BooleanField(default=True)
     placeholder = models.TextField(blank=True)
+    required = models.BooleanField(default=True)
 
     class Meta:
         verbose_name = ""
@@ -211,3 +211,11 @@ class FormData(models.Model):
     data = JSONField()
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Form Response"
+        verbose_name_plural = "Form Responses"
+
+    def __str__(self):
+        return "%s Response: %s" % (
+            self.form_template.name, self.created.strftime("%A, %d. %B %Y %I:%M%p"))
