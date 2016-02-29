@@ -68,16 +68,12 @@ class FormTemplate(models.Model):
 
         Methods:
 
-            __str__(self):
-                returns the instance name
 
             get_json(self):
                 returns json serialization of the instance
 
             get_formfields(self):
                 returns all related FieldTemplate objects
-
-
     '''
 
     name = models.CharField(
@@ -97,7 +93,7 @@ class FormTemplate(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        return reverse('builder.views.json_formtemplate', args=[str(self.id)])
+        return reverse('builder.views.formtemplate_details', args=[str(self.id)])
 
     def as_dict(self):
         return get_dict(self)
@@ -219,3 +215,6 @@ class FormData(models.Model):
     def __str__(self):
         return "%s Response: %s" % (
             self.form_template.name, self.created.strftime("%A, %d. %B %Y %I:%M%p"))
+
+    def get_absolute_url(self):
+        return reverse('builder.views.formtemplate_results', args=[str(self.id)])

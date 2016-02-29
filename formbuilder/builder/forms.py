@@ -11,7 +11,7 @@ def create_field(f):
 
     if hasattr(f, 'fieldtemplateoptions'):
         options = f.fieldtemplateoptions
-        if _options.label:
+        if options.label:
             _label = options.label
         else:
             _label = ""
@@ -21,7 +21,6 @@ def create_field(f):
         if options.autocomplete:
             _autocomplete = "on"
 
-        _placeholder = options.placeholder
 
     _attrs={
         'id': f.name.lower(),
@@ -29,10 +28,11 @@ def create_field(f):
         'placeholder': _placeholder,
         'autocomplete': _autocomplete,
         'name': f.name.lower(),
-        'type': f.field_type
+        'type': f.field_type,
+        'required': options.required
     }
 
-    if f.field_type == input_types.TEXT:
+    if f.field_type == input_types.TEXT or f.field_type == input_types.NUMBER:
         return forms.CharField(
             max_length=f.max_length,
             widget=forms.TextInput(

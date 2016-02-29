@@ -14,12 +14,6 @@
 </head>
 
 <body>
-    <form action={{ form.get_absolute_url }} method="POST">
-        {% csrf_token %}
-        {{ form.as_p }}
 
-        {{ form.errors }}
-        <input type="submit" value="submit"/>
-    </form>
 </body>
 </html>
