@@ -1,4 +1,5 @@
 from django.test import TestCase
+<<<<<<< HEAD
 from django.core import serializers
 from .models import Department
 from .models import FormTemplate, FieldTemplate, FieldTemplateOptions
@@ -31,3 +32,7 @@ class FormTemplateTestCase(TestCase):
         print form.as_dict()
         print form.get_absolute_url()
         #print form.as_json()
+=======
+
+# Create your tests here.
+>>>>>>> fa07aeb8f3c6cab5dbbed23d5eedf386894d07ab

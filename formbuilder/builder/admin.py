@@ -1,4 +1,5 @@
 from django.contrib import admin
+<<<<<<< HEAD
 from django.utils.html import mark_safe
 from django import forms
 from .models import Department
@@ -67,3 +68,7 @@ admin.site.register(Department, DepartmentAdmin)
 admin.site.register(FieldTemplate, FieldTemplateAdmin)
 admin.site.register(FormTemplate, FormTemplateAdmin)
 admin.site.register(FormData)
+=======
+
+# Register your models here.
+>>>>>>> fa07aeb8f3c6cab5dbbed23d5eedf386894d07ab

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 """Builder app models"""
 from __future__ import unicode_literals
 from django.db import models
@@ -211,3 +212,10 @@ class FormData(models.Model):
     data = JSONField()
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
+=======
+from __future__ import unicode_literals
+
+from django.db import models
+
+# Create your models here.
+>>>>>>> fa07aeb8f3c6cab5dbbed23d5eedf386894d07ab

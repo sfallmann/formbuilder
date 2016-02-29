@@ -10,6 +10,7 @@ Class-based views
     1. Add an import:  from other_app.views import Home
     2. Add a URL to urlpatterns:  url(r'^$', Home.as_view(), name='home')
 Including another URLconf
+<<<<<<< HEAD
     1. Add an import:  from blog import urls as blog_urls
     2. Import the include() function: from django.conf.urls import url, include
     3. Add a URL to urlpatterns:  url(r'^blog/', include(blog_urls))
@@ -21,4 +22,14 @@ from builder import urls as builder_urls
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^builder/', include(builder_urls)),
+=======
+    1. Import the include() function: from django.conf.urls import url, include
+    2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
+"""
+from django.conf.urls import url
+from django.contrib import admin
+
+urlpatterns = [
+    url(r'^admin/', admin.site.urls),
+>>>>>>> fa07aeb8f3c6cab5dbbed23d5eedf386894d07ab
 ]

@@ -1,4 +1,5 @@
 from django.shortcuts import render
+<<<<<<< HEAD
 from django.http import JsonResponse, HttpResponse
 import json
 from .models import FormTemplate, FormData
@@ -24,3 +25,7 @@ def json_formtemplate(request, id):
         pass
 
     return render(request, 'builder/form.html', {"form": f},)
+=======
+
+# Create your views here.
+>>>>>>> fa07aeb8f3c6cab5dbbed23d5eedf386894d07ab
