@@ -138,4 +138,7 @@ target/
 
 # pyenv
 .python-version
->>>>>>> fa07aeb8f3c6cab5dbbed23d5eedf386894d07ab
+
+
+# Django migration folder
+migrations/
