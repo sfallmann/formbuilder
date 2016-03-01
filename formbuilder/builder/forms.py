@@ -5,41 +5,45 @@ from helper.constants import input_types
 
 def create_field(f):
 
-    _label = f.name.title()
-    _placeholder = ""
-    _autocomplete = "off"
+    options = f.fieldtemplateoptions
 
-    if hasattr(f, 'fieldtemplateoptions'):
-        options = f.fieldtemplateoptions
-        if options.label:
-            _label = options.label
-        else:
-            _label = ""
+    other_tags = [
+        input_types.TEXT_AREA
+    ]
 
-        _placeholder = options.placeholder
-
-        if options.autocomplete:
-            _autocomplete = "on"
+    if options.autocomplete:
+        autocomplete = "on"
+    else:
+        autocomlete = "off"
 
 
-    _attrs={
+    attrs={
         'id': f.name.lower(),
         'class': 'test',
-        'placeholder': _placeholder,
-        'autocomplete': _autocomplete,
+        'placeholder': options.placeholder,
+        'autocomplete': autocomplete,
         'name': f.name.lower(),
         'type': f.field_type,
         'required': options.required
     }
 
-    if f.field_type == input_types.TEXT or f.field_type == input_types.NUMBER:
-        return forms.CharField(
-            max_length=f.max_length,
-            widget=forms.TextInput(
-                attrs=_attrs
-            ),
-            label = _label
+    if f.field_type not in other_tags:
 
+        return forms.CharField(
+            max_length=options.max_length,
+            widget=forms.TextInput(
+                attrs=attrs
+            ),
+            label = options.label
+        )
+    elif f.field_type == input_types.TEXT_AREA:
+
+        return forms.CharField(
+            max_length=options.max_length,
+            widget=forms.Textarea(
+                attrs=attrs
+            ),
+            label = options.label
         )
 
 
@@ -49,10 +53,10 @@ class Form(forms.Form):
 
     def __init__(self, obj, *args, **kwargs):
         super(Form, self).__init__(*args, **kwargs)
-        _fields = obj.field_templates.all()
+        field_templates = obj.field_templates.all()
         self.get_absolute_url = obj.get_absolute_url
-        for _field in _fields:
-            self.fields[_field.name] = create_field(_field)
+        for template in field_templates:
+            self.fields[template.name] = create_field(template)
 
 
 

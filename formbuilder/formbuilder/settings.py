@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'django.contrib.admin',
+    'django.contrib.admindocs',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -138,7 +139,7 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
             'verbose': {
-                'format' : "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s\n\n",
+                'format' : "[%(asctime)s] %(levelname)s[%(name)s:%(lineno)s] %(message)s",
                 'datefmt' : "%d/%b/%Y %H:%M:%S"
             },
             'simple': {
@@ -146,28 +147,60 @@ LOGGING = {
             },
         },
     'handlers': {
-        'django_log': {
+
+        # Debug handlers
+        'django_debug': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': 'logs/django.log',
+            'filename': 'logs/django.debug.log',
             'formatter': 'verbose'
         },
-        'builder_log': {
+        'builder_debug': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': 'logs/builder.log',
+            'filename': 'logs/builder.debug.log',
             'formatter': 'verbose'
         },
+
+        # Info handlers
+        'django_info': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': 'logs/django.info.log',
+            'formatter': 'simple'
+        },
+        'builder_info': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': 'logs/builder.info.log',
+            'formatter': 'simple'
+        },
+
     },
     'loggers': {
+
+        # Debug loggers
         'django': {
-            'handlers':['django_log'],
+            'handlers':['django_debug'],
             'propagate': True,
             'level':'DEBUG',
         },
         'builder': {
-            'handlers': ['builder_log'],
+            'handlers': ['builder_debug'],
             'level': 'DEBUG',
         },
+
+        # Debug loggers
+        'django': {
+            'handlers':['django_info'],
+            'propagate': True,
+            'level':'INFO',
+        },
+        'builder': {
+            'handlers': ['builder_info'],
+            'level': 'INFO',
+        },
+
+
     }
 }

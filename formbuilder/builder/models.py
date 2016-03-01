@@ -1,7 +1,6 @@
-"""Builder app models"""
 from __future__ import unicode_literals
 from django.db import models
-from django.contrib.postgres.fields import JSONField
+from django.contrib.postgres.fields import JSONField, ArrayField
 from django.core.urlresolvers import reverse
 from django.core import serializers
 from django.contrib.contenttypes.models import ContentType
@@ -9,33 +8,28 @@ from django.http import JsonResponse
 from helper.validators import is_alpha_num, is_alpha, is_alpha_num_words
 from helper.serializers import get_json, get_dict
 from helper.constants import input_types
-# Constants
-
-from django.dispatch import receiver
-from django.db.models.signals import post_save
 
 
-
-
-class Department(models.Model):
+class Category(models.Model):
 
     '''
-    Department Model-
-        Company division or department.
+    Category
 
-        Attributes-
+    Company division or Category.
 
-            name:       Name of the department.
-                        CharField - must be unique, max length 50
-            acronym:    Acronym of the department.
-                        CharField - must be unique, max length 3
-            slug:       Slugified name.
-                        Prepopulated in the admin view for this model.
-                        SlugField - max length 100
-            created:    Date and time the instance was created.
-                        DateTimeField
-            modified:   Date and time the instance was last changed.
-                        DateTimeField
+    Attributes-
+
+        name:       Name of the Category.
+                    CharField - must be unique, max length 50
+        acronym:    Acronym of the Category.
+                    CharField - must be unique, max length 3
+        slug:       Slugified name.
+                    Prepopulated in the admin view for this model.
+                    SlugField - max length 100
+        created:    Date and time the instance was created.
+                    DateTimeField
+        modified:   Date and time the instance was last changed.
+                    DateTimeField
     '''
 
     name = models.CharField(max_length=50,unique=True)
@@ -44,46 +38,33 @@ class Department(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        verbose_name_plural = "Categories"
+
     def __str__(self):
         return self.name
 
 class FormTemplate(models.Model):
 
     '''
-    FormTemplate Model-
-        Template for the user created form.
+    FormTemplate
 
-        Attributes-
+    Template for the user created form.
 
-            name:           Name of the form.
-                            CharField - must be unique, max length 30
-            department:     Department the instance will belong to.
-                            ForeignKey - Department,
-                                         related_name="form_templates",
-                                         related_query_name="form_template",
-                                         null=True
-            published:      Check when the form should be usable
-                            BooleanField - default=False
-            created:        Date and time the instance was created.
-                            DateTimeField
-            modified:       Date and time the instance was last changed.
-                            DateTimeField
+    Methods:
 
 
-        Methods:
+        get_json(self):
+            returns json serialization of the instance
 
-
-            get_json(self):
-                returns json serialization of the instance
-
-            get_formfields(self):
-                returns all related FieldTemplate objects
+        get_formfields(self):
+            returns all related FieldTemplate objects
     '''
 
     name = models.CharField(
         max_length=30, validators=[is_alpha_num_words])
-    department = models.ForeignKey(
-        Department,
+    category = models.ForeignKey(
+        Category,
         related_name="form_templates",
     )
     published = models.BooleanField(default=False)
@@ -91,7 +72,9 @@ class FormTemplate(models.Model):
     modified = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = (("name", "department"),)
+        unique_together = (("name", "category"),)
+        verbose_name = "Form Template"
+        verbose_name_plural = "Form Templates"
 
     def __str__(self):
         return self.name
@@ -113,6 +96,10 @@ class FormTemplateOptions(models.Model):
         primary_key=True
     )
 
+    class Meta:
+        verbose_name = "Options"
+        verbose_name_plural = "Options"
+
 
 class FieldSet(models.Model):
     form_template = models.ForeignKey(
@@ -128,6 +115,11 @@ class FieldSet(models.Model):
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        verbose_name = "Fieldset"
+        verbose_name_plural = "Fieldsets"
+
 
 class FieldTemplate(models.Model):
 
@@ -146,9 +138,12 @@ class FieldTemplate(models.Model):
     )
     field_type = models.CharField(
         max_length=20, choices=FIELD_TYPE_CHOICES, default=input_types.TEXT)
-    max_length = models.PositiveIntegerField(default=20, null=True)
+    position = models.PositiveIntegerField(null=True)
+
     class Meta:
         unique_together = (("name", "form_template"),)
+        verbose_name = "Field Template"
+        verbose_name_plural = "Field Templates"
 
     def __str__(self):
         return self.name
@@ -177,10 +172,7 @@ class FieldTemplateOptions(models.Model):
         on_delete=models.CASCADE,
         primary_key=True
     )
-    label = models.CharField(
-        max_length=50,
-        blank=True,
-    )
+    label = models.CharField(max_length=50, blank=True)
     fieldset = models.ForeignKey(
         FieldSet,
         related_name="field_template_options",
@@ -188,13 +180,36 @@ class FieldTemplateOptions(models.Model):
         null=True,
         on_delete=models.SET_NULL,
     )
-    autocomplete = models.BooleanField(default=True)
+
+    # Common tag attributes
+    autofocus = models.BooleanField(default=False)
+    max_length = models.PositiveIntegerField(null=True, blank=True)
     placeholder = models.TextField(blank=True)
+    read_only = models.BooleanField(default=False)
     required = models.BooleanField(default=True)
 
+    # HTML Input tag attributes
+    autocomplete = models.BooleanField(default=True)
+    checked = models.BooleanField(default=False)
+    disabled = models.BooleanField(default=False)
+    min_length = models.PositiveIntegerField(null=True, blank=True)
+    min_value = models.IntegerField(null=True, blank=True)
+    max_value = models.IntegerField(null=True, blank=True)
+    pattern = models.CharField(max_length=50, blank=True, default="")
+
+    # HTML Textarea tag attributes
+    columns = models.PositiveIntegerField(null=True, blank=True)
+    rows = models.PositiveIntegerField(null=True, blank=True)
+
+    # HTML for implementing tags with choices
+    choices = ArrayField(
+        models.CharField(max_length=30, blank=True),
+        null=True
+    )
+
     class Meta:
-        verbose_name = ""
-        verbose_name_plural = "Options"
+        verbose_name = "Options"
+        verbose_name_plural = ""
 
     def __str__(self):
         return ""
@@ -224,9 +239,4 @@ class FormData(models.Model):
         return reverse('builder.views.formtemplate_results', args=[str(self.id)])
 
 
-@receiver(post_save, sender=FieldTemplate)
-def create_options_for_new_fieldtemplate(sender, created, instance, **kwargs):
-    if created:
-        options = FieldTemplateOptions(field_template=instance)
-        options.save()
-        print "OPTIONS CREATED!"
+
