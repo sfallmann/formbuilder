@@ -11,6 +11,10 @@ from helper.serializers import get_json, get_dict
 from helper.constants import input_types
 # Constants
 
+from django.dispatch import receiver
+from django.db.models.signals import post_save
+
+
 
 
 class Department(models.Model):
@@ -218,3 +222,11 @@ class FormData(models.Model):
 
     def get_absolute_url(self):
         return reverse('builder.views.formtemplate_results', args=[str(self.id)])
+
+
+@receiver(post_save, sender=FieldTemplate)
+def create_options_for_new_fieldtemplate(sender, created, instance, **kwargs):
+    if created:
+        options = FieldTemplateOptions(field_template=instance)
+        options.save()
+        print "OPTIONS CREATED!"

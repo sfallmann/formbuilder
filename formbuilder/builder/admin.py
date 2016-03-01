@@ -21,7 +21,7 @@ class DepartmentAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ("name",)}
 
 
-class FieldTemplateOptionsInline(admin.StackedInline):
+class FieldTemplateOptionsInline(admin.TabularInline):
     model = FieldTemplateOptions
     show_change_link = True
 
@@ -44,7 +44,11 @@ class FieldTemplateInline(admin.StackedInline):
 
 
 class FieldTemplateAdmin(admin.ModelAdmin):
+
+    list_display = ('name', 'field_type', 'form_template')
+    ordering = ('form_template', 'field_type', 'name')
     inlines = [FieldTemplateOptionsInline,]
+
 
 
 class FieldSetInline(admin.TabularInline):

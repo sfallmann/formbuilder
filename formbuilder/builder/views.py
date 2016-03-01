@@ -6,6 +6,10 @@ from .models import FormTemplate, FormData
 from .forms import Form
 
 
+def myotherfunction():
+    logger.error("this is an error message!!")
+
+
 def formtemplate_results(request, id):
 
     results = FormData.objects.get(id=id)
