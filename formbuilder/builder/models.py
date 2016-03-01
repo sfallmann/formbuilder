@@ -138,7 +138,7 @@ class FieldTemplate(models.Model):
     )
     field_type = models.CharField(
         max_length=20, choices=FIELD_TYPE_CHOICES, default=input_types.TEXT)
-    position = models.PositiveIntegerField(null=True)
+    position = models.PositiveIntegerField(null=True, blank=True)
 
     class Meta:
         unique_together = (("name", "form_template"),)

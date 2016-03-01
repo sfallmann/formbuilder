@@ -7,6 +7,22 @@ from .models import FormTemplateOptions, FieldSet
 from .models import FieldTemplate, FieldTemplateOptions
 from helper.constants import input_types
 
+
+class FieldTemplateInlineForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        if "instance" in kwargs:
+            print "instance"
+
+
+        super(FieldTemplateInlineForm, self).__init__(*args, **kwargs)
+        all_fields = FieldTemplate.objects.all()
+        choices = ([(f.position, f.position) for f in all_fields])
+
+        self.fields['position'] = forms.ChoiceField(choices=choices)
+
+
+
 class CategoryAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ("name",)}
 
@@ -14,6 +30,7 @@ class CategoryAdmin(admin.ModelAdmin):
 class FieldTemplateOptionsInline(admin.StackedInline):
     model = FieldTemplateOptions
     show_change_link = True
+
 
     def get_formset(self, request, obj, **kwargs):
 
@@ -59,6 +76,7 @@ class FieldTemplateOptionsInline(admin.StackedInline):
 
 class FieldTemplateInline(admin.StackedInline):
     model = FieldTemplate
+    form = FieldTemplateInlineForm
     show_change_link = True
     extra = 1
 
