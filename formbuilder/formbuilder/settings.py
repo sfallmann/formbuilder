@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'builder.apps.BuilderConfig',
+    'crispy_forms',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -204,3 +205,7 @@ LOGGING = {
 
     }
 }
+
+# cripsy forms template pack
+CRISPY_TEMPLATE_PACK = 'bootstrap3'
+

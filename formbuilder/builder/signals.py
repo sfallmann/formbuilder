@@ -11,6 +11,7 @@ def create_options_for_new_fieldtemplate(sender, created, instance, **kwargs):
     if created:
 
         options = FieldTemplateOptions(field_template=instance)
+        options.label = instance.name.title()
         options.save()
 
         msg = "FieldTemplateOptions [id:%s] created"\
@@ -28,9 +29,8 @@ def set_field_template_position_save(sender, instance, **kwargs):
         instance.position = fields.count() + 1
 
         msg = "New FieldTemplate. Set to "\
-        "position [%s], field_set [id:%s], form_template [id:%s]"\
-        ".\n\r" % (instance.position, instance.field_set.pk,
-                   instance.form_template.pk)
+        "position [%s], field_set NONE, form_template [id:%s]"\
+        ".\n\r" % (instance.position, instance.form_template.pk)
 
         logger.info(msg)
 

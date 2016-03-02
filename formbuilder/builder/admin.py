@@ -17,7 +17,8 @@ class FieldTemplateInlineForm(forms.ModelForm):
 
         if "instance" in kwargs:
             f = kwargs["instance"]
-            fields = FieldTemplate.objects.filter(field_set=f.field_set)
+            fields = FieldTemplate.objects.filter(
+                form_template=f.form_template, field_set=f.field_set)
             count = fields.count()
             value = f.position
 
@@ -36,22 +37,32 @@ class FieldTemplateForm(forms.ModelForm):
 
         instance = kwargs.get('instance')
 
+
         if instance:
 
-            fields = FieldTemplate.objects.filter(field_set=instance.field_set)
-            count = fields.count()
-            form_template = instance.form_template
+            fields = FieldTemplate.objects.filter(
+                form_template=instance.form_template,
+                field_set=instance.field_set
+            )
 
+            count = fields.count()
+
+            position_choices = ([(x, x) for x in range(1, count+1)])
+
+            self.fields['position'] = forms.ChoiceField(choices=position_choices, required=False)
+            self.fields['field_set'].queryset = FieldSet.objects.filter(
+                form_template=instance.form_template)
         else:
 
+            form_template = None
             fields = FieldTemplate.objects.filter(field_set=None)
             count = fields.count() + 1
-            form_template = None
 
-        position_choices = ([(x, x) for x in range(1, count+1)])
+            self.fields['position'].disabled = True
 
-        self.fields['field_set'].queryset = FieldSet.objects.filter(form_template=form_template)
-        self.fields['position'] = forms.ChoiceField(choices=position_choices, required=False)
+
+
+
 
 
 class CategoryAdmin(admin.ModelAdmin):
@@ -66,7 +77,7 @@ class FieldTemplateOptionsInline(admin.StackedInline):
 
     def get_formset(self, request, obj, **kwargs):
 
-        common_fields = ('autofocus','required')
+        common_fields = ('label','autofocus','required')
 
         self.fieldsets = (
             (None, {
@@ -108,7 +119,7 @@ class FieldTemplateInline(admin.StackedInline):
 
 
     def get_queryset(self, request):
-            return super(FieldTemplateInline, self).get_queryset(request).order_by('position','field_set')
+            return super(FieldTemplateInline, self).get_queryset(request).order_by('field_set','position')
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "field_set":

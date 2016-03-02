@@ -2,11 +2,18 @@
 
 <html lang="en">
 <head>
-  <meta charset="utf-8">
+    <meta charset="utf-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>The HTML5 Herald</title>
-  <meta name="description" content="The HTML5 Herald">
-  <meta name="author" content="SitePoint">
+    <title>Custom Forms</title>
+    <meta name="description" content="Custom Forms">
+    <meta name="Sean Fallmann" content="FormDeployment">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link href='https://fonts.googleapis.com/css?family=Fjalla+One' rel='stylesheet' type='text/css'>
+
 
   <!--[if lt IE 9]>
   <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -14,12 +21,20 @@
 </head>
 
 <body>
-    <form action={{ form.get_absolute_url }} method="POST">
-        {% csrf_token %}
-        {{ form.as_p }}
+    <div class="container">
+        <br/><br/><br/>
+        <div class="row">
+            <div class="col-xs-12">
 
-        {{ form.errors }}
-        <input type="submit" value="submit"/>
-    </form>
+                {% load crispy_forms_tags %}
+                {% crispy form form.helper %}
+
+            </div>
+        </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
 </body>
 </html>
