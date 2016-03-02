@@ -106,8 +106,9 @@ class FieldTemplateInline(admin.StackedInline):
     show_change_link = True
     extra = 0
 
+
     def get_queryset(self, request):
-            return super(FieldTemplateInline, self).get_queryset(request).order_by('position')
+            return super(FieldTemplateInline, self).get_queryset(request).order_by('position','field_set')
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "field_set":
@@ -125,8 +126,9 @@ class FieldTemplateInline(admin.StackedInline):
 class FieldTemplateAdmin(admin.ModelAdmin):
 
     form = FieldTemplateForm
-    list_display = ('name', 'field_type', 'form_template')
-    ordering = ('form_template', 'field_type', 'name')
+    list_display = ('name', 'field_type', 'form_template','field_set','position')
+    ordering = ('position','field_set','form_template','field_type','name')
+    list_filter = ('form_template','field_set',)
     inlines = [FieldTemplateOptionsInline,]
 
 

@@ -27,6 +27,13 @@ def set_field_template_position_save(sender, instance, **kwargs):
             form_template=instance.form_template, field_set=None)
         instance.position = fields.count() + 1
 
+        msg = "New FieldTemplate. Set to "\
+        "position [%s], field_set [id:%s], form_template [id:%s]"\
+        ".\n\r" % (instance.position, instance.field_set.pk,
+                   instance.form_template.pk)
+
+        logger.info(msg)
+
     else:
 
         orig_field = FieldTemplate.objects.get(pk=instance.pk)
@@ -57,9 +64,20 @@ def set_field_template_position_save(sender, instance, **kwargs):
             )
 
             for field in old_field_set_fields:
-                field.update(position=field.position-1)
+                FieldTemplate.objects.filter(pk=field.pk).update(position=field.position-1)
 
 
+        if instance.field_set is None:
+            fs = None
+        else:
+            fs = instance.field_set.pk
+
+        msg = "FieldTemplate [id:%s] set to "\
+        "position [%s], field_set [id:%s], form_template [id:%s]"\
+        ".\n\r" % (instance.pk, instance.position,
+                  fs, instance.form_template.pk)
+
+        logger.info(msg)
 
 
 @receiver(post_delete, sender=FieldTemplate)
@@ -75,4 +93,9 @@ def set_field_template_position_delete(sender, instance, **kwargs):
         FieldTemplate.objects.filter(
             pk=field.pk).update(position=field.position-1)
 
+        msg = "FieldTemplate [id:%s] deleted. Updating Field Template [id:%s]"\
+        "position [%s], field_set [id:%s], form_template [id:%s]"\
+        ".\n\r" % (instance.pk, field.pk, field.position,
+                  field.field_set.pk, field.form_template.pk)
 
+        logger.info(msg)
