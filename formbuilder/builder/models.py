@@ -108,7 +108,7 @@ class FieldSet(models.Model):
         on_delete=models.CASCADE,
     )
     name = models.CharField(
-        max_length=30, validators=[is_alpha_num])
+        max_length=30, validators=[is_alpha_num_words])
 
     class Meta:
         unique_together = (("name", "form_template"),)
@@ -138,6 +138,15 @@ class FieldTemplate(models.Model):
     )
     field_type = models.CharField(
         max_length=20, choices=FIELD_TYPE_CHOICES, default=input_types.TEXT)
+
+    field_set = models.ForeignKey(
+        FieldSet,
+        related_name="field_templates",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+    )
+
     position = models.PositiveIntegerField(null=True, blank=True)
 
     class Meta:
@@ -173,13 +182,6 @@ class FieldTemplateOptions(models.Model):
         primary_key=True
     )
     label = models.CharField(max_length=50, blank=True)
-    fieldset = models.ForeignKey(
-        FieldSet,
-        related_name="field_template_options",
-        blank=True,
-        null=True,
-        on_delete=models.SET_NULL,
-    )
 
     # Common tag attributes
     autofocus = models.BooleanField(default=False)
