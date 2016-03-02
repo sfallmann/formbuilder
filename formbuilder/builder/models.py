@@ -147,7 +147,7 @@ class FieldTemplate(models.Model):
         on_delete=models.SET_NULL,
     )
 
-    position = models.PositiveIntegerField(null=True, blank=True)
+    position = models.PositiveIntegerField(default=None,null=True, blank=True)
 
     class Meta:
         unique_together = (("name", "form_template"),)

@@ -15,7 +15,6 @@ class FieldTemplateInlineForm(forms.ModelForm):
 
         super(FieldTemplateInlineForm, self).__init__(*args, **kwargs)
 
-
         if "instance" in kwargs:
             f = kwargs["instance"]
             fields = FieldTemplate.objects.filter(field_set=f.field_set)
@@ -27,20 +26,7 @@ class FieldTemplateInlineForm(forms.ModelForm):
             self.fields['position'] = forms.ChoiceField(choices=(choices), required=False, initial=value)
 
         else:
-            fields = FieldTemplate.objects.filter(field_set=None)
-            count = fields.count()
-
-            count += 1
-            value = count
-            choices = ([(x, x) for x in range(1, count+1)])
-            self.fields['position'] = forms.ChoiceField(choices=(choices), required=False, initial=value)
-
-
-
-
-
-
-
+            self.fields['position'].disabled = True
 
 class FieldTemplateForm(forms.ModelForm):
 
@@ -66,8 +52,6 @@ class FieldTemplateForm(forms.ModelForm):
 
         self.fields['field_set'].queryset = FieldSet.objects.filter(form_template=form_template)
         self.fields['position'] = forms.ChoiceField(choices=position_choices, required=False)
-
-
 
 
 class CategoryAdmin(admin.ModelAdmin):
@@ -165,6 +149,9 @@ class FormTemplateOptionsInline(admin.TabularInline):
 class FormTemplateAdmin(admin.ModelAdmin):
 
     inlines = [FormTemplateOptionsInline, FieldSetInline, FieldTemplateInline,]
+
+
+
 
 
 class FormDataAdmin(admin.ModelAdmin):

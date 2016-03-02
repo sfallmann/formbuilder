@@ -18,45 +18,48 @@ def create_options_for_new_fieldtemplate(sender, created, instance, **kwargs):
 
         logger.info(msg)
 
-
 @receiver(pre_save, sender=FieldTemplate)
 def set_field_template_position_save(sender, instance, **kwargs):
 
-
-
-
     if instance.pk is None:
 
-        all_fields = FieldTemplate.objects.filter(
+        fields = FieldTemplate.objects.filter(
             form_template=instance.form_template, field_set=None)
-        instance.position = all_fields.count() + 1
+        instance.position = fields.count() + 1
 
     else:
 
-        orig = FieldTemplate.objects.get(pk=instance.pk)
+        orig_field = FieldTemplate.objects.get(pk=instance.pk)
 
-        if instance.field_set != orig.field_set:
-            count = FieldTemplate.objects.filter(
+        if instance.field_set == orig_field.field_set:
+
+            fields = FieldTemplate.objects.filter(
+                form_template=instance.form_template,
+                field_set=instance.field_set).exclude(pk=instance.pk)
+
+            position_list = [f.position for f in fields]
+
+            if instance.position in position_list:
+
+                FieldTemplate.objects.filter(
+                    position=instance.position).update(position=orig_field.position)
+
+        else:
+
+            fields = FieldTemplate.objects.filter(
                 form_template=instance.form_template, field_set=instance.field_set)
 
-            instance.position = all_fields.count() + 1
+            instance.position = fields.count() + 1
 
-            all_fields = FieldTemplate.objects.filter(
-                form_template=instance.form_template,
-                field_set=orig.field_set,
-                position__gt=orig.position
+            old_field_set_fields = FieldTemplate.objects.filter(
+                form_template=orig_field.form_template,
+                field_set=orig_field.field_set, position__gt=orig_field.position
             )
-            for field in all_fields:
-                FieldTemplate.objects.filter(
-                    pk=field.pk).update(position=field.position-1)
-        else:
-            if instance.position != orig.position:
 
-                if FieldTemplate.objects.filter(position=instance.position):
+            for field in old_field_set_fields:
+                field.update(position=field.position-1)
 
-                    obj_at_position = FieldTemplate.objects.get(position=instance.position)
-                    FieldTemplate.objects.filter(
-                        pk=obj_at_position.pk).update(position=orig.position)
+
 
 
 @receiver(post_delete, sender=FieldTemplate)
@@ -71,4 +74,5 @@ def set_field_template_position_delete(sender, instance, **kwargs):
     for field in all_fields:
         FieldTemplate.objects.filter(
             pk=field.pk).update(position=field.position-1)
+
 
