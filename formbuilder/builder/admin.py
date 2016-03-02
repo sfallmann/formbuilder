@@ -10,6 +10,7 @@ from helper.constants import input_types
 
 class FieldTemplateInlineForm(forms.ModelForm):
 
+
     def __init__(self, *args, **kwargs):
 
         super(FieldTemplateInlineForm, self).__init__(*args, **kwargs)
@@ -20,13 +21,25 @@ class FieldTemplateInlineForm(forms.ModelForm):
             fields = FieldTemplate.objects.filter(field_set=f.field_set)
             count = fields.count()
             value = f.position
+
+            choices = ([(x, x) for x in range(1, count+1)])
+
+            self.fields['position'] = forms.ChoiceField(choices=(choices), required=False, initial=value)
+
         else:
             fields = FieldTemplate.objects.filter(field_set=None)
-            value = count = fields.count() + 1
+            count = fields.count()
 
-        choices = ([(x, x) for x in range(1, count+1)])
+            count += 1
+            value = count
+            choices = ([(x, x) for x in range(1, count+1)])
+            self.fields['position'] = forms.ChoiceField(choices=(choices), required=False, initial=value)
 
-        self.fields['position'] = forms.ChoiceField(choices=(choices), required=False, initial=value)
+
+
+
+
+
 
 
 class FieldTemplateForm(forms.ModelForm):
@@ -109,6 +122,8 @@ class FieldTemplateInline(admin.StackedInline):
     show_change_link = True
     extra = 0
 
+    def get_queryset(self, request):
+            return super(FieldTemplateInline, self).get_queryset(request).order_by('position')
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "field_set":
