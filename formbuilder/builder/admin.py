@@ -24,7 +24,7 @@ class FieldTemplateInlineForm(forms.ModelForm):
             choices = ([(x, x) for x in range(1, count+1)])
 
             self.fields['position'] = forms.ChoiceField(choices=(choices), required=False, initial=value)
-
+            self.fields['position'].show_hidden_initial = True
         else:
             self.fields['position'].disabled = True
 
