@@ -21,5 +21,5 @@ from builder import urls as builder_urls
 urlpatterns = [
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^admin/', admin.site.urls),
-    url(r'^builder/', include(builder_urls)),
+    url(r'fb/', include(builder_urls)),
 ]

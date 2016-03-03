@@ -2,6 +2,7 @@ DATE = "date"
 DATE_TIME = "datetime"
 DATE_TIME_LOCAL = "datetim-local"
 EMAIL = "email"
+FILE = "file"
 HIDDEN = "hidden"
 MONTH = "month"
 NUMBER = "number"
@@ -16,6 +17,7 @@ def as_list():
         DATE_TIME,
         DATE_TIME_LOCAL,
         EMAIL,
+        FILE,
         HIDDEN,
         MONTH,
         NUMBER,

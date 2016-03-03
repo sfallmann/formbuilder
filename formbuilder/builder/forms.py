@@ -8,6 +8,9 @@ def create_field(f):
 
     options = f.fieldtemplateoptions
 
+    if options.required:
+        options.label += "*"
+
     other_tags = [
         input_types.TEXT_AREA
     ]
@@ -25,7 +28,8 @@ def create_field(f):
         'autocomplete': autocomplete,
         'name': f.name.lower(),
         'type': f.field_type,
-        'required': options.required
+        "required": options.required,
+
     }
 
     if f.field_type not in other_tags:
@@ -35,6 +39,7 @@ def create_field(f):
             widget=forms.TextInput(
                 attrs=attrs
             ),
+            required=False,
             label = options.label
         )
     elif f.field_type == input_types.TEXT_AREA:
@@ -44,6 +49,7 @@ def create_field(f):
             widget=forms.Textarea(
                 attrs=attrs
             ),
+            required=False,
             label = options.label
         )
 
@@ -90,7 +96,7 @@ class Form(forms.Form):
         self.helper.form_id = obj.name
         self.helper.form_method = 'post'
         self.helper.form_action = obj.get_absolute_url()
-
+        self.helper.attrs = {'enctype': 'multipart/form-data'}
 
         layout.append(ButtonHolder
                       (Submit('submit', 'Submit', css_class='button white')))

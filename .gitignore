@@ -52,7 +52,7 @@ coverage.xml
 
 # Django stuff:
 *.log
-
+migrations/
 
 # Flask instance folder
 instance/
@@ -140,5 +140,6 @@ target/
 .python-version
 
 
-# Django migration folder
-migrations/
+# Formbuilder
+uploads/
+
