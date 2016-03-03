@@ -141,5 +141,5 @@ target/
 
 
 # Formbuilder
-uploads/
+uploads/*
 
