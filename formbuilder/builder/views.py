@@ -8,9 +8,12 @@ from django.shortcuts import redirect
 from .models import FormTemplate, FormData
 from .forms import Form
 from django.conf import settings
+from django.core.files.uploadedfile import InMemoryUploadedFile
 
 FILESTORE = FileSystemStorage(location='/uploads')
 UPLOAD_FOLDER = os.getcwd() +"/uploads"
+
+
 '''
 Views for rendering forms, capturing submitted data,
 and displaying the captured\saved results
@@ -48,9 +51,20 @@ def formtemplate_details(request, category, id):
 
         # Pass the FormTemplate object into Form with the posted data
         f = Form(template_, request.POST, request.FILES)
-
         # Check if the data is valid
         if f.is_valid():
+
+            uploaded_files = []
+
+
+            f.cleaned_data.keys().sort()
+            sorted_dict = {}
+            for key in f.cleaned_data.keys():
+
+                if isinstance(f.cleaned_data[key],InMemoryUploadedFile):
+                    uploaded_files.append(f.cleaned_data[key])
+                    f.cleaned_data.pop(key)
+
 
             data = {
                 "category": 	template_.category.name,
@@ -63,11 +77,11 @@ def formtemplate_details(request, category, id):
                 data=data
             )
 
-            file_ = request.FILES['file']
-            handle_uploaded_file(file_, str(results.pk))
+            for file_ in uploaded_files:
+                handle_uploaded_file(file_, str(results.pk))
 
             # Redirect to view to display the save data
-            return redirect(formtemplate_results, results.id)
+            return redirect(formtemplate_results, results.form_template.category.acronym, results.id)
 
     return render(request, 'builder/form.html', {"form": f},)
 
@@ -79,6 +93,7 @@ def handle_uploaded_file(f, folder):
     make_folder(path)
 
     filepath = path + "/" + str(f._name)
+
     with open(filepath, 'wb+') as destination:
         for chunk in f.chunks():
             destination.write(chunk)
