@@ -8,7 +8,8 @@ from django.shortcuts import redirect
 from .models import FormTemplate, FormData
 from .forms import Form
 from django.conf import settings
-from django.core.files.uploadedfile import InMemoryUploadedFile
+
+
 
 FILESTORE = FileSystemStorage(location='/uploads')
 UPLOAD_FOLDER = os.getcwd() +"/uploads"
@@ -54,22 +55,10 @@ def formtemplate_details(request, category, id):
         # Check if the data is valid
         if f.is_valid():
 
-            uploaded_files = []
-
-
-            f.cleaned_data.keys().sort()
-            sorted_dict = {}
-            for key in f.cleaned_data.keys():
-
-                if isinstance(f.cleaned_data[key],InMemoryUploadedFile):
-                    uploaded_files.append(f.cleaned_data[key])
-                    f.cleaned_data.pop(key)
-
-
             data = {
                 "category": 	template_.category.name,
                 "name": 		template_.name,
-                "data":			f.cleaned_data
+                "data":			f.clean_data_only
             }
             # Create the FormData object with the posted data
             results = FormData.objects.create(
@@ -77,7 +66,7 @@ def formtemplate_details(request, category, id):
                 data=data
             )
 
-            for file_ in uploaded_files:
+            for file_ in f.file_list:
                 handle_uploaded_file(file_, str(results.pk))
 
             # Redirect to view to display the save data
