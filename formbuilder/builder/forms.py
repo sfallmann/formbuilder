@@ -3,7 +3,7 @@ from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from builder.models import FormTemplate, FieldTemplate, FieldSet
-from helper.constants import input_types
+from helper.constants import field_types
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit
 
@@ -97,8 +97,8 @@ def create_field(f):
         options.label += "*"
 
     other_tags = [
-        input_types.TEXT_AREA,
-        input_types.FILE,
+        field_types.TEXT_AREA,
+        field_types.FILE,
     ]
 
     if options.autocomplete:
@@ -128,7 +128,7 @@ def create_field(f):
             required=False,
             label = options.label
         )
-    elif f.field_type == input_types.TEXT_AREA:
+    elif f.field_type == field_types.TEXT_AREA:
 
         return forms.CharField(
             max_length=options.max_length,
@@ -138,7 +138,7 @@ def create_field(f):
             required=False,
             label = options.label
         )
-    elif f.field_type == input_types.FILE:
+    elif f.field_type == field_types.FILE:
 
         return forms.FileField(
             max_length=options.max_length,

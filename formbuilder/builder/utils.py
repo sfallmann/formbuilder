@@ -1,4 +1,4 @@
-from helper.constants import input_types
+from helper.constants import field_types
 
 
 class FormFactory(form_template):
@@ -16,8 +16,8 @@ class FormFactory(form_template):
             options.label += "*"
 
         other_tags = [
-            input_types.TEXT_AREA,
-            input_types.FILE,
+            field_types.TEXT_AREA,
+            field_types.FILE,
         ]
 
         if options.autocomplete:
@@ -47,7 +47,7 @@ class FormFactory(form_template):
                 required=False,
                 label = options.label
             )
-        elif f.field_type == input_types.TEXT_AREA:
+        elif f.field_type == field_types.TEXT_AREA:
 
             return forms.CharField(
                 max_length=options.max_length,
@@ -57,7 +57,7 @@ class FormFactory(form_template):
                 required=False,
                 label = options.label
             )
-        elif f.field_type == input_types.FILE:
+        elif f.field_type == field_types.FILE:
 
             return forms.FileField(
                 max_length=options.max_length,
