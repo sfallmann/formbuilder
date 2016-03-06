@@ -6,7 +6,7 @@ from .models import FormTemplate, FormData
 from .models import FormTemplateOptions, FieldSet
 from .models import FieldTemplate, FieldTemplateOptions
 from .adminforms import FieldTemplateInlineForm, FieldTemplateForm
-from .adminforms import FieldTemplateOptionsInlineForm
+from .adminforms import FieldTemplateOptionsInlineForm, FieldSetInlineForm
 from helper.constants import field_types
 from helper.widgets import JsonPairInputs
 
@@ -26,7 +26,8 @@ class FieldTemplateOptionsInline(admin.StackedInline):
         self.fields = ["label","autofocus","required"]
 
         if obj:
-            self.fields = field_types.ATTRS[obj.field_type]
+            common = ["label",]
+            self.fields = common + field_types.ATTRS[obj.field_type]
 
         return super(FieldTemplateOptionsInline, self).get_formset(request, obj, **kwargs)
 
@@ -69,8 +70,9 @@ class FieldTemplateAdmin(admin.ModelAdmin):
 class FieldSetInline(admin.TabularInline):
 
     model = FieldSet
+    form = FieldSetInlineForm
     show_change_link = True
-    extra = 1
+    extra = 0
 
 
 class FormTemplateOptionsInline(admin.TabularInline):

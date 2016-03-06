@@ -6,7 +6,7 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 from builder.models import FormTemplate, FieldTemplate, FieldSet
 from helper.constants import field_types
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit
+from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit, HTML
 
 
 class Form(forms.Form):
@@ -40,9 +40,12 @@ class Form(forms.Form):
                 form_template=obj, field_set=fset).order_by('position')
 
             values = [str(fset.name)]
+            if fset.helper_text:
+                values.append(HTML(fset.helper_text))
 
             for t in _templates:
                 values.append(str(t.name))
+
             layout.append(Fieldset(*values))
 
         _templates = FieldTemplate.objects.filter(
@@ -90,72 +93,11 @@ class Form(forms.Form):
                 self.clean_data_only[key] = cleaned_data[key]
 
 
-def _create_field(f):
-
-    options = f.fieldtemplateoptions
-
-    if options.required:
-        options.label += "*"
-
-    other_tags = [
-        field_types.TEXT_AREA,
-        field_types.FILE,
-    ]
-
-    if options.autocomplete:
-        autocomplete = "on"
-    else:
-        autocomplete = "off"
-
-
-    attrs={
-        'id': f.name.lower(),
-        'class': 'form-control',
-        'placeholder': options.placeholder,
-        'autocomplete': autocomplete,
-        'name': f.name.lower(),
-        'type': f.field_type,
-        "required": options.required,
-
-    }
-
-
-    if f.field_type not in other_tags:
-
-        return forms.CharField(
-            max_length=options.maxlength,
-            widget=forms.TextInput(
-                attrs=attrs
-            ),
-            required=False,
-            label = options.label
-        )
-    elif f.field_type == field_types.TEXT_AREA:
-
-        return forms.CharField(
-            max_length=options.maxlength,
-            widget=forms.Textarea(
-                attrs=attrs
-            ),
-            required=False,
-            label = options.label
-        )
-    elif f.field_type == field_types.FILE:
-
-        return forms.FileField(
-            max_length=options.maxlength,
-            required=False,
-            label = options.label
-        )
-
-
-
-
 def create_field(f):
 
     options = f.fieldtemplateoptions
 
-    if options.required:
+    if options.required and options.label:
         options.label += "*"
 
     other_tags = [
@@ -174,29 +116,38 @@ def create_field(f):
 
     choices = []
     attrs = {}
+    initial = None
+
     for a in field_types.ATTRS[f.field_type]:
 
-        if a != "choice_list":
-
-            attrs.update({a: getattr(options,a)})
-
-        else:
+        if a == "choice_list":
 
             keys = options.choice_list.keys()
             keys.sort()
-
+            initial = keys[0]
             for key in keys:
 
                 choice = (key, options.choice_list[key])
                 choices.append(choice)
 
-    attrs.update({
-        'id': f.name.lower(),
-        'class': 'form-control',
-        'name': f.name.lower(),
-    })
+        elif a == "pattern":
+
+            if getattr(options,a):
+                attrs.update({a: getattr(options,a)})
+
+        else:
+
+            attrs.update({a: getattr(options,a)})
+
+
 
     if f.field_type not in other_tags:
+
+        attrs.update({
+            'id': f.name.lower(),
+            'class': 'form-control',
+            'name': f.name.lower(),
+        })
 
         return forms.CharField(
             max_length=options.maxlength,
@@ -208,6 +159,12 @@ def create_field(f):
         )
     elif f.field_type == field_types.TEXT_AREA:
 
+        attrs.update({
+            'id': f.name.lower(),
+            'class': 'form-control',
+            'name': f.name.lower(),
+        })
+
         return forms.CharField(
             max_length=options.maxlength,
             widget=forms.Textarea(
@@ -218,6 +175,12 @@ def create_field(f):
         )
     elif f.field_type == field_types.FILE:
 
+        attrs.update({
+            'id': f.name.lower(),
+            'class': 'form-control',
+            'name': f.name.lower(),
+        })
+
         return forms.FileField(
             max_length=options.maxlength,
             required=False,
@@ -225,12 +188,28 @@ def create_field(f):
         )
     elif f.field_type == field_types.RADIO:
 
-        return forms.ChoiceField(
-            widget=forms.RadioSelect(
-                attrs=attrs
-            ),
+        _field = forms.ChoiceField(
+            widget=forms.RadioSelect,
+            choices=choices,
             required=False,
             label = options.label,
-            choices=(choices),
+            initial=initial
         )
+
+        _field.widget.attrs.update(attrs)
+
+        return _field
+
+    elif f.field_type == field_types.SELECT:
+
+        _field = forms.ChoiceField(
+            choices=choices,
+            required=False,
+            label = options.label,
+            initial=initial
+        )
+
+        _field.widget.attrs.update(attrs)
+
+        return _field
 

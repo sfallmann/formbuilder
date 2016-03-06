@@ -6,9 +6,9 @@ from django.core import serializers
 from django.contrib.contenttypes.models import ContentType
 from django.http import JsonResponse
 from helper.validators import is_alpha_num, is_alpha, is_alpha_num_words, is_lower
+from helper.validators import is_alpha_num_whitespace, min_20
 from helper.serializers import get_json, get_dict
 from helper.constants import field_types
-
 
 class DictBase(models.Model):
 
@@ -124,6 +124,7 @@ class FieldSet(models.Model):
     )
     name = models.CharField(
         max_length=30, validators=[is_alpha_num_words])
+    helper_text = models.TextField(blank=True)
 
     class Meta:
         unique_together = (("name", "form_template"),)
@@ -156,7 +157,7 @@ class FieldTemplate(models.Model):
     )
 
     name = models.CharField(
-        max_length=30, validators=[is_alpha_num])
+        max_length=30, validators=[is_alpha_num_whitespace, is_lower])
     form_template = models.ForeignKey(
         FormTemplate,
         related_name="field_templates",
@@ -221,7 +222,8 @@ class FieldTemplateOptions(models.Model):
 
     # Common tag attributes
     autofocus = models.BooleanField(default=False)
-    maxlength = models.PositiveIntegerField(null=True, blank=True)
+    maxlength = models.PositiveIntegerField(
+        null=True, blank=True,default=100,validators=[min_20,])
     placeholder = models.TextField(blank=True)
     readonly = models.BooleanField(default=False)
     required = models.BooleanField(default=True)

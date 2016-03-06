@@ -3,6 +3,17 @@ from .models import FieldTemplate, FieldSet, FieldTemplateOptions
 from helper.widgets import JsonPairInputs
 
 
+
+class FieldSetInlineForm(forms.ModelForm):
+
+    model = FieldSet
+
+    def __init__(self, *args, **kwargs):
+        super(FieldSetInlineForm, self).__init__(*args, **kwargs)
+
+        #self.fields['helper_text'] = forms.CharField(widget=TinyMCE(attrs={'cols': 60, 'rows': 15}))
+
+
 class FieldTemplateInlineForm(forms.ModelForm):
 
     model = FieldTemplate
@@ -25,6 +36,7 @@ class FieldTemplateInlineForm(forms.ModelForm):
             self.fields['position'].show_hidden_initial = True
         else:
             self.fields['position'].disabled = True
+
 
 class FieldTemplateForm(forms.ModelForm):
 

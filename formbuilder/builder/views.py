@@ -52,6 +52,10 @@ def formtemplate_details(request, category, id):
 
         # Pass the FormTemplate object into Form with the posted data
         f = Form(template_, request.POST, request.FILES)
+
+        print f.files
+        print f.changed_data
+
         # Check if the data is valid
         if f.is_valid():
 
@@ -65,6 +69,8 @@ def formtemplate_details(request, category, id):
                 form_template=template_,
                 data=data
             )
+
+
 
             for file_ in f.file_list:
                 handle_uploaded_file(file_, str(results.pk))

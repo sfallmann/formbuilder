@@ -50,8 +50,6 @@ NUM_ATTRS = COMMON_ATTRS + [
 ]
 
 CHOICE_ATTRS = [
-    "disabled",
-    "required",
     "choice_list"
 ]
 
