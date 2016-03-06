@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.utils.html import mark_safe
 from django import forms
+from django.db import models
 from .models import Category
 from .models import FormTemplate, FormData
 from .models import FormTemplateOptions, FieldSet
@@ -21,6 +22,8 @@ class FieldTemplateOptionsInline(admin.StackedInline):
     model = FieldTemplateOptions
     show_change_link = True
 
+    form = FieldTemplateOptionsInlineForm
+
     def get_formset(self, request, obj, **kwargs):
 
         self.fields = ["label","autofocus","required"]
@@ -30,6 +33,7 @@ class FieldTemplateOptionsInline(admin.StackedInline):
             self.fields = common + field_types.ATTRS[obj.field_type]
 
         return super(FieldTemplateOptionsInline, self).get_formset(request, obj, **kwargs)
+
 
     def has_delete_permission(self, request, obj):
         return False

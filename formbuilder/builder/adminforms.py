@@ -1,6 +1,8 @@
 from django import forms
 from .models import FieldTemplate, FieldSet, FieldTemplateOptions
 from helper.widgets import JsonPairInputs
+from ckeditor.widgets import CKEditorWidget
+from ckeditor_uploader.widgets import CKEditorUploadingWidget
 
 
 
@@ -11,7 +13,7 @@ class FieldSetInlineForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(FieldSetInlineForm, self).__init__(*args, **kwargs)
 
-        #self.fields['helper_text'] = forms.CharField(widget=TinyMCE(attrs={'cols': 60, 'rows': 15}))
+        self.fields['helper_text'] = forms.CharField(widget=CKEditorUploadingWidget())
 
 
 class FieldTemplateInlineForm(forms.ModelForm):
@@ -78,12 +80,10 @@ class FieldTemplateOptionsInlineForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(FieldTemplateOptionsInlineForm, self).__init__(*args, **kwargs)
 
-        self.fields['choice_list'] = forms.CharField(
-            label  = "Choices",
-            required = False,
-            widget = JsonPairInputs(
-                val_attrs={'size':35},
-                key_attrs={'class':'large'}
-            )
+        self.fields['choice_list'].widget = forms.Textarea(
+            attrs={
+                'style': 'height: 300px; width: 600px; font-size: 1.15em;'
+            }
         )
+
 

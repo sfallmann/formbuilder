@@ -76,7 +76,7 @@ class FormTemplate(models.Model):
     def get_absolute_url(self):
         return reverse(
             'builder.views.formtemplate_details',
-            args=[str(self.category.acronym).lower(),str(self.id)])
+            args=[str(self.id)])
 
     def as_dict(self):
         return get_dict(self)
@@ -287,7 +287,7 @@ class FormData(models.Model):
     def get_absolute_url(self):
         return reverse(
             'builder.views.formtemplate_results',
-            args=[str(self.form_template.category.acronym).lower(),str(self.id)])
+            args=[str(self.id)])
 
 
 

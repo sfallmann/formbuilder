@@ -20,7 +20,7 @@ Views for rendering forms, capturing submitted data,
 and displaying the captured\saved results
 '''
 
-def formtemplate_results(request, category, id):
+def formtemplate_results(request, id):
     '''
     formtemplate_results(request, id):
 
@@ -34,7 +34,7 @@ def formtemplate_results(request, category, id):
 
 
 
-def formtemplate_details(request, category, id):
+def formtemplate_details(request, id):
     '''
     formtemplate_details(request, id):
 
@@ -76,7 +76,7 @@ def formtemplate_details(request, category, id):
                 handle_uploaded_file(file_, str(results.pk))
 
             # Redirect to view to display the save data
-            return redirect(formtemplate_results, results.form_template.category.acronym, results.id)
+            return redirect(formtemplate_results, results.id)
 
     return render(request, 'builder/form.html', {"form": f},)
 
