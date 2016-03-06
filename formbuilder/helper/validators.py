@@ -24,3 +24,17 @@ def is_alpha_num_words(value):
             params={'value': value},
         )
 
+def is_alpha_num_whitespace(value):
+    if re.match('^[\w_-\d]+$', value) is None:
+        raise ValidationError(
+            ('%(value)s must be words consisting of alphanumeric characters, -, or _'),
+            params={'value': value},
+        )
+
+def is_lower(value):
+
+    if value != value.lower():
+        raise ValidationError(
+            ('%(value)s must be lowercase'),
+            params={'value': value},
+        )

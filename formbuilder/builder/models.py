@@ -5,9 +5,15 @@ from django.core.urlresolvers import reverse
 from django.core import serializers
 from django.contrib.contenttypes.models import ContentType
 from django.http import JsonResponse
-from helper.validators import is_alpha_num, is_alpha, is_alpha_num_words
+from helper.validators import is_alpha_num, is_alpha, is_alpha_num_words, is_lower
 from helper.serializers import get_json, get_dict
 from helper.constants import field_types
+
+
+class DictBase(models.Model):
+
+    key = models.CharField(max_length=32,unique=True, validators=[is_alpha_num_words, is_lower])
+    value = models.CharField(max_length=255,unique=True)
 
 
 class Category(models.Model):
@@ -195,6 +201,7 @@ class FieldTemplate(models.Model):
     def as_json(self):
         return get_json(self)
 
+
 class FieldTemplateOptions(models.Model):
 
     '''
@@ -231,19 +238,21 @@ class FieldTemplateOptions(models.Model):
     # HTML Textarea tag attributes
     columns = models.PositiveIntegerField(null=True, blank=True)
     rows = models.PositiveIntegerField(null=True, blank=True)
-
-    # HTML for implementing tags with choices
-    choices = ArrayField(
-        models.CharField(max_length=30, blank=True),
-        null=True
-    )
+    choice_list = JSONField(default={})
 
     class Meta:
         verbose_name = "Options"
         verbose_name_plural = ""
 
+    def get_admin_change_url(self):
+        content_type = ContentType.objects.get_for_model(self.__class__)
+        return reverse(
+            "admin:%s_%s_change" % (
+                content_type.app_label, content_type.model), args=(self.id,))
+
     def __str__(self):
         return ""
+
 
 
 class FormData(models.Model):

@@ -1,8 +1,11 @@
 from django import forms
-from .models import FieldTemplate, FieldSet
+from .models import FieldTemplate, FieldSet, FieldTemplateOptions
+from helper.widgets import JsonPairInputs
 
 
 class FieldTemplateInlineForm(forms.ModelForm):
+
+    model = FieldTemplate
 
 
     def __init__(self, *args, **kwargs):
@@ -24,6 +27,8 @@ class FieldTemplateInlineForm(forms.ModelForm):
             self.fields['position'].disabled = True
 
 class FieldTemplateForm(forms.ModelForm):
+
+    model = FieldTemplate
 
     def __init__(self, *args, **kwargs):
 
@@ -53,3 +58,20 @@ class FieldTemplateForm(forms.ModelForm):
             count = fields.count() + 1
 
             self.fields['position'].disabled = True
+
+class FieldTemplateOptionsInlineForm(forms.ModelForm):
+
+    model = FieldTemplateOptions
+
+    def __init__(self, *args, **kwargs):
+        super(FieldTemplateOptionsInlineForm, self).__init__(*args, **kwargs)
+
+        self.fields['choice_list'] = forms.CharField(
+            label  = "Choices",
+            required = False,
+            widget = JsonPairInputs(
+                val_attrs={'size':35},
+                key_attrs={'class':'large'}
+            )
+        )
+
