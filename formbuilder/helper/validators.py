@@ -31,6 +31,13 @@ def is_alpha_num_whitespace(value):
             params={'value': value},
         )
 
+def is_alpha_num_nospace(value):
+    if re.match(r'^[a-zA-Z0-9][A-Za-z0-9_-]*$', value) is None:
+        raise ValidationError(
+            ('%(value)s must be words consisting of alphanumeric characters, -, or _'),
+            params={'value': value},
+        )
+
 def is_lower(value):
 
     if value != value.lower():

@@ -7,6 +7,7 @@ from builder.models import FormTemplate, FieldTemplate, FieldSet
 from helper.constants import field_types
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit, HTML
+from django.utils.html import mark_safe
 
 
 class Form(forms.Form):
@@ -23,7 +24,8 @@ class Form(forms.Form):
         key_order = []
 
         for template in field_templates:
-            self.fields[template.name] = create_field(template)
+            if template.field_type != "html":
+                self.fields[template.name] = create_field(template)
             key_order.append(template.name)
 
         self.fields.keyOrder=key_order
@@ -39,12 +41,15 @@ class Form(forms.Form):
             _templates = FieldTemplate.objects.filter(
                 form_template=obj, field_set=fset).order_by('position')
 
-            values = [str(fset.name)]
+            values = [str(fset.label)]
             if fset.helper_text:
                 values.append(HTML(fset.helper_text))
 
             for t in _templates:
-                values.append(str(t.name))
+                if t.field_type =='html':
+                    values.append(HTML(t.options.html))
+                else:
+                    values.append(str(t.name))
 
             layout.append(Fieldset(*values))
 
@@ -95,7 +100,7 @@ class Form(forms.Form):
 
 def create_field(f):
 
-    options = f.fieldtemplateoptions
+    options = f.options
 
     if options.required and options.label:
         options.label += "*"

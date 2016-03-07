@@ -22,13 +22,22 @@
 
 <body >
     <div class="container">
-        <br/><br/><br/>
+        <div class="row">
+            <div class="col-xs-12">
+                {{ header }}
+            </div>
+        </div>
         <div class="row">
             <div class="col-xs-12">
 
                 {% load crispy_forms_tags %}
                 {% crispy form form.helper %}
 
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                {{ header }}
             </div>
         </div>
     </div>
@@ -38,7 +47,7 @@
 </body>
     <script>
 $(window).load(function() {
-    alert("Form resetting!");
+    console.log("Form resetting!");
     $('form').get(0).reset(); //clear form data on page load
 });
     </script>

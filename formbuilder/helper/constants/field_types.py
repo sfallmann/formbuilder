@@ -1,10 +1,11 @@
 CHECKBOX = "checkbox"
 DATE = "date"
 DATE_TIME = "datetime"
-DATE_TIME_LOCAL = "datetim-local"
+DATE_TIME_LOCAL = "datetime-local"
 EMAIL = "email"
 FILE = "file"
 HIDDEN = "hidden"
+HTML = "html"
 MONTH = "month"
 NUMBER = "number"
 PASSWORD = "password"
@@ -23,6 +24,7 @@ def as_list():
         EMAIL,
         FILE,
         HIDDEN,
+        HTML,
         MONTH,
         NUMBER,
         PASSWORD,
@@ -71,6 +73,10 @@ TEXT_AREA_ATTRS = [
     "value",
 ]
 
+HTML_ATTRS = [
+    "html"
+]
+
 ATTRS = {
 
     DATE: NUM_ATTRS,
@@ -79,6 +85,7 @@ ATTRS = {
     EMAIL: COMMON_ATTRS,
     FILE: FILE_ATTRS,
     HIDDEN: COMMON_ATTRS,
+    HTML: HTML_ATTRS,
     MONTH: NUM_ATTRS,
     PASSWORD: COMMON_ATTRS,
     RADIO: CHOICE_ATTRS,

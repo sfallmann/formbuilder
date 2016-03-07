@@ -2,10 +2,32 @@ from django.dispatch import receiver
 from django.db.models.signals import post_save, pre_save
 from django.db.models.signals import post_delete, pre_delete
 from .models import FieldTemplate, FieldTemplateOptions
+from .models import FormTemplate, FormTemplateOptions
 import logging
 
 
 logger = logging.getLogger(__name__)
+
+
+@receiver(post_save, sender=FormTemplate)
+def create_options_for_new_formtemplate(sender, created, instance, **kwargs):
+
+    """
+    Creates a FormTemplateOptions instance for a FormTemplate on the
+    FormTemplate's creation.
+    """
+
+    #  Check if the save was for a newly created FieldTemplate instance
+    if created:
+
+        #  Create a FieldTemplateOption instance for the FieldTemplate
+        options = FormTemplateOptions(form_template=instance)
+        options.save()
+
+        msg = "FormTemplateOptions [id:%s] created"\
+        "for FormTemplate [id:%s].\n\r" % (instance.pk, options.pk)
+
+        logger.info(msg)
 
 
 @receiver(post_save, sender=FieldTemplate)

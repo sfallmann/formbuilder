@@ -8,6 +8,7 @@ from django.shortcuts import redirect
 from .models import FormTemplate, FormData
 from .forms import Form
 from django.conf import settings
+from django.utils.html import mark_safe
 
 
 
@@ -78,7 +79,12 @@ def formtemplate_details(request, id):
             # Redirect to view to display the save data
             return redirect(formtemplate_results, results.id)
 
-    return render(request, 'builder/form.html', {"form": f},)
+    return render(
+        request, 'builder/form.html', {
+            "form": f,
+            "header": mark_safe(template_.options.header)
+        }
+    )
 
 
 def handle_uploaded_file(f, folder):

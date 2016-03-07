@@ -6,7 +6,7 @@ from django.core import serializers
 from django.contrib.contenttypes.models import ContentType
 from django.http import JsonResponse
 from helper.validators import is_alpha_num, is_alpha, is_alpha_num_words, is_lower
-from helper.validators import is_alpha_num_whitespace, min_20
+from helper.validators import is_alpha_num_whitespace,  is_alpha_num_nospace, min_20
 from helper.serializers import get_json, get_dict
 from helper.constants import field_types
 
@@ -99,13 +99,17 @@ class FormTemplateOptions(models.Model):
     form_template = models.OneToOneField(
         FormTemplate,
         on_delete=models.CASCADE,
-        primary_key=True
+        primary_key=True,
+        related_name='options'
     )
-
+    header = models.TextField(blank=True)
+    footer = models.TextField(blank=True)
     class Meta:
         verbose_name = "Options"
         verbose_name_plural = "Options"
 
+    def __str__(self):
+        return ""
 
 class FieldSet(models.Model):
 
@@ -123,18 +127,17 @@ class FieldSet(models.Model):
         on_delete=models.CASCADE,
     )
     name = models.CharField(
-        max_length=30, validators=[is_alpha_num_words])
+        max_length=30, validators=[is_alpha_num_nospace, is_lower])
+    label = models.CharField(max_length=50, blank=True)
     helper_text = models.TextField(blank=True)
 
     class Meta:
         unique_together = (("name", "form_template"),)
-
-    def __str__(self):
-        return self.name
-
-    class Meta:
         verbose_name = "Fieldset"
         verbose_name_plural = "Fieldsets"
+
+    def __str__(self):
+        return "%s: %s" % (self.name, self.form_template.name)
 
 
 class FieldTemplate(models.Model):
@@ -184,6 +187,12 @@ class FieldTemplate(models.Model):
     def __str__(self):
         return self.name
 
+    def get_form_admin_change_url(self):
+        content_type = ContentType.objects.get_for_model(self.form_template.__class__)
+        return reverse(
+            "admin:%s_%s_change" % (
+                content_type.app_label, content_type.model), args=(self.form_template.id,))
+
     def get_admin_change_url(self):
         content_type = ContentType.objects.get_for_model(self.__class__)
         return reverse(
@@ -216,7 +225,8 @@ class FieldTemplateOptions(models.Model):
     field_template = models.OneToOneField(
         FieldTemplate,
         on_delete=models.CASCADE,
-        primary_key=True
+        primary_key=True,
+        related_name='options'
     )
     label = models.CharField(max_length=50, blank=True)
 
@@ -241,6 +251,12 @@ class FieldTemplateOptions(models.Model):
     columns = models.PositiveIntegerField(null=True, blank=True)
     rows = models.PositiveIntegerField(null=True, blank=True)
     choice_list = JSONField(default={})
+
+    html = models.TextField(blank=True)
+
+    accept = ArrayField(
+        models.CharField(max_length=10, blank=True), null=True, blank=True
+    )
 
     class Meta:
         verbose_name = "Options"
@@ -281,8 +297,8 @@ class FormData(models.Model):
         verbose_name_plural = "Form Responses"
 
     def __str__(self):
-        return "%s Response: %s" % (
-            self.form_template.name, self.created.strftime("%A, %d. %B %Y %I:%M%p"))
+        return "Response: [id:%s]  %s" % (
+            self.pk, self.created.strftime("%A, %d. %B %Y %I:%M%p"))
 
     def get_absolute_url(self):
         return reverse(

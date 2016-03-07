@@ -18,6 +18,7 @@ from django.conf.urls import url, include
 from django.contrib import admin
 from builder import urls as builder_urls
 from django.conf import settings
+import django.views
 
 urlpatterns = [
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),

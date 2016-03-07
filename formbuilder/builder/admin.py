@@ -8,6 +8,7 @@ from .models import FormTemplateOptions, FieldSet
 from .models import FieldTemplate, FieldTemplateOptions
 from .adminforms import FieldTemplateInlineForm, FieldTemplateForm
 from .adminforms import FieldTemplateOptionsInlineForm, FieldSetInlineForm
+from ckeditor.widgets import CKEditorWidget
 from helper.constants import field_types
 from helper.widgets import JsonPairInputs
 
@@ -21,12 +22,13 @@ class FieldTemplateOptionsInline(admin.StackedInline):
 
     model = FieldTemplateOptions
     show_change_link = True
+    template="admin/builder/fieldtemplateoptions/edit_inline.html"
 
     form = FieldTemplateOptionsInlineForm
 
     def get_formset(self, request, obj, **kwargs):
 
-        self.fields = ["label","autofocus","required"]
+        self.fields = ["label",]
 
         if obj:
             common = ["label",]

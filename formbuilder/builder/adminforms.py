@@ -13,7 +13,10 @@ class FieldSetInlineForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(FieldSetInlineForm, self).__init__(*args, **kwargs)
 
-        self.fields['helper_text'] = forms.CharField(widget=CKEditorUploadingWidget())
+        self.fields['helper_text'] = forms.CharField(
+            required=False,
+            widget=CKEditorUploadingWidget()
+        )
 
 
 class FieldTemplateInlineForm(forms.ModelForm):
@@ -67,10 +70,8 @@ class FieldTemplateForm(forms.ModelForm):
                 form_template=instance.form_template)
         else:
 
-            form_template = None
-            fields = FieldTemplate.objects.filter(field_set=None)
-            count = fields.count() + 1
 
+            self.fields['field_set'].disabled = True
             self.fields['position'].disabled = True
 
 class FieldTemplateOptionsInlineForm(forms.ModelForm):
@@ -80,10 +81,20 @@ class FieldTemplateOptionsInlineForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(FieldTemplateOptionsInlineForm, self).__init__(*args, **kwargs)
 
-        self.fields['choice_list'].widget = forms.Textarea(
-            attrs={
-                'style': 'height: 300px; width: 600px; font-size: 1.15em;'
-            }
-        )
+        if 'choice_list' in self.fields:
+            self.fields['choice_list'].widget = forms.Textarea(
+                attrs={
+                    'style': 'height: 300px; width: 600px; font-size: 1.15em;'
+                }
+            )
+
+        if 'html' in self.fields:
+            self.fields['html'].widget = CKEditorWidget(config_name="coding",
+                attrs={
+                    'style': 'height: 300px; width: 600px; font-size: 1.15em;'
+                }
+            )
+
+
 
 
