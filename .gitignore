@@ -142,4 +142,8 @@ target/
 
 # Formbuilder
 uploads/*
+thumbs.db
+secrets.json
+
+
 

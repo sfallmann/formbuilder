@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 
 import os
-
+import json
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -20,7 +20,11 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'temporary_dev_key'
+SECRETS = os.path.join(BASE_DIR, 'secrets.json')
+SECRET_KEY = json.loads(
+	open(SECRETS, 'r').read())['DJANGO_SECRET_KEY']
+RECAPTCHA_SECRET = json.loads(
+	open(SECRETS, 'r').read())['RECAPTCHA_SECRET']
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -31,29 +35,29 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.admindocs',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'builder.apps.BuilderConfig',
-    'crispy_forms',
-    'floppyforms',
-    'ckeditor',
-    'ckeditor_uploader',
+	'django.contrib.admin',
+	'django.contrib.admindocs',
+	'django.contrib.auth',
+	'django.contrib.contenttypes',
+	'django.contrib.sessions',
+	'django.contrib.messages',
+	'django.contrib.staticfiles',
+	'builder.apps.BuilderConfig',
+	'crispy_forms',
+	'floppyforms',
+	'ckeditor',
+	'ckeditor_uploader',
 ]
 
 MIDDLEWARE_CLASSES = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+	'django.middleware.security.SecurityMiddleware',
+	'django.contrib.sessions.middleware.SessionMiddleware',
+	'django.middleware.common.CommonMiddleware',
+	'django.middleware.csrf.CsrfViewMiddleware',
+	'django.contrib.auth.middleware.AuthenticationMiddleware',
+	'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+	'django.contrib.messages.middleware.MessageMiddleware',
+	'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
 ROOT_URLCONF = 'formbuilder.urls'
@@ -61,21 +65,21 @@ ROOT_URLCONF = 'formbuilder.urls'
 PROJECT_TEMPLATES = BASE_DIR + "/templates"
 
 TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
+	{
+		'BACKEND': 'django.template.backends.django.DjangoTemplates',
+		'DIRS': [
 
-        ],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
-        },
-    },
+		],
+		'APP_DIRS': True,
+		'OPTIONS': {
+			'context_processors': [
+				'django.template.context_processors.debug',
+				'django.template.context_processors.request',
+				'django.contrib.auth.context_processors.auth',
+				'django.contrib.messages.context_processors.messages',
+			],
+		},
+	},
 ]
 
 print BASE_DIR + "/templates"
@@ -87,15 +91,15 @@ WSGI_APPLICATION = 'formbuilder.wsgi.application'
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'formbuilder_dev',
-        # The following settings are not used with sqlite3:
-        'USER': 'form_dev',
-        'PASSWORD': '$Password1',
-        'HOST': 'localhost',                      # Empty for localhost through domain sockets or           '127.0.0.1' for localhost through TCP.
-        'PORT': '',                      # Set to empty string for default.
-    }
+	'default': {
+		'ENGINE': 'django.db.backends.postgresql_psycopg2',
+		'NAME': 'formbuilder_dev',
+		# The following settings are not used with sqlite3:
+		'USER': 'form_dev',
+		'PASSWORD': '$Password1',
+		'HOST': 'localhost',                      # Empty for localhost through domain sockets or           '127.0.0.1' for localhost through TCP.
+		'PORT': '',                      # Set to empty string for default.
+	}
 }
 
 
@@ -105,18 +109,18 @@ DATABASES = {
 # https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+	{
+		'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+	},
+	{
+		'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+	},
+	{
+		'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+	},
+	{
+		'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+	},
 ]
 
 
@@ -142,74 +146,74 @@ MEDIA_ROOT = BASE_DIR + "/media/"
 MEDIA_URL = '/media/'
 
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-            'verbose': {
-                'format' : "[%(asctime)s] %(levelname)s[%(name)s:%(lineno)s] %(message)s",
-                'datefmt' : "%d/%b/%Y %H:%M:%S"
-            },
-            'simple': {
-                'format': '%(levelname)s %(message)s'
-            },
-        },
-    'handlers': {
+	'version': 1,
+	'disable_existing_loggers': False,
+	'formatters': {
+			'verbose': {
+				'format' : "[%(asctime)s] %(levelname)s[%(name)s:%(lineno)s] %(message)s",
+				'datefmt' : "%d/%b/%Y %H:%M:%S"
+			},
+			'simple': {
+				'format': '%(levelname)s %(message)s'
+			},
+		},
+	'handlers': {
 
-        # Debug handlers
-        'django_debug': {
-            'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': 'logs/django.debug.log',
-            'formatter': 'verbose'
-        },
-        'builder_debug': {
-            'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': 'logs/builder.debug.log',
-            'formatter': 'verbose'
-        },
+		# Debug handlers
+		'django_debug': {
+			'level': 'DEBUG',
+			'class': 'logging.FileHandler',
+			'filename': 'logs/django.debug.log',
+			'formatter': 'verbose'
+		},
+		'builder_debug': {
+			'level': 'DEBUG',
+			'class': 'logging.FileHandler',
+			'filename': 'logs/builder.debug.log',
+			'formatter': 'verbose'
+		},
 
-        # Info handlers
-        'django_info': {
-            'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': 'logs/django.info.log',
-            'formatter': 'simple'
-        },
-        'builder_info': {
-            'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': 'logs/builder.info.log',
-            'formatter': 'simple'
-        },
+		# Info handlers
+		'django_info': {
+			'level': 'INFO',
+			'class': 'logging.FileHandler',
+			'filename': 'logs/django.info.log',
+			'formatter': 'simple'
+		},
+		'builder_info': {
+			'level': 'INFO',
+			'class': 'logging.FileHandler',
+			'filename': 'logs/builder.info.log',
+			'formatter': 'simple'
+		},
 
-    },
-    'loggers': {
+	},
+	'loggers': {
 
-        # Debug loggers
-        'django': {
-            'handlers':['django_debug'],
-            'propagate': True,
-            'level':'DEBUG',
-        },
-        'builder': {
-            'handlers': ['builder_debug'],
-            'level': 'DEBUG',
-        },
+		# Debug loggers
+		'django': {
+			'handlers':['django_debug'],
+			'propagate': True,
+			'level':'DEBUG',
+		},
+		'builder': {
+			'handlers': ['builder_debug'],
+			'level': 'DEBUG',
+		},
 
-        # Debug loggers
-        'django': {
-            'handlers':['django_info'],
-            'propagate': True,
-            'level':'INFO',
-        },
-        'builder': {
-            'handlers': ['builder_info'],
-            'level': 'INFO',
-        },
+		# Debug loggers
+		'django': {
+			'handlers':['django_info'],
+			'propagate': True,
+			'level':'INFO',
+		},
+		'builder': {
+			'handlers': ['builder_info'],
+			'level': 'INFO',
+		},
 
 
-    }
+	}
 }
 
 # cripsy forms template pack
@@ -221,69 +225,75 @@ CKEDITOR_UPLOAD_PATH = "uploads/"
 CKEDITOR_IMAGE_BACKEND = "pillow"
 CKEDITOR_BROWSE_SHOW_DIRS= True
 CKEDITOR_CONFIGS = {
-    'default': {
-        "removePlugins": "stylesheetparser",
-        'skin': 'moono',
-        'toolbar_YouCustomToolbarConfig': [
-            {'name': 'clipboard', 'items': ['Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', '-', 'Undo', 'Redo']},
-            {'name': 'editing', 'items': ['Find', 'Replace', '-', 'SelectAll', 'Source', 'Preview']},
-
-            {'name': 'basicstyles',
-             'items': ['Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', '-', 'RemoveFormat']},
-            {'name': 'paragraph',
-             'items': ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote', 'CreateDiv', '-',
-                       'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock', '-', 'BidiLtr', 'BidiRtl',
-                       'Language']},
-            {'name': 'links', 'items': ['Link', 'Unlink', 'Anchor']},
-            {'name': 'insert',
-             'items': ['Image', 'Flash', 'Table', 'HorizontalRule', 'Smiley', 'SpecialChar', 'PageBreak', 'Iframe']},
-            {'name': 'styles', 'items': ['Styles', 'Format', 'Font', 'FontSize']},
-            {'name': 'colors', 'items': ['TextColor', 'BGColor']},
-            {'name': 'tools', 'items': ['Maximize', 'ShowBlocks']},
-
-        ],
-        'toolbar': 'YouCustomToolbarConfig',  # put selected toolbar config here
-        'toolbarGroups': [{ 'name': 'document', 'groups': [ 'mode', 'document', 'doctools' ] }],
-        'height': 291,
-        'width': '100%',
-        'filebrowserWindowHeight': 725,
-        'filebrowserWindowWidth': 940,
-        'toolbarCanCollapse': True,
-        'mathJaxLib': '//cdn.mathjax.org/mathjax/2.2-latest/MathJax.js?config=TeX-AMS_HTML',
-        'tabSpaces': 4,
-        'extraPlugins': ','.join(
-            [
-                # you extra plugins here
-                'div',
-                'autolink',
-                'autoembed',
-                'embedsemantic',
-                'autogrow',
-                'devtools',
-                'widget',
-                'lineutils',
-                'clipboard',
-                'dialog',
-                'dialogui',
-                'elementspath',
-                'bbcode',
-            ]),
-    },
-    'coding': {
-        'skin': 'moono',
-        'toolbar_Basic': [
-            ['Source', '-', 'Bold', 'Italic']
-        ],
-        'toolbar_YouCustomToolbarConfig': [
-            {'name': 'links', 'items': ['Link', 'Unlink', 'Anchor']},
-            {'name': 'insert',
-             'items': ['Image', 'Flash', 'Table', 'HorizontalRule', 'Smiley', 'SpecialChar', 'PageBreak', 'Iframe']},
-        ],
-        'tabSpaces': 4,
-        'extraPlugins': ','.join(
-            [
-                # you extra plugins here
-                'bbcode'
-            ]),
-    }
+	'default': {
+		'skin': 'moono',
+		# 'skin': 'office2013',
+		'toolbar_Basic': [
+			['Source', '-', 'Bold', 'Italic']
+		],
+		'toolbar_YouCustomToolbarConfig': [
+			{'name': 'document', 'items': ['Source', '-', 'Save', 'NewPage', 'Preview', 'Print', '-', 'Templates']},
+			{'name': 'clipboard', 'items': ['Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', '-', 'Undo', 'Redo']},
+			{'name': 'editing', 'items': ['Find', 'Replace', '-', 'SelectAll']},
+			{'name': 'forms',
+			 'items': ['Form', 'Checkbox', 'Radio', 'TextField', 'Textarea', 'Select', 'Button', 'ImageButton',
+					   'HiddenField']},
+			'/',
+			{'name': 'basicstyles',
+			 'items': ['Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', '-', 'RemoveFormat']},
+			{'name': 'paragraph',
+			 'items': ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote', 'CreateDiv', '-',
+					   'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock', '-', 'BidiLtr', 'BidiRtl',
+					   'Language']},
+			{'name': 'links', 'items': ['Link', 'Unlink', 'Anchor']},
+			{'name': 'insert',
+			 'items': ['Image', 'Flash', 'Table', 'HorizontalRule', 'Smiley', 'SpecialChar', 'PageBreak', 'Iframe']},
+			{'name': 'styles', 'items': ['Styles', 'Format', 'Font', 'FontSize']},
+			{'name': 'colors', 'items': ['TextColor', 'BGColor']},
+			{'name': 'tools', 'items': ['Maximize', 'ShowBlocks']},
+			{'name': 'about', 'items': ['About']},
+		],
+		'toolbar': 'YouCustomToolbarConfig',  # put selected toolbar config here
+		# 'toolbarGroups': [{ 'name': 'document', 'groups': [ 'mode', 'document', 'doctools' ] }],
+		# 'height': 291,
+		# 'width': '100%',
+		# 'filebrowserWindowHeight': 725,
+		# 'filebrowserWindowWidth': 940,
+		# 'toolbarCanCollapse': True,
+		# 'mathJaxLib': '//cdn.mathjax.org/mathjax/2.2-latest/MathJax.js?config=TeX-AMS_HTML',
+		'tabSpaces': 4,
+		'extraPlugins': ','.join(
+			[
+				# you extra plugins here
+				'div',
+				'autolink',
+				'autoembed',
+				'embedsemantic',
+				'autogrow',
+				# 'devtools',
+				'widget',
+				'lineutils',
+				'clipboard',
+				'dialog',
+				'dialogui',
+				'elementspath'
+			]),
+	},
+	'coding': {
+		'skin': 'moono',
+		'toolbar_Basic': [
+			['Source', '-', 'Bold', 'Italic']
+		],
+		'toolbar_YouCustomToolbarConfig': [
+			{'name': 'links', 'items': ['Link', 'Unlink', 'Anchor']},
+			{'name': 'insert',
+			 'items': ['Image', 'Flash', 'Table', 'HorizontalRule', 'Smiley', 'SpecialChar', 'PageBreak', 'Iframe']},
+		],
+		'tabSpaces': 4,
+		'extraPlugins': ','.join(
+			[
+				# you extra plugins here
+				'bbcode'
+			]),
+	}
 }

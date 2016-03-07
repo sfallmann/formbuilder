@@ -16,82 +16,82 @@ TEXT_AREA = "textarea"
 
 def as_list():
 
-    return [
-        #CHECKBOX,
-        DATE,
-        DATE_TIME,
-        DATE_TIME_LOCAL,
-        EMAIL,
-        FILE,
-        HIDDEN,
-        HTML,
-        MONTH,
-        NUMBER,
-        PASSWORD,
-        RADIO,
-        SELECT,
-        TEXT,
-        TEXT_AREA,
-    ]
+	return [
+		#CHECKBOX,
+		DATE,
+		DATE_TIME,
+		DATE_TIME_LOCAL,
+		EMAIL,
+		FILE,
+		HIDDEN,
+		HTML,
+		MONTH,
+		NUMBER,
+		PASSWORD,
+		RADIO,
+		SELECT,
+		TEXT,
+		TEXT_AREA,
+	]
 
 COMMON_ATTRS = [
-    "autocomplete",
-    "autofocus",
-    "disabled",
-    "maxlength",
-    "pattern",
-    "placeholder",
-    "readonly",
-    "required",
-    #"value",
-    ]
+	"autocomplete",
+	"autofocus",
+	"disabled",
+	"maxlength",
+	"pattern",
+	"placeholder",
+	"readonly",
+	"required",
+	#"value",
+	]
 
 NUM_ATTRS = COMMON_ATTRS + [
-    "min",
-    "max",
+	"min",
+	"max",
 ]
 
 CHOICE_ATTRS = [
-    "choice_list"
+	"choice_list"
 ]
 
 FILE_ATTRS = [
-    "accept",
-    "disabled",
-    "required",
+	"accept",
+	"disabled",
+	"required",
 ]
 
 TEXT_AREA_ATTRS = [
-    "autofocus",
-    "cols",
-    "disabled",
-    "maxlength",
-    "placeholder"
-    "readonly",
-    "required",
-    "rows",
-    "value",
+	"autofocus",
+	"cols",
+	"rows",
+	"disabled",
+	"maxlength",
+	"placeholder",
+	"readonly",
+	"required",
+	#"value",
 ]
 
 HTML_ATTRS = [
-    "html"
+	"html"
 ]
 
 ATTRS = {
 
-    DATE: NUM_ATTRS,
-    DATE_TIME: NUM_ATTRS,
-    DATE_TIME_LOCAL: NUM_ATTRS,
-    EMAIL: COMMON_ATTRS,
-    FILE: FILE_ATTRS,
-    HIDDEN: COMMON_ATTRS,
-    HTML: HTML_ATTRS,
-    MONTH: NUM_ATTRS,
-    PASSWORD: COMMON_ATTRS,
-    RADIO: CHOICE_ATTRS,
-    SELECT: CHOICE_ATTRS,
-    TEXT: COMMON_ATTRS,
-    TEXT_AREA: TEXT_AREA_ATTRS
+	DATE: NUM_ATTRS,
+	DATE_TIME: NUM_ATTRS,
+	DATE_TIME_LOCAL: NUM_ATTRS,
+	EMAIL: COMMON_ATTRS,
+	FILE: FILE_ATTRS,
+	HIDDEN: COMMON_ATTRS,
+	HTML: HTML_ATTRS,
+	MONTH: NUM_ATTRS,
+	PASSWORD: COMMON_ATTRS,
+	RADIO: CHOICE_ATTRS,
+	SELECT: CHOICE_ATTRS,
+	TEXT: COMMON_ATTRS,
+	TEXT_AREA: TEXT_AREA_ATTRS
 
 }
 
