@@ -7,7 +7,7 @@ from builder.models import FormTemplate, FieldTemplate, FieldSet
 from helper.constants import field_types
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit, HTML
-from django.utils.html import mark_safe
+
 
 
 class Form(forms.Form):

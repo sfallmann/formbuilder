@@ -8,6 +8,7 @@ from .models import FormTemplateOptions, FieldSet
 from .models import FieldTemplate, FieldTemplateOptions
 from .adminforms import FieldTemplateInlineForm, FieldTemplateForm
 from .adminforms import FieldTemplateOptionsInlineForm, FieldSetInlineForm
+from .adminforms import FormTemplateOptionsInlineForm
 from ckeditor.widgets import CKEditorWidget
 from helper.constants import field_types
 from helper.widgets import JsonPairInputs
@@ -84,6 +85,7 @@ class FieldSetInline(admin.TabularInline):
 class FormTemplateOptionsInline(admin.TabularInline):
 
     model = FormTemplateOptions
+    form = FormTemplateOptionsInlineForm
     show_change_link = True
 
     def has_delete_permission(self, request, obj):
@@ -91,7 +93,6 @@ class FormTemplateOptionsInline(admin.TabularInline):
 
 
 class FormTemplateAdmin(admin.ModelAdmin):
-
     inlines = [FormTemplateOptionsInline, FieldSetInline, FieldTemplateInline,]
 
 

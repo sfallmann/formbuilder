@@ -1,9 +1,29 @@
 from django import forms
 from .models import FieldTemplate, FieldSet, FieldTemplateOptions
+from .models import FormTemplateOptions
 from helper.widgets import JsonPairInputs
 from ckeditor.widgets import CKEditorWidget
 from ckeditor_uploader.widgets import CKEditorUploadingWidget
 
+
+class FormTemplateOptionsInlineForm(forms.ModelForm):
+
+    model = FormTemplateOptions
+
+    def __init__(self, *args, **kwargs):
+        super(FormTemplateOptionsInlineForm, self).__init__(*args, **kwargs)
+
+        self.fields['header'].widget = CKEditorUploadingWidget(config_name="default",
+                attrs={
+                    'style': 'height: 300px; width: 600px; font-size: 1.15em;'
+                }
+            )
+
+        self.fields['footer'].widget = CKEditorUploadingWidget(config_name="default",
+                attrs={
+                    'style': 'height: 300px; width: 600px; font-size: 1.15em;'
+                }
+            )
 
 
 class FieldSetInlineForm(forms.ModelForm):
@@ -13,16 +33,16 @@ class FieldSetInlineForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(FieldSetInlineForm, self).__init__(*args, **kwargs)
 
-        self.fields['helper_text'] = forms.CharField(
-            required=False,
-            widget=CKEditorUploadingWidget()
-        )
+        self.fields['helper_text'].widget = CKEditorWidget(config_name="coding",
+                attrs={
+                    'style': 'height: 300px; width: 600px; font-size: 1.15em;'
+                }
+            )
 
 
 class FieldTemplateInlineForm(forms.ModelForm):
 
     model = FieldTemplate
-
 
     def __init__(self, *args, **kwargs):
 
@@ -89,12 +109,8 @@ class FieldTemplateOptionsInlineForm(forms.ModelForm):
             )
 
         if 'html' in self.fields:
-            self.fields['html'].widget = CKEditorWidget(config_name="coding",
+            self.fields['html'].widget = CKEditorUploadingWidget(config_name="default",
                 attrs={
                     'style': 'height: 300px; width: 600px; font-size: 1.15em;'
                 }
             )
-
-
-
-
