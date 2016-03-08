@@ -227,7 +227,7 @@ class FieldChoice(DictBase):
     )
 
     def __str__(self):
-        return "Field: [key:%s], [value:%s]" %(
+        return "Field: %s  [key:%s], [value:%s]" %(
             self.field_template.name, self.key, self.value)
 
 
