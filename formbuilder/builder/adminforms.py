@@ -1,17 +1,17 @@
 from django import forms
-from .models import FieldTemplate, FieldSet, FieldTemplateOptions
-from .models import FormTemplateOptions
-from helper.widgets import JsonPairInputs
+from .models import FieldTemplate, FieldSet, FormTemplate
+from .models import FieldChoice
 from ckeditor.widgets import CKEditorWidget
 from ckeditor_uploader.widgets import CKEditorUploadingWidget
 
 
-class FormTemplateOptionsInlineForm(forms.ModelForm):
 
-    model = FormTemplateOptions
+class FormTemplateForm(forms.ModelForm):
+
+    model = FormTemplate
 
     def __init__(self, *args, **kwargs):
-        super(FormTemplateOptionsInlineForm, self).__init__(*args, **kwargs)
+        super(FormTemplateForm, self).__init__(*args, **kwargs)
 
         self.fields['header'].widget = CKEditorUploadingWidget(config_name="default",
                 attrs={
@@ -88,25 +88,11 @@ class FieldTemplateForm(forms.ModelForm):
             self.fields['position'] = forms.ChoiceField(choices=position_choices, required=False)
             self.fields['field_set'].queryset = FieldSet.objects.filter(
                 form_template=instance.form_template)
-        else:
 
+        else:
 
             self.fields['field_set'].disabled = True
             self.fields['position'].disabled = True
-
-class FieldTemplateOptionsInlineForm(forms.ModelForm):
-
-    model = FieldTemplateOptions
-
-    def __init__(self, *args, **kwargs):
-        super(FieldTemplateOptionsInlineForm, self).__init__(*args, **kwargs)
-
-        if 'choice_list' in self.fields:
-            self.fields['choice_list'].widget = forms.Textarea(
-                attrs={
-                    'style': 'height: 300px; width: 600px; font-size: 1.15em;'
-                }
-            )
 
         if 'html' in self.fields:
             self.fields['html'].widget = CKEditorUploadingWidget(config_name="default",
@@ -114,3 +100,13 @@ class FieldTemplateOptionsInlineForm(forms.ModelForm):
                     'style': 'height: 300px; width: 600px; font-size: 1.15em;'
                 }
             )
+
+        #if 'choice_list' in self.fields:
+        #    self.fields['choice_list'].widget = forms.Textarea(
+        #        attrs={
+        #            'style': 'height: 300px; width: 600px; font-size: 1.15em;'
+        #        }
+        #    )
+
+
+
