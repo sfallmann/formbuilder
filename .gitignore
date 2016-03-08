@@ -141,8 +141,9 @@ target/
 
 
 # Formbuilder
-uploads/*/*
-media/*/*
+uploads/
+media/
+logs/
 thumbs.db
 secrets.json
 

@@ -297,3 +297,7 @@ CKEDITOR_CONFIGS = {
 			]),
 	}
 }
+
+
+# Builder specific
+EMPTY_FIELDSET = "empty"
