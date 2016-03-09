@@ -10,14 +10,12 @@ from .models import FormData, FormTemplate, FieldSet
 from .models import FieldTemplate, FieldChoice
 from .adminforms import FieldTemplateInlineForm, FieldTemplateForm
 from .adminforms import FieldSetInlineForm, FormTemplateForm
-from ckeditor.widgets import CKEditorWidget
 from helper.constants import field_types
-
-
 
 
 class CategoryAdmin(admin.ModelAdmin):
 
+    # Autofills the slug field based on the name field
     prepopulated_fields = {"slug": ("name",)}
 
 
@@ -29,24 +27,44 @@ class FieldTemplateInline(admin.StackedInline):
 
     def get_formset(self, request, obj, **kwargs):
 
-        self.fields = ["name","form_template","field_type","field_set","label","position",]
+        # only show the fields in the common to all field types
+        self.fields = [
+            "name",
+            "form_template",
+            "field_type",
+            "field_set",
+            "label",
+            "position",
+        ]
 
-        return super(FieldTemplateInline, self).get_formset(request, obj, **kwargs)
+        return super(
+            FieldTemplateInline, self).get_formset(request, obj, **kwargs)
 
+    #  order the fields by field set membership and then position
     def get_queryset(self, request):
-            return super(FieldTemplateInline, self).get_queryset(request).order_by('field_set','position')
+            return super(
+                FieldTemplateInline, self
+            ).get_queryset(request).order_by('field_set', 'position')
 
+    #  only show FieldSets that are related to the fields' FormTemplate
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
+
         if db_field.name == "field_set":
             try:
+                # id of the FormTemplate
                 parent_obj_id = request.resolver_match.args[0]
                 form_template = FormTemplate.objects.get(id=parent_obj_id)
-                kwargs["queryset"] = FieldSet.objects.filter(form_template=form_template)
+
+                kwargs["queryset"] = FieldSet.objects.filter(
+                    form_template=form_template
+                )
+
             except IndexError:
                 kwargs["queryset"] = FieldSet.objects.none()
 
         return super(FieldTemplateInline, self).formfield_for_foreignkey(
             db_field, request, **kwargs)
+
 
 class FieldChoiceInline(admin.StackedInline):
     model = FieldChoice
@@ -56,29 +74,46 @@ class FieldChoiceInline(admin.StackedInline):
 class FieldTemplateAdmin(admin.ModelAdmin):
 
     form = FieldTemplateForm
-    list_display = ('name', 'field_type', 'form_template','field_set','position')
-    ordering = ('field_set','form_template', 'position', 'field_type','name')
-    list_filter = ('form_template','field_set',)
-
+    list_display = (
+        'name', 'field_type', 'form_template', 'field_set', 'position')
+    ordering = (
+        'field_set', 'form_template', 'position', 'field_type', 'name')
+    list_filter = ('form_template', 'field_set',)
 
     def get_form(self, request, obj, **kwargs):
 
-        self.fields = ["name","form_template","field_type","field_set","label","position",]
+        #  fields common to all field types
+        self.fields = [
+            "name",
+            "form_template",
+            "field_type",
+            "field_set",
+            "label",
+            "position",
+        ]
 
+        #  if this is for an existing FieldTemplate
         if obj:
-            common = ["form_template","field_set","field_type","name","label","position",]
+            #  define the fields common to all FieldTemplates
+            #  TODO:  Need to make this into a constant
+            common = [
+                "form_template",
+                "field_set",
+                "field_type",
+                "name",
+                "label",
+                "position",
+            ]
+            #  get all the availabled fields based on the value of field_type
+            #  and then sort them.
             field_types.ATTRS[obj.field_type].sort()
+            #  add the additional fields with common
             self.fields = common + field_types.ATTRS[obj.field_type]
-
+            #  add FieldChoiceInline for select and radio field types
             if obj.field_type == "select" or obj.field_type == "radio":
-                self.inlines =[FieldChoiceInline,]
+                self.inlines = [FieldChoiceInline, ]
 
         return super(FieldTemplateAdmin, self).get_form(request, obj, **kwargs)
-
-
-
-class FieldSetAdmin(admin.ModelAdmin):
-    pass
 
 
 class FieldSetFormSet(BaseInlineFormSet):
@@ -86,20 +121,36 @@ class FieldSetFormSet(BaseInlineFormSet):
     def clean(self):
         super(FieldSetFormSet, self).clean()
 
+        #  Check through all the FieldSSet forms
         for form in self.forms:
+            #  If the form doesn't have cleane_data continue
             if not hasattr(form, 'cleaned_data'):
                 continue
-
+            #  If it's the "empty" FieldSet
             if form.instance.name == settings.EMPTY_FIELDSET:
+
+                #  clean the data
                 data = form.cleaned_data
 
+                #  if the the name has been changed raise and error
                 if(data.get('name') != settings.EMPTY_FIELDSET):
                     raise ValidationError(
-                        'FieldSet %s cannot be renamed!' % settings.EMPTY_FIELDSET)
+                        'FieldSet %s cannot be renamed!' %
+                        settings.EMPTY_FIELDSET
+                    )
+                #  if the the name has been changed raise and error
+                if(data.get('label')):
+                    raise ValidationError(
+                        'FieldSet %s cannot be given a label!' %
+                        settings.EMPTY_FIELDSET
+                    )
 
+                #  if the delete button is checked raise and error
                 if (data.get('DELETE')):
                     raise ValidationError(
-                        'FieldSet %s can never be deleted!' % settings.EMPTY_FIELDSET)
+                        'FieldSet %s can never be deleted!' %
+                        settings.EMPTY_FIELDSET
+                    )
 
 
 class FieldSetInline(admin.StackedInline):
@@ -113,20 +164,18 @@ class FieldSetInline(admin.StackedInline):
 
     fieldsets = (
         (None, {
-            'fields': (('name','label'),)
+            'fields': (('name', 'label'))
         }),
         ('Advanced options', {
             'classes': ('collapse',),
             'fields': ('helper_text',),
         }),
     )
-    def get_formset(self, request, obj, **kwargs):
 
-        return super(FieldSetInline, self).get_formset(request, obj, **kwargs)
 
 class FormTemplateAdmin(admin.ModelAdmin):
     form = FormTemplateForm
-    inlines = [FieldSetInline, FieldTemplateInline,]
+    inlines = [FieldSetInline, FieldTemplateInline, ]
 
     fieldsets = (
         (None, {
@@ -134,24 +183,22 @@ class FormTemplateAdmin(admin.ModelAdmin):
                     'name',
                     'category',
                     'notification_list',
-                    ('login_required','send_confirmation'),
+                    ('login_required', 'send_confirmation'),
                 )
         }),
         ('Advanced options', {
             'classes': ('collapse',),
-            'fields': ('header','footer'),
+            'fields': ('header', 'footer'),
         }),
     )
 
 
-
-
-
 class FormDataAdmin(admin.ModelAdmin):
-    list_display = ("__str__","form_template", "data_category")
+    list_display = ("__str__", "form_template", "data_category")
     ordering = ('form_template', 'id')
     readonly_fields = ["form_template", "data"]
 
+    # allows for sotring by Category
     def data_category(self, obj):
 
         if obj.form_template:
@@ -164,6 +211,5 @@ class FormDataAdmin(admin.ModelAdmin):
 
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(FieldTemplate, FieldTemplateAdmin)
-#admin.site.register(FieldSet, FieldSetAdmin)
 admin.site.register(FormTemplate, FormTemplateAdmin)
 admin.site.register(FormData, FormDataAdmin)
