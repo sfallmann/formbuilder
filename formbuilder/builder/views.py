@@ -98,7 +98,7 @@ def formtemplate_details(request, id):
 
 
     return render(
-        request, 'builder/form.html', {
+        request, 'form.html', {
             "form": f,
             "header": mark_safe(template_.header)
         }
