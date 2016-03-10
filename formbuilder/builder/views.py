@@ -11,16 +11,14 @@ from .forms import Form
 from django.conf import settings
 from django.utils.html import mark_safe
 
-
-
 FILESTORE = FileSystemStorage(location='/uploads')
-UPLOAD_FOLDER = os.getcwd() +"/uploads"
-
+UPLOAD_FOLDER = os.path.join(os.getcwd(), "uploads")
 
 '''
 Views for rendering forms, capturing submitted data,
 and displaying the captured\saved results
 '''
+
 
 def formtemplate_results(request, id):
     '''
@@ -35,7 +33,6 @@ def formtemplate_results(request, id):
     return HttpResponse(json.dumps(results.data))
 
 
-
 def formtemplate_details(request, id):
     '''
     formtemplate_details(request, id):
@@ -44,12 +41,11 @@ def formtemplate_details(request, id):
         created from a FormTemplate.
     '''
 
-    # Get the FormTemplate object by id
+    #  Get the FormTemplate object by id
     template_ = FormTemplate.objects.get(id=id)
 
-    # Pass the FormTemplate object into Form
+    #  Pass the FormTemplate object into Form
     f = Form(obj=template_)
-
 
     if request.method == "POST":
 
@@ -61,25 +57,23 @@ def formtemplate_details(request, id):
         print f.files
         print f.changed_data
 
-        # Check if the data is valid
-        if f.is_valid(): # and recaptcha_passed:
+        #  Check if the data is valid
+        if f.is_valid():  # and recaptcha_passed:
 
-
-            # Create the FormData object with the posted data
-            formdata = create_formdata(template_,f.clean_data_only,request.user)
-
-
+            #  Create the FormData object with the posted data
+            formdata = create_formdata(
+                template_, f.clean_data_only, request.user)
 
             for file_ in f.file_list:
                 handle_uploaded_file(file_, str(formdata.pk))
 
-            # Redirect to view to display the save data
+            #  Redirect to view to display the save data
             return redirect(formtemplate_results, formdata.id)
 
         else:
 
             recaptcha_error = "<p class='alert alert-danger'>%s</h4>"\
-            % 'reCAPTCHA failed. Please try again.'
+                % 'reCAPTCHA failed. Please try again.'
 
             return render(
                 request, 'builder/form.html', {
@@ -88,7 +82,6 @@ def formtemplate_details(request, id):
                     "recaptcha_error": recaptcha_error
                 }
             )
-
 
     return render(
         request, 'form.html', {
@@ -100,15 +93,16 @@ def formtemplate_details(request, id):
 
 def handle_uploaded_file(f, folder):
 
-    path = UPLOAD_FOLDER + "/%s/" % (folder)
+    path = os.path.join(UPLOAD_FOLDER, ("%s/" % folder))
 
     make_folder(path)
 
-    filepath = path + "/" + str(f._name)
+    filepath = os.path.join(path, f._name)
 
     with open(filepath, 'wb+') as destination:
         for chunk in f.chunks():
             destination.write(chunk)
+
 
 def make_folder(folder):
 
@@ -149,6 +143,7 @@ def get_client_ip(request):
         ip = request.META.get('REMOTE_ADDR')
     return ip
 
+
 def create_formdata(form, results, user):
 
     data = {
@@ -167,6 +162,4 @@ def create_formdata(form, results, user):
                 }
             })
 
-
-
-    return FormData.objects.create(form_template=form,data=data)
+    return FormData.objects.create(form_template=form, data=data)

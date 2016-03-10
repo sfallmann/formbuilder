@@ -6,15 +6,19 @@ from django.core.urlresolvers import reverse
 from django.core import serializers
 from django.contrib.contenttypes.models import ContentType
 from django.http import JsonResponse
-from helper.validators import is_alpha_num, is_alpha, is_alpha_num_words, is_lower
-from helper.validators import is_alpha_num_whitespace,  is_alpha_num_nospace, min_20
+from helper.validators import is_lower, min_20
+from helper.validators import is_alpha_num, is_alpha, is_alpha_num_words
+from helper.validators import is_alpha_num_whitespace, is_alpha_num_nospace
 from helper.serializers import get_json, get_dict
 from helper.constants import field_types
 
+
 class DictBase(models.Model):
 
-    key = models.CharField(max_length=32,unique=True, validators=[is_alpha_num_words, is_lower])
-    value = models.CharField(max_length=255,unique=True)
+    key = models.CharField(
+        max_length=32, unique=True, validators=[is_alpha_num_words, is_lower]
+    )
+    value = models.CharField(max_length=255, unique=True)
 
 
 class Category(models.Model):
@@ -26,8 +30,8 @@ class Category(models.Model):
 
     '''
 
-    name = models.CharField(max_length=50,unique=True)
-    acronym = models.CharField(max_length=3,unique=True)
+    name = models.CharField(max_length=50, unique=True)
+    acronym = models.CharField(max_length=3, unique=True)
     slug = models.SlugField(max_length=100)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
@@ -165,14 +169,14 @@ class FieldTemplate(models.Model):
         on_delete=models.SET_NULL,
     )
 
-    position = models.PositiveIntegerField(default=None,null=True, blank=True)
+    position = models.PositiveIntegerField(default=None, null=True, blank=True)
 
     label = models.CharField(max_length=50, blank=True)
 
     # Common tag attributes
     autofocus = models.BooleanField(default=False)
     maxlength = models.PositiveIntegerField(
-        null=True, blank=True,default=100,validators=[min_20,])
+        null=True, blank=True, default=100, validators=[min_20, ])
     placeholder = models.TextField(blank=True)
     readonly = models.BooleanField(default=False)
     required = models.BooleanField(default=False)
@@ -205,10 +209,14 @@ class FieldTemplate(models.Model):
         return self.name
 
     def get_form_admin_change_url(self):
-        content_type = ContentType.objects.get_for_model(self.form_template.__class__)
+        content_type = ContentType.objects.get_for_model(
+            self.form_template.__class__
+        )
         return reverse(
             "admin:%s_%s_change" % (
-                content_type.app_label, content_type.model), args=(self.form_template.id,))
+                content_type.app_label, content_type.model), args=(
+                self.form_template.id,)
+        )
 
     def get_admin_change_url(self):
         content_type = ContentType.objects.get_for_model(self.__class__)
@@ -229,9 +237,6 @@ class FieldTemplate(models.Model):
         return get_json(self)
 
 
-
-
-
 class FieldChoice(DictBase):
 
     field_template = models.ForeignKey(
@@ -241,7 +246,7 @@ class FieldChoice(DictBase):
     )
 
     def __str__(self):
-        return "Field: %s  [key:%s], [value:%s]" %(
+        return "Field: %s  [key:%s], [value:%s]" % (
             self.field_template.name, self.key, self.value)
 
 
@@ -278,6 +283,3 @@ class FormData(models.Model):
         return reverse(
             'builder.views.formtemplate_results',
             args=[str(self.id)])
-
-
-

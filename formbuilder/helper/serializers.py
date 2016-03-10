@@ -1,5 +1,6 @@
 import json
 
+
 def get_dict(obj):
     d = {}
     [

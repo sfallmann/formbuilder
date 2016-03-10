@@ -10,7 +10,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-
 @receiver(post_delete, sender=FieldSet)
 def delete_fieldset_cleanup(sender, instance, **kwargs):
 
@@ -37,8 +36,8 @@ def create_none_field_set(sender, instance, created, **kwargs):
 
         fs = FieldSet.objects.create(
             form_template=instance,
-            name = settings.EMPTY_FIELDSET,
-            label = ""
+            name=settings.EMPTY_FIELDSET,
+            label=""
         )
 
 
@@ -55,7 +54,7 @@ def intialize_fieldtemplate_values(sender, instance, **kwargs):
             name=settings.EMPTY_FIELDSET
         )
 
-    if instance.field_set == None:
+    if instance.field_set is None:
         instance.field_set = fs
 
     #  Check if the save was for a newly created FieldTemplate instance
@@ -66,18 +65,18 @@ def intialize_fieldtemplate_values(sender, instance, **kwargs):
         #
         #  All new FieldTemplate instances have field_set=None
 
-
         fields = FieldTemplate.objects.filter(
             form_template=instance.form_template, field_set=instance.field_set)
 
-
         #  Set the new instances position to fields.count + 1
         instance.position = fields.count() + 1
-        instance.label = instance.name.title()
+
+        if not instance.label:
+            instance.label = instance.name.title()
 
         msg = "New FieldTemplate. Set to "\
-        "position [%s], field_set NONE, form_template [id:%s]"\
-        ".\n\r" % (instance.position, instance.form_template.pk)
+            "position [%s], field_set NONE, form_template [id:%s]"\
+            ".\n\r" % (instance.position, instance.form_template.pk)
 
         logger.info(msg)
     #  For an existing FieldTemplate instance
@@ -138,12 +137,12 @@ def intialize_fieldtemplate_values(sender, instance, **kwargs):
                     position=field.position-1
                 )
 
-
-
         msg = "FieldTemplate [id:%s] set to "\
-        "position [%s], field_set [id:%s], form_template [id:%s]"\
-        ".\n\r" % (instance.pk, instance.position,
-                  instance.field_set.pk, instance.form_template.pk)
+            "position [%s], field_set [id:%s], form_template [id:%s]"\
+            ".\n\r" % (
+                instance.pk, instance.position,
+                instance.field_set.pk, instance.form_template.pk
+            )
 
         logger.info(msg)
 
@@ -170,9 +169,10 @@ def adjust_fieldtemplate_positions(sender, instance, **kwargs):
             pk=field.pk).update(position=field.position-1)
 
         msg = "FieldTemplate [id:%s] deleted. Updating Field Template [id:%s]"\
-        "position [%s], field_set [id:%s], form_template [id:%s]"\
-        ".\n\r" % (instance.pk, field.pk, field.position,
-                  field.field_set.pk, field.form_template.pk)
+            "position [%s], field_set [id:%s], form_template [id:%s]"\
+            ".\n\r" % (
+                instance.pk, field.pk, field.position,
+                field.field_set.pk, field.form_template.pk
+            )
 
         logger.info(msg)
-
