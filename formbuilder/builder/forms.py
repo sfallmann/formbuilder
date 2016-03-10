@@ -1,5 +1,6 @@
 import json
 from django import forms
+from django.conf import settings
 from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -11,223 +12,222 @@ from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit, HTML
 
 class Form(forms.Form):
 
-	def __init__(self, obj, *args, **kwargs):
+    def __init__(self, obj, *args, **kwargs):
 
-		super(Form, self).__init__(*args, **kwargs)
+        super(Form, self).__init__(*args, **kwargs)
 
-		self.helper = FormHelper()
+        self.helper = FormHelper()
 
-		field_templates = obj.field_templates.all().order_by('field_set','position')
-		self.get_absolute_url = obj.get_absolute_url
+        field_templates = obj.field_templates.all().order_by(
+            'field_set', 'position')
+        self.get_absolute_url = obj.get_absolute_url
 
-		key_order = []
+        key_order = []
 
-		for template in field_templates:
-			if template.field_type != "html":
-				self.fields[template.name] = create_field(template)
+        for template in field_templates:
+            if template.field_type != "html":
+                self.fields[template.name] = create_field(template)
 
-		layout = self.helper.layout = Layout()
+        layout = self.helper.layout = Layout()
 
+        obj_fieldsets = FieldSet.objects.filter(form_template=obj)
 
-		obj_fieldsets = FieldSet.objects.filter(form_template=obj)
+        for fset in obj_fieldsets:
 
+            _templates = FieldTemplate.objects.filter(
+                form_template=obj, field_set=fset).order_by('position')
 
-		for fset in obj_fieldsets:
+            values = [str(fset.label)]
+            if fset.helper_text:
+                values.append(HTML(fset.helper_text))
 
-			_templates = FieldTemplate.objects.filter(
-				form_template=obj, field_set=fset).order_by('position')
+            for t in _templates:
+                if t.field_type =='html':
+                    values.append(HTML(t.f.html))
+                else:
+                    values.append(str(t.name))
 
-			values = [str(fset.label)]
-			if fset.helper_text:
-				values.append(HTML(fset.helper_text))
+            layout.append(Fieldset(*values))
 
-			for t in _templates:
-				if t.field_type =='html':
-					values.append(HTML(t.f.html))
-				else:
-					values.append(str(t.name))
+        _templates = FieldTemplate.objects.filter(
+                form_template=obj, field_set=None).order_by('position')
 
-			layout.append(Fieldset(*values))
+        self.helper.form_id = obj.name
+        self.helper.form_method = 'post'
+        self.helper.form_action = obj.get_absolute_url()
+        self.helper.attrs = {'enctype': 'multipart/form-data'}
 
-		_templates = FieldTemplate.objects.filter(
-				form_template=obj, field_set=None).order_by('position')
+        recaptcha = '<div class="g-recaptcha" data-sitekey="%s">'\
+        '</div>' % settings.RECAPTCHA_SITEKEY
+        layout.append(HTML("{{recaptcha_error|safe}}"))
 
+        layout.append(HTML(recaptcha))
 
-		self.helper.form_id = obj.name
-		self.helper.form_method = 'post'
-		self.helper.form_action = obj.get_absolute_url()
-		self.helper.attrs = {'enctype': 'multipart/form-data'}
+        layout.append(ButtonHolder
+                      (Submit('submit', 'Submit', css_class='button white')))
 
-		recaptcha = '<div class="g-recaptcha" data-sitekey="6LcyMBoTAAAAAOLSi90hQ33PFhQg6ejClya9Vv88"></div>'
-		layout.append(HTML("{{recaptcha_error|safe}}"))
+    def clean(self):
 
-		layout.append(HTML(recaptcha))
+        self.clean_files_only = {}
+        self.clean_data_only = {}
+        self.file_list = []
 
-		layout.append(ButtonHolder
-					  (Submit('submit', 'Submit', css_class='button white')))
+        cleaned_data = super(Form, self).clean()
 
-	def clean(self):
+        file_types = [
+            TemporaryUploadedFile,
+            InMemoryUploadedFile,
+            SimpleUploadedFile
+        ]
 
-		self.clean_files_only = {}
-		self.clean_data_only = {}
-		self.file_list = []
+        for key in cleaned_data.keys():
 
-		cleaned_data = super(Form, self).clean()
+            is_file = False
 
-		file_types = [
-			TemporaryUploadedFile,
-			InMemoryUploadedFile,
-			SimpleUploadedFile
-		]
+            for type_ in file_types:
 
-		for key in cleaned_data.keys():
+                is_file = isinstance(cleaned_data[key], type_)
+                if is_file:
+                    break
 
-			is_file = False
+            if is_file:
 
-			for type_ in file_types:
+                self.clean_files_only[key] = cleaned_data[key]
+                self.file_list.append(cleaned_data[key])
 
-				is_file = isinstance(cleaned_data[key], type_)
-				if is_file:
-					break
+            else:
 
-			if is_file:
-
-				self.clean_files_only[key] = cleaned_data[key]
-				self.file_list.append(cleaned_data[key])
-
-			else:
-
-				self.clean_data_only[key] = cleaned_data[key]
+                self.clean_data_only[key] = cleaned_data[key]
 
 
 def create_field(f):
 
-	if f.required and f.label:
-		f.label += "*"
+    if f.required and f.label:
+        f.label += "*"
 
 
-	empty_choice = "No choices were added to this field!"
+    empty_choice = "No choices were added to this field!"
 
-	other_tags = [
+    other_tags = [
 
-		field_types.FILE,
-		field_types.RADIO,
-		field_types.SELECT,
-		field_types.TEXT_AREA,
+        field_types.FILE,
+        field_types.RADIO,
+        field_types.SELECT,
+        field_types.TEXT_AREA,
 
-	]
+    ]
 
-	if f.autocomplete:
-		autocomplete = "on"
-	else:
-		autocomplete = "off"
+    if f.autocomplete:
+        autocomplete = "on"
+    else:
+        autocomplete = "off"
 
-	attrs = {}
-	initial = None
-
-
-	if f.field_type == "select" or f.field_type == "radio":
-		field_choices = f.field_choices.all()
-
-		choices = [(c.key,c.value) for c in field_choices]
-
-		if not choices: choices = [(empty_choice, empty_choice)]
-		initial = choices[0][0]
+    attrs = {}
+    initial = None
 
 
-	for a in field_types.ATTRS[f.field_type]:
+    if f.field_type == "select" or f.field_type == "radio":
+        field_choices = f.field_choices.all()
 
-		if a == "pattern":
+        choices = [(c.key,c.value) for c in field_choices]
 
-			if getattr(f,a):
-				attrs.update({a: getattr(f,a)})
-
-		elif a == 'accept':
-
-			if getattr(f,a):
-				accept = ",".join(getattr(f,a))
-				attrs.update({a: accept})
-
-		else:
-
-			attrs.update({a: getattr(f,a)})
+        if not choices: choices = [(empty_choice, empty_choice)]
+        initial = choices[0][0]
 
 
+    for a in field_types.ATTRS[f.field_type]:
 
-	if f.field_type not in other_tags:
+        if a == "pattern":
 
-		attrs.update({
-			'id': f.name.lower(),
-			'class': 'form-control',
-			'name': f.name.lower(),
-			'type': f.field_type
-		})
+            if getattr(f,a):
+                attrs.update({a: getattr(f,a)})
 
-		return forms.CharField(
-			max_length=f.maxlength,
-			widget=forms.TextInput(
-				attrs=attrs
-			),
-			required=False,
-			label = f.label
-		)
-	elif f.field_type == field_types.TEXT_AREA:
+        elif a == 'accept':
 
-		attrs.update({
-			'id': f.name.lower(),
-			'class': 'form-control',
-			'name': f.name.lower(),
-		})
+            if getattr(f,a):
+                accept = ",".join(getattr(f,a))
+                attrs.update({a: accept})
 
-		return forms.CharField(
-			max_length=f.maxlength,
-			widget=forms.Textarea(
-				attrs=attrs
-			),
-			required=False,
-			label = f.label
-		)
-	elif f.field_type == field_types.FILE:
+        else:
 
-		attrs.update({
-			'id': f.name.lower(),
-			'class': 'form-control',
-			'name': f.name.lower(),
-		})
+            attrs.update({a: getattr(f,a)})
 
-		return forms.FileField(
-			widget=forms.ClearableFileInput(
-				attrs=attrs
-			),
-			required=False,
-			label = f.label
 
-		)
-	elif f.field_type == field_types.RADIO:
 
-		_field = forms.ChoiceField(
-			widget=forms.RadioSelect,
-			choices=choices,
-			required=False,
-			label = f.label,
-			initial=initial
-		)
+    if f.field_type not in other_tags:
 
-		_field.widget.attrs.update(attrs)
+        attrs.update({
+            'id': f.name.lower(),
+            'class': 'form-control',
+            'name': f.name.lower(),
+            'type': f.field_type
+        })
 
-		return _field
+        return forms.CharField(
+            max_length=f.maxlength,
+            widget=forms.TextInput(
+                attrs=attrs
+            ),
+            required=False,
+            label = f.label
+        )
+    elif f.field_type == field_types.TEXT_AREA:
 
-	elif f.field_type == field_types.SELECT:
+        attrs.update({
+            'id': f.name.lower(),
+            'class': 'form-control',
+            'name': f.name.lower(),
+        })
 
-		_field = forms.ChoiceField(
-			choices=choices,
-			required=False,
-			label = f.label,
-			initial=initial
-		)
+        return forms.CharField(
+            max_length=f.maxlength,
+            widget=forms.Textarea(
+                attrs=attrs
+            ),
+            required=False,
+            label = f.label
+        )
+    elif f.field_type == field_types.FILE:
 
-		_field.widget.attrs.update(attrs)
+        attrs.update({
+            'id': f.name.lower(),
+            'class': 'form-control',
+            'name': f.name.lower(),
+        })
 
-		return _field
+        return forms.FileField(
+            widget=forms.ClearableFileInput(
+                attrs=attrs
+            ),
+            required=False,
+            label = f.label
+
+        )
+    elif f.field_type == field_types.RADIO:
+
+        _field = forms.ChoiceField(
+            widget=forms.RadioSelect,
+            choices=choices,
+            required=False,
+            label = f.label,
+            initial=initial
+        )
+
+        _field.widget.attrs.update(attrs)
+
+        return _field
+
+    elif f.field_type == field_types.SELECT:
+
+        _field = forms.ChoiceField(
+            choices=choices,
+            required=False,
+            label = f.label,
+            initial=initial
+        )
+
+        _field.widget.attrs.update(attrs)
+
+        return _field
 
 
