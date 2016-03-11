@@ -6,7 +6,7 @@ from django.core.urlresolvers import reverse
 from django.core import serializers
 from django.contrib.contenttypes.models import ContentType
 from django.http import JsonResponse
-from helper.validators import is_lower, min_20
+from helper.validators import is_lower, min_20, max_files
 from helper.validators import is_alpha_num, is_alpha, is_alpha_num_words
 from helper.validators import is_alpha_num_whitespace, is_alpha_num_nospace
 from helper.serializers import get_json, get_dict
@@ -197,6 +197,8 @@ class FieldTemplate(models.Model):
 
     html = models.TextField(blank=True)
 
+    maxfiles = models.IntegerField(
+        null=True, blank=True, validators=[max_files, ], default=1)
     accept = ArrayField(
         models.CharField(max_length=10, blank=True), null=True, blank=True
     )

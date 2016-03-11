@@ -61,6 +61,7 @@ FILE_ATTRS = [
     "accept",
     "disabled",
     "required",
+    "maxfiles"
 ]
 
 TEXT_AREA_ATTRS = [
@@ -83,7 +84,7 @@ DROPZONE_ATTRS = {
     #"accept",
     #"disabled",
     "required",
-    "maxvalue"
+    "maxfiles"
 }
 
 ATTRS = {

@@ -10,11 +10,20 @@ from builder.models import FormTemplate, FieldTemplate, FieldSet
 from helper.constants import field_types
 
 
+FILE_LABEL = "<label for='{name}' class='control-label'>{label}</label>"
+FILE_HTML = "<input name='{name}' id='{name}' type=file id='file'"\
+                "{multiple} data-maxfiles='{maxfiles}' class='form-control'/>"
+
+
 class Form(forms.Form):
 
     def __init__(self, obj, *args, **kwargs):
 
         super(Form, self).__init__(*args, **kwargs)
+
+        self.exclusions = [
+            "html", "file"
+        ]
 
         self.get_absolute_url = obj.get_absolute_url
         self.helper = FormHelper()
@@ -23,7 +32,7 @@ class Form(forms.Form):
             'field_set', 'position')
 
         for template in field_templates:
-            if template.field_type != "html":
+            if template.field_type not in self.exclusions:
                 self.fields[template.name] = self.create_field(template)
 
         layout = self.helper.layout = Layout()
@@ -35,7 +44,7 @@ class Form(forms.Form):
         self.helper.form_action = obj.get_absolute_url()
         self.helper.attrs = {'enctype': 'multipart/form-data'}
 
-        recaptcha = '<div class="g-recaptcha" data-sitekey="%s">'\
+        recaptcha = '<hr/><div class="g-recaptcha" data-sitekey="%s">'\
             '</div>' % settings.RECAPTCHA_SITEKEY
 
         layout.append(HTML("{{recaptcha_error|safe}}"))
@@ -166,22 +175,7 @@ class Form(forms.Form):
                 required=False,
                 label=f.label
             )
-        elif f.field_type == field_types.FILE:
 
-            attrs.update({
-                'id': f.name.lower(),
-                'class': 'form-control',
-                'name': f.name.lower(),
-            })
-
-            return forms.FileField(
-                widget=forms.ClearableFileInput(
-                    attrs=attrs
-                ),
-                required=False,
-                label=f.label
-
-            )
         elif f.field_type == field_types.RADIO:
 
             _field = forms.ChoiceField(
@@ -226,6 +220,33 @@ class Form(forms.Form):
 
             return _field
 
+
+    def create_html(self, template):
+
+        if template.field_type == "html":
+            return template.html
+
+        elif template.field_type == field_types.FILE:
+
+            multiple = ""
+
+            if template.maxfiles > 1:
+                multiple = "multiple"
+
+            file_label = FILE_LABEL.format(
+                name=template.name,
+                label=template.label
+            )
+
+            file_html = FILE_HTML.format(
+                name = template.name,
+                multiple = multiple,
+                maxfiles = template.maxfiles
+            )
+
+            return file_label + file_html
+
+
     def create_fieldsets(self, obj):
 
         for fset in obj.fieldsets.all():
@@ -237,9 +258,10 @@ class Form(forms.Form):
                 values.append(HTML(fset.helper_text))
 
             for t in _templates:
-                if t.field_type == 'html':
-                    values.append(HTML(t.html))
+                if t.field_type in self.exclusions:
+                    values.append(HTML(self.create_html(t)))
                 else:
                     values.append(str(t.name))
 
             self.helper.layout.append(Fieldset(*values))
+

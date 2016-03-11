@@ -70,3 +70,11 @@ def min_20(value):
             ('Value must be 20 or greater'),
             params={'value': value},
         )
+
+def max_files(value):
+
+    if int(value) < 1 or int(value) > 10:
+        raise ValidationError(
+            ('Value must be greater than 0 and less than 10'),
+            params={'value': value},
+        )
