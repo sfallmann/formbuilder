@@ -16,22 +16,18 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from django.contrib import admin
-from builder import urls as builder_urls
 from django.conf import settings
 import django.views
 
 urlpatterns = [
-
+    url(r'^ckeditor/', include('ckeditor_uploader.urls')),
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^admin/', admin.site.urls),
     url('', include('social.apps.django_app.urls', namespace='social')),
     url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {
         'document_root': settings.MEDIA_ROOT}),
-    url(r'fb/', include(builder_urls)),
-    url(r'^ckeditor/', include('ckeditor_uploader.urls')),
-    url(r'^$', 'login.views.login'),
-    url(r'^home/$', 'login.views.home'),
-    url(r'^logout/$', 'login.views.logout'),
+    url('', include('builder.urls')),
+    url('', include('login.urls')),
 ]
 
 

@@ -122,6 +122,7 @@ class FieldSet(models.Model):
     name = models.CharField(
         max_length=30, validators=[is_alpha_num_nospace, is_lower])
     label = models.CharField(max_length=50, blank=True)
+    position = models.PositiveIntegerField(default=None, null=True, blank=True)
     helper_text = models.TextField(blank=True)
 
     class Meta:

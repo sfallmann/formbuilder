@@ -1,0 +1,97 @@
+
+    $(function() {
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie != '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = jQuery.trim(cookies[i]);
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function csrfSafeMethod(method) {
+            // these HTTP methods do not require CSRF protection
+            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+        }
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                }
+            }
+        });
+
+
+
+        var action = $("form").attr("action");
+
+
+        var formId = $("form").attr("id");
+        var hidden = $("[data-dropzone]");
+        var id = hidden.attr("id") + "_div";
+
+        var maxFiles = hidden.data("limit");
+        var maxSize = 500 / maxFiles;
+
+        var dropzoneDiv = $("<form />", {
+            "name": name,
+            "id": name,
+        });
+
+        hidden.after(dropzoneDiv);
+        dropzoneDiv.append("{% csrf_token %}");
+
+        Dropzone.autoDiscover = false;
+        // or disable for specific dropzone:
+        // Dropzone.options.myDropzone = false;
+
+
+
+        options = {
+            url: action,
+            //parallelUploads: 2,
+            uploadMultiple: true,
+            maxFilesize: maxSize,
+            addRemoveLinks: true,
+            clickable: true,
+            createImageThumbnails: true,
+            maxFiles: maxFiles,
+            autoProcessQueue: false,
+            init: function() {
+
+                $(this.element).addClass("dropzone");
+
+                this.on("sending", function(file, xhr, formData) {
+                    formData = $("#"+formId).serialize();
+
+                });
+            }
+        };
+
+
+          // Now that the DOM is fully loaded, create the dropzone, and setup the
+          // event listeners
+        var myDropzone = new Dropzone("#"+name, options);
+
+
+
+
+        $("#submit-id-submit").click(function(e){
+
+            e.preventDefault();
+            e.stopPropagation();
+            myDropzone.processQueue();
+        });
+
+
+        myDropzone.on("addedfile", function(file) {
+            /* Maybe display some more file information on your page */
+        });
+    })

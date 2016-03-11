@@ -30,7 +30,7 @@ class Form(forms.Form):
 
         self.create_fieldsets(obj)
 
-        self.helper.form_id = obj.name
+        self.helper.form_id = "form_%s" % obj.id
         self.helper.form_method = 'post'
         self.helper.form_action = obj.get_absolute_url()
         self.helper.attrs = {'enctype': 'multipart/form-data'}
@@ -92,6 +92,7 @@ class Form(forms.Form):
             field_types.RADIO,
             field_types.SELECT,
             field_types.TEXT_AREA,
+            field_types.DROPZONE
 
         ]
 
@@ -205,6 +206,23 @@ class Form(forms.Form):
             )
 
             _field.widget.attrs.update(attrs)
+
+        elif f.field_type == field_types.DROPZONE:
+
+            return forms.CharField(
+                widget=forms.TextInput(
+                    attrs={
+                        "type": "hidden",
+                        "name": f.name,
+                        "id": f.name,
+                        "required": f.required,
+                        "data-dropzone": f.name,
+                        "data-limit": f.maxvalue
+                    }
+                ),
+                required=False,
+            )
+
 
             return _field
 

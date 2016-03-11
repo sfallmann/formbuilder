@@ -54,11 +54,12 @@ def formtemplate_details(request, id):
         # Pass the FormTemplate object into Form with the posted data
         f = Form(template_, request.POST, request.FILES)
 
-        print f.files
-        print f.changed_data
-
         #  Check if the data is valid
         if f.is_valid():  # and recaptcha_passed:
+
+
+            print f.cleaned_data
+            print request.FILES
 
             #  Create the FormData object with the posted data
             formdata = create_formdata(

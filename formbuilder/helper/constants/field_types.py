@@ -13,6 +13,7 @@ RADIO = "radio"
 SELECT = "select"
 TEXT = "text"
 TEXT_AREA = "textarea"
+DROPZONE = "dropzone"
 
 def as_list():
 
@@ -22,7 +23,6 @@ def as_list():
         DATE_TIME,
         DATE_TIME_LOCAL,
         EMAIL,
-        FILE,
         HIDDEN,
         HTML,
         MONTH,
@@ -32,6 +32,8 @@ def as_list():
         SELECT,
         TEXT,
         TEXT_AREA,
+        FILE,
+        DROPZONE
     ]
 
 COMMON_ATTRS = [
@@ -77,13 +79,19 @@ HTML_ATTRS = [
     "html"
 ]
 
+DROPZONE_ATTRS = {
+    #"accept",
+    #"disabled",
+    "required",
+    "maxvalue"
+}
+
 ATTRS = {
 
     DATE: NUM_ATTRS,
     DATE_TIME: NUM_ATTRS,
     DATE_TIME_LOCAL: NUM_ATTRS,
     EMAIL: COMMON_ATTRS,
-    FILE: FILE_ATTRS,
     HIDDEN: COMMON_ATTRS,
     HTML: HTML_ATTRS,
     MONTH: NUM_ATTRS,
@@ -91,8 +99,9 @@ ATTRS = {
     RADIO: CHOICE_ATTRS,
     SELECT: CHOICE_ATTRS,
     TEXT: COMMON_ATTRS,
-    TEXT_AREA: TEXT_AREA_ATTRS
-
+    TEXT_AREA: TEXT_AREA_ATTRS,
+    FILE: FILE_ATTRS,
+    DROPZONE: DROPZONE_ATTRS
 }
 
 
