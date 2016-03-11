@@ -55,6 +55,9 @@ def formtemplate_details(request, id):
         f = Form(template_, request.POST, request.FILES)
 
         #  Check if the data is valid
+
+        print "Got the files I think: %s" % request.FILES
+
         if f.is_valid():  # and recaptcha_passed:
 
 
