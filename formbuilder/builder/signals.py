@@ -10,6 +10,33 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+@receiver(post_save, sender=FormTemplate)
+def create_none_field_set(sender, instance, created, **kwargs):
+
+    if created:
+
+        fs = FieldSet.objects.create(
+            form_template=instance,
+            name=settings.EMPTY_FIELDSET,
+            label=""
+        )
+
+
+@receiver(post_delete, sender=FieldSet)
+def adjust_fieldset_position(sender, instance, **kwargs):
+
+    all_fieldsets = FieldSet.objects.filter(
+        form_template=instance.form_template,
+        position__gt=instance.position
+    ).order_by('position')
+
+    #  Decrement the position of the FieldSets
+    for fieldset in all_fieldsets:
+
+        FieldSet.objects.filter(
+            pk=fieldset.pk).update(position=fieldset.position-1)
+
+
 @receiver(post_delete, sender=FieldSet)
 def delete_fieldset_cleanup(sender, instance, **kwargs):
 
@@ -29,16 +56,50 @@ def delete_fieldset_cleanup(sender, instance, **kwargs):
             f.field_set = fs
 
 
-@receiver(post_save, sender=FormTemplate)
-def create_none_field_set(sender, instance, created, **kwargs):
+@receiver(pre_save, sender=FieldSet)
+def intialize_fieldset_values(sender, instance, **kwargs):
 
-    if created:
+    """
+    Sets a FieldSets instance's position on an save.  Change's all other
+    related FieldSet instances positions accordingly.
+    """
 
-        fs = FieldSet.objects.create(
-            form_template=instance,
-            name=settings.EMPTY_FIELDSET,
-            label=""
-        )
+    #  Check if the save was for a newly created FieldTemplate instance
+    if instance.pk is None:
+
+        #  Get a queryset of all the FieldSetss with the same
+        #  form_template
+
+        fieldsets = FieldSet.objects.filter(
+            form_template=instance.form_template)
+
+        #  Set the new instances position to fields.count + 1
+        instance.position = fieldsets.count() + 1
+
+        if instance.name != settings.EMPTY_FIELDSET:
+            instance.label = instance.name.title()
+
+    #  For an existing FieldSet instance
+    else:
+
+        orig_fieldset = FieldSet.objects.get(pk=instance.pk)
+        #  Get all the FieldTemplate instances with the instances field_set
+        #  but exclude the instance from the query
+        fieldsets = FieldSet.objects.filter(
+            form_template=instance.form_template).exclude(pk=instance.pk)
+
+        #  Make list of positions from fields
+        position_list = [f.position for f in fieldsets]
+
+        #  If the instance's position is in the list, it was changed
+        #  to another instance's position.
+        #  This will give the other instance, the old position in effect
+        #  swapping positions.
+        if instance.position in position_list:
+
+            FieldSet.objects.filter(
+                position=instance.position).update(
+                position=orig_fieldset.position)
 
 
 @receiver(pre_save, sender=FieldTemplate)

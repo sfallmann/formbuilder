@@ -127,19 +127,25 @@ class FieldSetFormSet(BaseInlineFormSet):
             if not hasattr(form, 'cleaned_data'):
                 continue
             #  If it's the "empty" FieldSet
-            if form.instance.name == settings.EMPTY_FIELDSET:
 
-                #  clean the data
-                data = form.cleaned_data
+            #  clean the data
+            data = form.cleaned_data
+
+
+            fs = FieldSet.objects.get(name=settings.EMPTY_FIELDSET)
+
+            if form.instance.pk == fs.pk:
 
                 #  if the the name has been changed raise and error
                 if(data.get('name') != settings.EMPTY_FIELDSET):
+
                     raise ValidationError(
                         'FieldSet %s cannot be renamed!' %
                         settings.EMPTY_FIELDSET
                     )
                 #  if the the name has been changed raise and error
                 if(data.get('label')):
+
                     raise ValidationError(
                         'FieldSet %s cannot be given a label!' %
                         settings.EMPTY_FIELDSET
@@ -164,13 +170,17 @@ class FieldSetInline(admin.StackedInline):
 
     fieldsets = (
         (None, {
-            'fields': (('name', 'label'))
+            'fields': (('name', 'label', 'position'))
         }),
         ('Advanced options', {
             'classes': ('collapse',),
             'fields': ('helper_text',),
         }),
     )
+    def get_queryset(self, request):
+            return super(
+                FieldSetInline, self
+            ).get_queryset(request).order_by('position')
 
 
 class FormTemplateAdmin(admin.ModelAdmin):

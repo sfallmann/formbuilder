@@ -31,11 +31,21 @@ RECAPTCHA_SITEKEY = json.loads(
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+DEBUG_TOOLBAR_PATCH_SETTINGS = False
+
+def show_toolbar(request):
+    return True
+
+DEBUG_TOOLBAR_CONFIG = {
+    "SHOW_TOOLBAR_CALLBACK" : show_toolbar,
+}
+
 ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
 INSTALLED_APPS = [
+    'debug_toolbar',
     'django.contrib.admin',
     'django.contrib.admindocs',
     'django.contrib.auth',
@@ -50,9 +60,11 @@ INSTALLED_APPS = [
     'ckeditor',
     'ckeditor_uploader',
     'social.apps.django_app.default',
+
 ]
 
 MIDDLEWARE_CLASSES = [
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -63,6 +75,7 @@ MIDDLEWARE_CLASSES = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'social.apps.django_app.middleware.SocialAuthExceptionMiddleware',
 ]
+
 
 ROOT_URLCONF = 'formbuilder.urls'
 
@@ -354,3 +367,6 @@ CKEDITOR_CONFIGS = {
 
 # Builder specific
 EMPTY_FIELDSET = "empty"
+
+INTERNAL_IPS = ('127.0.0.1:8000','192.168.1.6:8000','localhost:8000')
+

@@ -3,6 +3,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit, HTML
 from django import forms
 from django.conf import settings
+from django.utils.html import format_html
 from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -91,8 +92,8 @@ class Form(forms.Form):
     def create_field(self, f):
 
         if f.required and f.label:
-            f.label += "*"
-
+            f.label += "<span class='glyphicon glyphicon-star'></span>"
+            #format_html(f.label)
         empty_choice = "No choices were added to this field!"
 
         other_tags = [
@@ -223,7 +224,9 @@ class Form(forms.Form):
 
     def create_html(self, template):
 
+        print template.field_type
         if template.field_type == "html":
+            print template.html
             return template.html
 
         elif template.field_type == field_types.FILE:
@@ -249,7 +252,7 @@ class Form(forms.Form):
 
     def create_fieldsets(self, obj):
 
-        for fset in obj.fieldsets.all():
+        for fset in obj.fieldsets.all().order_by('position'):
 
             _templates = fset.field_templates.all().order_by('position')
 

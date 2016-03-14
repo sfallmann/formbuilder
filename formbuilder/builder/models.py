@@ -94,7 +94,7 @@ class FormTemplate(models.Model):
 
     def get_absolute_url(self):
         return reverse(
-            'builder.views.formtemplate_details',
+            'formtemplate_details',
             args=[str(self.id)])
 
     def as_dict(self):
