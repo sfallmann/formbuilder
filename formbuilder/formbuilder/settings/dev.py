@@ -366,7 +366,7 @@ CKEDITOR_CONFIGS = {
 
 
 # Builder specific
-EMPTY_FIELDSET = "empty"
+EMPTY_FIELDSET = "default"
 
 INTERNAL_IPS = ('127.0.0.1:8000','192.168.1.6:8000','localhost:8000')
 

@@ -72,7 +72,9 @@ def formtemplate_details(request, id):
 
                 for file_ in file_list:
                     uploaded_file_list.append(file_.name)
-                    handle_uploaded_file(file_, str(formdata.pk))
+
+                    if settings.DEBUG == False:
+                        handle_uploaded_file(file_, str(formdata.pk))
 
                 formdata.data.update({
                         "files": uploaded_file_list

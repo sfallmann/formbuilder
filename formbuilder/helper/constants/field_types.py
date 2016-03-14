@@ -33,10 +33,11 @@ def as_list():
         TEXT,
         TEXT_AREA,
         FILE,
-        DROPZONE
+        #DROPZONE
     ]
 
 COMMON_ATTRS = [
+    "help_text",
     "autocomplete",
     "autofocus",
     "disabled",
@@ -54,7 +55,7 @@ NUM_ATTRS = COMMON_ATTRS + [
 ]
 
 CHOICE_ATTRS = [
-    #"choice_list"
+    "help_text",
 ]
 
 FILE_ATTRS = [

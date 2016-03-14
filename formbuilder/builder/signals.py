@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.dispatch import receiver
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.signals import post_save, pre_save
 from django.db.models.signals import post_delete, pre_delete
 from .models import FormTemplate, FieldTemplate, FieldSet
@@ -20,6 +21,41 @@ def create_none_field_set(sender, instance, created, **kwargs):
             name=settings.EMPTY_FIELDSET,
             label=""
         )
+
+
+@receiver(post_delete, sender=FieldTemplate)
+def adjust_fieldtemplate_positions(sender, instance, **kwargs):
+
+    """
+    On a FieldTemplate instance delete, updates the position
+    of all related FieldTemplate instances.
+    """
+
+    #  Get all the fields in the FormTemplate and FieldSet that the deleted
+    #  FieldTemplate was in.
+    try:
+        all_fields = FieldTemplate.objects.filter(
+            form_template=instance.form_template,
+            field_set=instance.field_set,
+            position__gt=instance.position
+        ).order_by('position')
+
+        for field in all_fields:
+            FieldTemplate.objects.filter(
+                pk=field.pk).update(position=field.position-1)
+
+            msg = "FieldTemplate [id:%s] deleted. Updating Field Template [id:%s]"\
+                "position [%s], field_set [id:%s], form_template [id:%s]"\
+                ".\n\r" % (
+                    instance.pk, field.pk, field.position,
+                    field.field_set.pk, field.form_template.pk
+                )
+
+            logger.info(msg)
+
+    except ObjectDoesNotExist as e:
+        print e
+        #logger.info(msg)
 
 
 @receiver(post_delete, sender=FieldSet)
@@ -208,32 +244,4 @@ def intialize_fieldtemplate_values(sender, instance, **kwargs):
         logger.info(msg)
 
 
-@receiver(post_delete, sender=FieldTemplate)
-def adjust_fieldtemplate_positions(sender, instance, **kwargs):
 
-    """
-    On a FieldTemplate instance delete, updates the position
-    of all related FieldTemplate instances.
-    """
-
-    #  Get all the fields in the FormTemplate and FieldSet that the deleted
-    #  FieldTemplate was in.
-    all_fields = FieldTemplate.objects.filter(
-        form_template=instance.form_template,
-        field_set=instance.field_set,
-        position__gt=instance.position
-    ).order_by('position')
-
-    #  Decrement the position of the FieldTemplates
-    for field in all_fields:
-        FieldTemplate.objects.filter(
-            pk=field.pk).update(position=field.position-1)
-
-        msg = "FieldTemplate [id:%s] deleted. Updating Field Template [id:%s]"\
-            "position [%s], field_set [id:%s], form_template [id:%s]"\
-            ".\n\r" % (
-                instance.pk, field.pk, field.position,
-                field.field_set.pk, field.form_template.pk
-            )
-
-        logger.info(msg)

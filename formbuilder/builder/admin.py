@@ -4,7 +4,7 @@ from django.utils.html import mark_safe
 from django import forms
 from django.db import models
 from django.forms.models import BaseInlineFormSet
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from .models import Category
 from .models import FormData, FormTemplate, FieldSet
 from .models import FieldTemplate, FieldChoice
@@ -131,32 +131,44 @@ class FieldSetFormSet(BaseInlineFormSet):
             #  clean the data
             data = form.cleaned_data
 
+            try:
+                fs = FieldSet.objects.get(form_template=form.instance.form_template, name=settings.EMPTY_FIELDSET)
 
-            fs = FieldSet.objects.get(name=settings.EMPTY_FIELDSET)
+                if form.instance.pk == fs.pk:
 
-            if form.instance.pk == fs.pk:
+                    #  if the the name has been changed raise and error
+                    if(data.get('name') != settings.EMPTY_FIELDSET):
 
-                #  if the the name has been changed raise and error
-                if(data.get('name') != settings.EMPTY_FIELDSET):
+                        raise ValidationError(
+                            'FieldSet %s cannot be renamed!' %
+                            settings.EMPTY_FIELDSET
+                        )
+                    #  if the the name has been changed raise and error
+                    if(data.get('label')):
+
+                        raise ValidationError(
+                            'FieldSet %s cannot be given a label!' %
+                            settings.EMPTY_FIELDSET
+                        )
+
+                    #  if the delete button is checked raise and error
+                    if (data.get('DELETE')):
+                        raise ValidationError(
+                            'FieldSet %s can never be deleted!' %
+                            settings.EMPTY_FIELDSET
+                        )
+
+            except ObjectDoesNotExist:
+
+                if(data.get('name') == settings.EMPTY_FIELDSET):
 
                     raise ValidationError(
-                        'FieldSet %s cannot be renamed!' %
-                        settings.EMPTY_FIELDSET
-                    )
-                #  if the the name has been changed raise and error
-                if(data.get('label')):
-
-                    raise ValidationError(
-                        'FieldSet %s cannot be given a label!' %
-                        settings.EMPTY_FIELDSET
+                        '{efs} is a reserved name.  A FieldSet with the name {efs}'\
+                        ' will be created once the FormTemplate is saved.'.format(
+                            efs=settings.EMPTY_FIELDSET
+                        )
                     )
 
-                #  if the delete button is checked raise and error
-                if (data.get('DELETE')):
-                    raise ValidationError(
-                        'FieldSet %s can never be deleted!' %
-                        settings.EMPTY_FIELDSET
-                    )
 
 
 class FieldSetInline(admin.StackedInline):
@@ -174,7 +186,7 @@ class FieldSetInline(admin.StackedInline):
         }),
         ('Advanced options', {
             'classes': ('collapse',),
-            'fields': ('helper_text',),
+            'fields': ('help_text',),
         }),
     )
     def get_queryset(self, request):

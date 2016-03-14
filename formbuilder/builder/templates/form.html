@@ -39,8 +39,21 @@
     */
 
     form * {
-        font-size: 1.05em;
+
         font-family: 'Noto Sans', sans-serif
+    }
+
+    label {
+        font-size: 1.05em;
+    }
+
+    form {
+
+        border: 2px;
+        border-radius: 5px;
+        border-style: solid;
+        padding: 10px;
+        background-color: #fdf6ee;
     }
 
 </style>
@@ -84,7 +97,26 @@
       alert('The File APIs are not fully supported in this browser.');
     }
 
-    $("form").addClass("dropzone");
+    $(function(){
+        var $fileUpload = $("input[type='file']");
+
+        if ($fileUpload.attr("multiple")){
+            console.log("multiple files allowed!");
+            var maxFiles = $fileUpload.data("maxfiles");
+
+            $("input[type='submit']").click(function(e){
+
+                if (parseInt($fileUpload.get(0).files.length)>maxFiles){
+                    alert("You can only upload a maximum of " + maxFiles + " files");
+                    e.stopPropagation();
+                    e.preventDefault();
+                }
+
+            });
+        }
+
+    });
+
 
 </script>
 

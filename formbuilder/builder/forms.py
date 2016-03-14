@@ -158,7 +158,8 @@ class Form(forms.Form):
                     attrs=attrs
                 ),
                 required=False,
-                label=f.label
+                label=f.label,
+                help_text=f.help_text
             )
         elif f.field_type == field_types.TEXT_AREA:
 
@@ -174,7 +175,8 @@ class Form(forms.Form):
                     attrs=attrs
                 ),
                 required=False,
-                label=f.label
+                label=f.label,
+                help_text=f.help_text
             )
 
         elif f.field_type == field_types.RADIO:
@@ -184,7 +186,8 @@ class Form(forms.Form):
                 choices=choices,
                 required=False,
                 label=f.label,
-                initial=initial
+                initial=initial,
+                help_text=f.help_text
             )
 
             _field.widget.attrs.update(attrs)
@@ -197,7 +200,8 @@ class Form(forms.Form):
                 choices=choices,
                 required=False,
                 label=f.label,
-                initial=initial
+                initial=initial,
+                help_text=f.help_text
             )
 
             _field.widget.attrs.update(attrs)
@@ -209,9 +213,8 @@ class Form(forms.Form):
                     attrs={
                         "type": "hidden",
                         "name": f.name,
-                        "id": f.name,
+                        "id": "add-dropzone",
                         "required": f.required,
-                        "data-dropzone": f.name,
                         "data-limit": f.maxvalue
                     }
                 ),
@@ -256,15 +259,24 @@ class Form(forms.Form):
 
             _templates = fset.field_templates.all().order_by('position')
 
-            values = [str(fset.label)]
-            if fset.helper_text:
-                values.append(HTML(fset.helper_text))
+            #values = ["<p style='font-size=2em;'>%s</p>" % str(fset.label)]
+
+            values = []
+
+            values =[str(fset.help_text),]
 
             for t in _templates:
                 if t.field_type in self.exclusions:
                     values.append(HTML(self.create_html(t)))
                 else:
                     values.append(str(t.name))
+            if values:
 
-            self.helper.layout.append(Fieldset(*values))
+                if fset.label:
+                    self.helper.layout.append(
+                        HTML("<h2>%s</h2>" % fset.label)
+                    )
+
+
+                self.helper.layout.append(Fieldset(*values))
 

@@ -123,7 +123,7 @@ class FieldSet(models.Model):
         max_length=30, validators=[is_alpha_num_nospace, is_lower])
     label = models.CharField(max_length=50, blank=True)
     position = models.PositiveIntegerField(default=None, null=True, blank=True)
-    helper_text = models.TextField(blank=True)
+    help_text = models.CharField(max_length=500, blank=True)
 
     class Meta:
         unique_together = (("name", "form_template"),)
@@ -173,7 +173,7 @@ class FieldTemplate(models.Model):
     position = models.PositiveIntegerField(default=None, null=True, blank=True)
 
     label = models.CharField(max_length=50, blank=True)
-
+    help_text = models.CharField(max_length=500, blank=True)
     # Common tag attributes
     autofocus = models.BooleanField(default=False)
     maxlength = models.PositiveIntegerField(

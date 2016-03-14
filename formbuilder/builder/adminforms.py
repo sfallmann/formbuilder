@@ -75,13 +75,6 @@ class FieldSetInlineForm(forms.ModelForm):
             #  new instances have position disabled
             self.fields['position'].disabled = True
 
-        #  changed the widget for the field
-        self.fields['helper_text'].widget = CKEditorWidget(
-            config_name="coding",
-            attrs={
-                'style': 'height: 300px; width: 600px; font-size: 1.15em;'
-            }
-        )
 
 
 class FieldTemplateInlineForm(forms.ModelForm):
