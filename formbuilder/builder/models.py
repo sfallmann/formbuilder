@@ -20,6 +20,9 @@ class DictBase(models.Model):
     )
     value = models.CharField(max_length=255, unique=True)
 
+    class Meta:
+        abstract = True
+
 
 class Category(models.Model):
 
@@ -70,7 +73,6 @@ class FormTemplate(models.Model):
         related_name="form_templates",
     )
 
-    send_confirmation = models.BooleanField(default=True)
     login_required = models.BooleanField(default=False)
 
     notification_list = ArrayField(
@@ -121,7 +123,7 @@ class FieldSet(models.Model):
     )
     name = models.CharField(
         max_length=30, validators=[is_alpha_num_nospace, is_lower])
-    label = models.CharField(max_length=50, blank=True)
+    label = models.CharField(max_length=250, blank=True)
     position = models.PositiveIntegerField(default=None, null=True, blank=True)
     help_text = models.CharField(max_length=500, blank=True)
 
@@ -146,9 +148,17 @@ class FieldTemplate(models.Model):
 
     '''
 
+    CSS_STRING = "col-sm-%s"
+
     FIELD_TYPE_CHOICES = (
         [
             (v, v) for v in field_types.as_list()
+        ]
+    )
+
+    CSS_CLASS_CHOICES = (
+        [
+            (CSS_STRING % x, CSS_STRING % x) for x in xrange(1,13)
         ]
     )
 
@@ -171,8 +181,13 @@ class FieldTemplate(models.Model):
     )
 
     position = models.PositiveIntegerField(default=None, null=True, blank=True)
+    css_class = models.CharField(
+        max_length=20, choices=CSS_CLASS_CHOICES, default="col-sm-12")
+
 
     label = models.CharField(max_length=50, blank=True)
+
+    send_confirmation = models.BooleanField(default=True)
     help_text = models.CharField(max_length=500, blank=True)
     # Common tag attributes
     autofocus = models.BooleanField(default=False)
@@ -180,7 +195,7 @@ class FieldTemplate(models.Model):
         null=True, blank=True, default=100, validators=[min_20, ])
     placeholder = models.TextField(blank=True)
     readonly = models.BooleanField(default=False)
-    required = models.BooleanField(default=False)
+    required = models.BooleanField(default=True)
 
     # HTML Input tag attributes
     autocomplete = models.BooleanField(default=True)
@@ -242,11 +257,17 @@ class FieldTemplate(models.Model):
 
 class FieldChoice(DictBase):
 
+
+    class Meta:
+        unique_together = ['key', 'field_template']
+
     field_template = models.ForeignKey(
         FieldTemplate,
         related_name="field_choices",
         on_delete=models.CASCADE,
     )
+
+
 
     def __str__(self):
         return "Field: %s  [key:%s], [value:%s]" % (

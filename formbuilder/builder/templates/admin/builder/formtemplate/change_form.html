@@ -1,0 +1,18 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_urls %}
+{% block object-tools-items %}
+    <script>
+        function openPreview(){
+        window.open("{% url 'admin:view_on_site' content_type_id original.pk %}", "name", "width=800,height=600");
+        }
+    </script>
+    <li>
+        <a href="{% url opts|admin_urlname:'history' original.pk|admin_urlquote %}" class="historylink">{% trans "History" %}</a>
+    </li>
+    {% if has_absolute_url %}
+        <li>
+            <a target="popup" href="#" onclick=openPreview(); class="viewsitelink">{% trans "View on Site" %}</a>
+        </li>
+    {% endif %}
+
+{% endblock %}

@@ -11,8 +11,10 @@ NUMBER = "number"
 PASSWORD = "password"
 RADIO = "radio"
 SELECT = "select"
+TEL = "tel"
 TEXT = "text"
 TEXT_AREA = "textarea"
+URL = "url"
 DROPZONE = "dropzone"
 
 def as_list():
@@ -30,8 +32,10 @@ def as_list():
         PASSWORD,
         RADIO,
         SELECT,
+        TEL,
         TEXT,
         TEXT_AREA,
+        URL,
         FILE,
         #DROPZONE
     ]
@@ -100,8 +104,10 @@ ATTRS = {
     PASSWORD: COMMON_ATTRS,
     RADIO: CHOICE_ATTRS,
     SELECT: CHOICE_ATTRS,
+    TEL: COMMON_ATTRS,
     TEXT: COMMON_ATTRS,
     TEXT_AREA: TEXT_AREA_ATTRS,
+    URL: COMMON_ATTRS,
     FILE: FILE_ATTRS,
     DROPZONE: DROPZONE_ATTRS
 }

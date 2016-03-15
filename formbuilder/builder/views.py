@@ -65,7 +65,7 @@ def formtemplate_details(request, id):
                 template_, f.clean_data_only, request.user)
 
             uploaded_file_list = []
-
+            print f.confirmation_list
             for rf in request.FILES:
 
                 file_list = request.FILES.getlist(rf)

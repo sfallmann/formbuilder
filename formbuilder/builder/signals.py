@@ -16,7 +16,7 @@ def create_none_field_set(sender, instance, created, **kwargs):
 
     if created:
 
-        fs = FieldSet.objects.create(
+        FieldSet.objects.create(
             form_template=instance,
             name=settings.EMPTY_FIELDSET,
             label=""
@@ -86,7 +86,7 @@ def delete_fieldset_cleanup(sender, instance, **kwargs):
             )
 
         fields = FieldTemplate.objects.filter(
-            form_template=instance.form_template, field_set=None)
+            form_template=instance.form_template, field_set=fs)
 
         for f in fields:
             f.field_set = fs

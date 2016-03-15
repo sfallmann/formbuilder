@@ -1,6 +1,7 @@
 import json
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit, HTML
+from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit
+from crispy_forms.layout import HTML, Div
 from django import forms
 from django.conf import settings
 from django.utils.html import format_html
@@ -13,7 +14,8 @@ from helper.constants import field_types
 
 FILE_LABEL = "<label for='{name}' class='control-label'>{label}</label>"
 FILE_HTML = "<input name='{name}' id='{name}' type=file id='file'"\
-                "{multiple} data-maxfiles='{maxfiles}' class='form-control'/>"
+                "{multiple} data-maxfiles='{maxfiles}'"\
+                    "class='form-control {css_class}'/>"
 
 
 class Form(forms.Form):
@@ -25,6 +27,8 @@ class Form(forms.Form):
         self.exclusions = [
             "html", "file"
         ]
+
+        self.confirmation_keys = []
 
         self.get_absolute_url = obj.get_absolute_url
         self.helper = FormHelper()
@@ -61,6 +65,7 @@ class Form(forms.Form):
         self.clean_files_only = {}
         self.clean_data_only = {}
         self.file_list = []
+        self.confirmation_list = []
 
         cleaned_data = super(Form, self).clean()
 
@@ -71,6 +76,9 @@ class Form(forms.Form):
         ]
 
         for key in cleaned_data.keys():
+
+            if key in self.confirmation_keys:
+                self.confirmation_list.append(cleaned_data[key])
 
             is_file = False
 
@@ -92,7 +100,8 @@ class Form(forms.Form):
     def create_field(self, f):
 
         if f.required and f.label:
-            f.label += "<span class='glyphicon glyphicon-star'></span>"
+            f.label = "<span style='color: red; font-size: .95em;' "\
+                "class='glyphicon glyphicon-star'></span>" + f.label
             #format_html(f.label)
         empty_choice = "No choices were added to this field!"
 
@@ -147,7 +156,7 @@ class Form(forms.Form):
 
             attrs.update({
                 'id': f.name.lower(),
-                'class': 'form-control',
+                'class': 'form-control %s',
                 'name': f.name.lower(),
                 'type': f.field_type
             })
@@ -206,6 +215,8 @@ class Form(forms.Form):
 
             _field.widget.attrs.update(attrs)
 
+            return _field
+
         elif f.field_type == field_types.DROPZONE:
 
             return forms.CharField(
@@ -234,10 +245,10 @@ class Form(forms.Form):
 
         elif template.field_type == field_types.FILE:
 
-            multiple = ""
+            multiple=""
 
             if template.maxfiles > 1:
-                multiple = "multiple"
+                multiple="multiple"
 
             file_label = FILE_LABEL.format(
                 name=template.name,
@@ -245,9 +256,10 @@ class Form(forms.Form):
             )
 
             file_html = FILE_HTML.format(
-                name = template.name,
-                multiple = multiple,
-                maxfiles = template.maxfiles
+                name=template.name,
+                multiple=multiple,
+                maxfiles=template.maxfiles,
+                css_class=template.css_class
             )
 
             return file_label + file_html
@@ -269,7 +281,15 @@ class Form(forms.Form):
                 if t.field_type in self.exclusions:
                     values.append(HTML(self.create_html(t)))
                 else:
-                    values.append(str(t.name))
+                    if t.field_type == "email":
+                        if t.send_confirmation:
+                            self.confirmation_keys.append(t.name)
+                    values.append(
+                        Div(
+                            str(t.name),
+                            css_class=t.css_class
+                        )
+                    )
             if values:
 
                 if fset.label:

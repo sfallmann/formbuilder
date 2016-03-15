@@ -1,3 +1,5 @@
+import json
+from pprint import pprint
 from django.contrib import admin
 from django.conf import settings
 from django.utils.html import mark_safe
@@ -25,6 +27,15 @@ class FieldTemplateInline(admin.StackedInline):
     show_change_link = True
     extra = 0
 
+    fieldsets = (
+        ("Options",
+         {  'classes': ("collapse",),
+            'fields': ('name', 'label',('field_type','position','css_class'),'field_set',)
+            }
+        ),
+    )
+
+
     def get_formset(self, request, obj, **kwargs):
 
         # only show the fields in the common to all field types
@@ -34,8 +45,10 @@ class FieldTemplateInline(admin.StackedInline):
             "field_type",
             "field_set",
             "label",
+            "css_class",
             "position",
         ]
+
 
         return super(
             FieldTemplateInline, self).get_formset(request, obj, **kwargs)
@@ -66,6 +79,7 @@ class FieldTemplateInline(admin.StackedInline):
             db_field, request, **kwargs)
 
 
+
 class FieldChoiceInline(admin.StackedInline):
     model = FieldChoice
     extra = 1
@@ -89,6 +103,7 @@ class FieldTemplateAdmin(admin.ModelAdmin):
             "field_type",
             "field_set",
             "label",
+            "css_class",
             "position",
         ]
 
@@ -102,10 +117,15 @@ class FieldTemplateAdmin(admin.ModelAdmin):
                 "field_type",
                 "name",
                 "label",
+                "css_class",
                 "position",
             ]
             #  get all the availabled fields based on the value of field_type
             #  and then sort them.
+
+            if obj.field_type == "email":
+                common.append("send_confirmation")
+
             field_types.ATTRS[obj.field_type].sort()
             #  add the additional fields with common
             self.fields = common + field_types.ATTRS[obj.field_type]
@@ -170,7 +190,6 @@ class FieldSetFormSet(BaseInlineFormSet):
                     )
 
 
-
 class FieldSetInline(admin.StackedInline):
 
     model = FieldSet
@@ -205,7 +224,7 @@ class FormTemplateAdmin(admin.ModelAdmin):
                     'name',
                     'category',
                     'notification_list',
-                    ('login_required', 'send_confirmation'),
+                    'login_required',
                 )
         }),
         ('Advanced options', {
@@ -218,7 +237,7 @@ class FormTemplateAdmin(admin.ModelAdmin):
 class FormDataAdmin(admin.ModelAdmin):
     list_display = ("__str__", "form_template", "data_category")
     ordering = ('form_template', 'id')
-    readonly_fields = ["form_template", "data"]
+    readonly_fields = ["form_template", "data", "formatted_data","data_category"]
 
     # allows for sotring by Category
     def data_category(self, obj):
@@ -229,6 +248,16 @@ class FormDataAdmin(admin.ModelAdmin):
             return None
 
     data_category.short_description = "Category"
+
+    def formatted_data(self, obj):
+
+        return json.dumps(
+            obj.data,
+            sort_keys=True,
+            indent=4,
+            separators=(',', ': ')
+        )
+
 
 
 admin.site.register(Category, CategoryAdmin)
