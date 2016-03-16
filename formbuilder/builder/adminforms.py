@@ -2,8 +2,11 @@ from ckeditor.widgets import CKEditorWidget
 from ckeditor_uploader.widgets import CKEditorUploadingWidget
 from django import forms
 from django.conf import settings
+from django.db.models.query_utils import Q
+from django.core.exceptions import ValidationError
 from .models import FieldTemplate, FieldSet, FormTemplate
 from .models import FieldChoice
+from helper.constants import field_types
 
 
 class FormTemplateForm(forms.ModelForm):
@@ -154,4 +157,52 @@ class FieldTemplateForm(forms.ModelForm):
                     'style': 'height: 300px; width: 600px; font-size: 1.15em;'
                 }
             )
+    def clean(self):
 
+        cleaned_data = super(FieldTemplateForm, self).clean()
+
+        field_type = cleaned_data['field_type']
+        form_template = cleaned_data['form_template']
+        name = cleaned_data['name']
+
+        type_list = [
+            field_types.DROPZONE,
+            field_types.FILE
+        ]
+
+        dropzones = FieldTemplate.objects.filter(
+            form_template=form_template,
+            field_type=field_types.DROPZONE
+        ).exclude(
+            name=name,
+            form_template=form_template
+        )
+
+        file_and_dz = FieldTemplate.objects.filter(
+            Q(
+                field_type=field_types.DROPZONE,
+                form_template=form_template
+            )
+             |
+            Q(
+                field_type=field_types.FILE,
+                form_template=form_template
+            )
+
+        ).exclude(
+            name=name,
+            form_template=form_template
+        )
+
+        if field_type in type_list and dropzones:
+
+            raise ValidationError(
+                "You can't add file fields or dropzones to a form containing a dropzone"
+            )
+
+
+        if field_type == field_types.DROPZONE and file_and_dz:
+
+            raise ValidationError(
+                "You can't add a dropzone to a form containing a dropzone or file fields"
+            )

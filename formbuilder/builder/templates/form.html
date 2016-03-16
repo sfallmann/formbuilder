@@ -17,7 +17,6 @@
     <script src='https://www.google.com/recaptcha/api.js'></script>
 
     <link href='https://fonts.googleapis.com/css?family=Noto+Sans:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/4.3.0/min/dropzone.min.css">
     <script src='https://cdnjs.cloudflare.com/ajax/libs/dropzone/4.3.0/min/dropzone.min.js'></script>
 
@@ -97,31 +96,30 @@
         $('form').get(0).reset(); //clear form data on page load
     });
 
+    //Dropzone.autoDiscover = false;
+
     if (window.File && window.FileReader && window.FileList && window.Blob) {
   // Great success! All the File APIs are supported.
     } else {
       alert('The File APIs are not fully supported in this browser.');
     }
 
-    $(function(){
-        var $fileUpload = $("input[type='file']");
+    if ($("div").hasClass("add-dz")){
 
-        if ($fileUpload.attr("multiple")){
-            console.log("multiple files allowed!");
-            var maxFiles = $fileUpload.data("maxfiles");
+        var dropZone = new Dropzone("form");
 
-            $("input[type='submit']").click(function(e){
-
-                if (parseInt($fileUpload.get(0).files.length)>maxFiles){
-                    alert("You can only upload a maximum of " + maxFiles + " files");
-                    e.stopPropagation();
-                    e.preventDefault();
-                }
-
-            });
+        Dropzone.options.dropZone = {
+            clickable: "#dz-img",
+            hiddenInputContainer: "div#dz",
+            //dictDefaultMessage: "#dz-img"
         }
+        //var formId = "#" + form[0].id;
+        //var dropZone = new Dropzone(formId);
 
-    });
+        console.log(dropZone);
+
+    }
+
 
 
 </script>

@@ -22,9 +22,67 @@ class CategoryAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ("name",)}
 
 
+class FieldTemplateFormSet(BaseInlineFormSet):
+
+    def clean(self):
+        super(FieldTemplateFormSet, self).clean()
+
+        file_count = 0
+        dz_count = 0
+
+        #  Check through all the FieldSSet forms
+        for form in self.forms:
+            #  If the form doesn't have cleane_data continue
+            if not hasattr(form, 'cleaned_data'):
+                continue
+            #  If it's the "empty" FieldSet
+
+            #  clean the data
+            data = form.cleaned_data
+
+
+            type_list = [
+                field_types.DROPZONE,
+                field_types.FILE
+            ]
+
+            templates = FieldTemplate.objects.filter(
+                form_template=form.instance.form_template,
+                ).exclude(
+                pk=form.instance.pk
+            )
+
+            if form.instance.field_type == field_types.DROPZONE:
+                dz_count += 1
+
+            if form.instance.field_type == field_types.FILE:
+                file_count += 1
+
+            for t in templates:
+                print t.field_type
+                if t.field_type == field_types.FILE and data.get('field_type') == field_types.DROPZONE:
+                    raise ValidationError(
+                        "You can't add a file field since the form"\
+                            "has a dropzone"
+                    )
+
+                if t.field_type == field_types.DROPZONE and data.get('field_type') in type_list:
+                    raise ValidationError(
+                        "You can't add a dropzone since the form "\
+                            "has a dropzone or file field"
+                    )
+
+        if (dz_count and file_count) or dz_count > 1:
+            raise ValidationError(
+                "You can't add multiple dropzones or a dropzone with file fields."
+            )
+
+
+
 class FieldTemplateInline(admin.StackedInline):
     model = FieldTemplate
     form = FieldTemplateInlineForm
+    formset = FieldTemplateFormSet
     show_change_link = True
     extra = 0
     fieldsets = (
@@ -88,19 +146,32 @@ class FieldTemplateAdmin(admin.ModelAdmin):
 
     form = FieldTemplateForm
     list_display = (
-        'name', 'field_type', 'form_template', 'form_template_link', 'field_set', 'position')
+        'name',
+        'label',
+        'field_type',
+        'field_set',
+        'position',
+        'form_template',
+        'form_template_link',
+    )
+
+    list_editable =('label', 'field_set', 'position')
     ordering = (
         'field_set', 'form_template', 'position', 'field_type', 'name')
     list_filter = ('form_template', 'field_set',)
     save_on_top = True
-    save_on_bottom = False
+    show_add_link = False
+
+
+    def has_add_permission(self, request):
+        return False
 
     def get_form(self, request, obj, **kwargs):
 
         #  fields common to all field types
         self.fields = [
             "name",
-            "form_template",
+            #"form_template",
             "field_type",
             "field_set",
             "label",
@@ -109,11 +180,12 @@ class FieldTemplateAdmin(admin.ModelAdmin):
         ]
 
         #  if this is for an existing FieldTemplate
+        print kwargs
         if obj:
             #  define the fields common to all FieldTemplates
             #  TODO:  Need to make this into a constant
             common = [
-                "form_template",
+                #"form_template",
                 "field_set",
                 "field_type",
                 "name",

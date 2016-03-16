@@ -13,9 +13,12 @@ from helper.constants import field_types
 
 
 FILE_LABEL = "<label for='{name}' class='control-label'>{label}</label>"
-FILE_HTML = "<input name='{name}' id='{name}' type=file id='file'"\
+FILE_HTML = "<input name='{name}' id='{name}' type=file id='{name}'"\
                 "{multiple} data-maxfiles='{maxfiles}'"\
                     "class='form-control {css_class}'/>"
+DROPZONE = "<div id='dz' name={name} class='add-dz col-sm-12' >Drop Files Here</div>"\
+                '<img class="img-responsive" id="dz-img" src="/media/uploads/2016/03/16/dropzone-js.png"/>'\
+                "<div class='dz-preview col-sm-12' id='dz-preview'></div>"
 
 
 class Form(forms.Form):
@@ -25,7 +28,7 @@ class Form(forms.Form):
         super(Form, self).__init__(*args, **kwargs)
 
         self.exclusions = [
-            "html", "file"
+            "html", "file", "dropzone"
         ]
 
         self.confirmation_keys = []
@@ -245,9 +248,8 @@ class Form(forms.Form):
 
     def create_html(self, template):
 
-        print template.field_type
-        if template.field_type == "html":
-            print template.html
+        if template.field_type == field_types.HTML:
+
             return template.html
 
         elif template.field_type == field_types.FILE:
@@ -270,6 +272,12 @@ class Form(forms.Form):
             )
 
             return file_label + file_html
+
+        elif template.field_type == field_types.DROPZONE:
+
+            return DROPZONE.format(
+                name=template.name
+            )
 
 
     def create_fieldsets(self, obj):

@@ -37,7 +37,7 @@ def as_list():
         TEXT_AREA,
         URL,
         FILE,
-        #DROPZONE
+        DROPZONE
     ]
 
 COMMON_ATTRS = [
@@ -109,7 +109,7 @@ ATTRS = {
     TEXT_AREA: TEXT_AREA_ATTRS,
     URL: COMMON_ATTRS,
     FILE: FILE_ATTRS,
-    DROPZONE: DROPZONE_ATTRS
+    DROPZONE: FILE_ATTRS
 }
 
 
