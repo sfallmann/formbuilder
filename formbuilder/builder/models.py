@@ -6,6 +6,7 @@ from django.core.urlresolvers import reverse
 from django.core import serializers
 from django.contrib.contenttypes.models import ContentType
 from django.http import JsonResponse
+from colorful.fields import RGBColorField
 from helper.validators import is_lower, min_20, max_files
 from helper.validators import is_alpha_num, is_alpha, is_alpha_num_words
 from helper.validators import is_alpha_num_whitespace, is_alpha_num_nospace
@@ -79,6 +80,9 @@ class FormTemplate(models.Model):
         models.EmailField(max_length=100, blank=True)
     )
 
+    background_color = RGBColorField(default="#FFFFFF")
+    text_color = RGBColorField(default="#000000")
+
     header = models.TextField(blank=True)
     footer = models.TextField(blank=True)
 
@@ -98,6 +102,12 @@ class FormTemplate(models.Model):
         return reverse(
             'formtemplate_details',
             args=[str(self.id)])
+
+    def get_admin_change_url(self):
+        content_type = ContentType.objects.get_for_model(self.__class__)
+        return reverse(
+            "admin:%s_%s_change" % (
+                content_type.app_label, content_type.model), args=(self.id,))
 
     def as_dict(self):
         return get_dict(self)
@@ -227,6 +237,8 @@ class FieldTemplate(models.Model):
         return self.name
 
     def get_form_admin_change_url(self):
+
+
         content_type = ContentType.objects.get_for_model(
             self.form_template.__class__
         )

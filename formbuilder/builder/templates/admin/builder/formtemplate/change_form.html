@@ -2,8 +2,8 @@
 {% load i18n admin_urls %}
 {% block object-tools-items %}
     <script>
-        function openPreview(){
-        window.open("{% url 'admin:view_on_site' content_type_id original.pk %}", "name", "width=800,height=600");
+        function popupView(loc){
+        window.open(loc, "name", "width=1000,height=850");
         }
     </script>
     <li>
@@ -11,7 +11,7 @@
     </li>
     {% if has_absolute_url %}
         <li>
-            <a target="popup" href="#" onclick=openPreview(); class="viewsitelink">{% trans "View on Site" %}</a>
+            <a target="popup" href="#" onclick=popupView("{% url 'admin:view_on_site' content_type_id original.pk %}"); class="viewsitelink">{% trans "View on Site" %}</a>
         </li>
     {% endif %}
 

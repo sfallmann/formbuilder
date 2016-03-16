@@ -43,11 +43,18 @@ class Form(forms.Form):
         layout = self.helper.layout = Layout()
 
         self.create_fieldsets(obj)
-
         self.helper.form_id = "form_%s" % obj.id
         self.helper.form_method = 'post'
         self.helper.form_action = obj.get_absolute_url()
-        self.helper.attrs = {'enctype': 'multipart/form-data'}
+        self.helper.background_color = obj.background_color
+        self.helper.text_color = obj.text_color
+
+        form_style = "background-color: %s; color: %s"\
+            % (obj.background_color, obj.background_color)
+
+        self.helper.attrs = {
+            'enctype': 'multipart/form-data',
+        }
 
         recaptcha = '<hr/><div class="g-recaptcha" data-sitekey="%s">'\
             '</div>' % settings.RECAPTCHA_SITEKEY

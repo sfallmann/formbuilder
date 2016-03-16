@@ -7,6 +7,7 @@ from django import forms
 from django.db import models
 from django.forms.models import BaseInlineFormSet
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.http import HttpResponse
 from .models import Category
 from .models import FormData, FormTemplate, FieldSet
 from .models import FieldTemplate, FieldChoice
@@ -26,7 +27,6 @@ class FieldTemplateInline(admin.StackedInline):
     form = FieldTemplateInlineForm
     show_change_link = True
     extra = 0
-
     fieldsets = (
         ("Options",
          {  'classes': ("collapse",),
@@ -48,7 +48,6 @@ class FieldTemplateInline(admin.StackedInline):
             "css_class",
             "position",
         ]
-
 
         return super(
             FieldTemplateInline, self).get_formset(request, obj, **kwargs)
@@ -89,7 +88,7 @@ class FieldTemplateAdmin(admin.ModelAdmin):
 
     form = FieldTemplateForm
     list_display = (
-        'name', 'field_type', 'form_template', 'field_set', 'position')
+        'name', 'field_type', 'form_template', 'form_template_link', 'field_set', 'position')
     ordering = (
         'field_set', 'form_template', 'position', 'field_type', 'name')
     list_filter = ('form_template', 'field_set',)
@@ -134,6 +133,13 @@ class FieldTemplateAdmin(admin.ModelAdmin):
                 self.inlines = [FieldChoiceInline, ]
 
         return super(FieldTemplateAdmin, self).get_form(request, obj, **kwargs)
+
+    def form_template_link(self, obj):
+
+        link = obj.form_template.get_admin_change_url()
+
+
+        return mark_safe("<a href='%s'>Link</a>" % link)
 
 
 class FieldSetFormSet(BaseInlineFormSet):
@@ -217,7 +223,7 @@ class FieldSetInline(admin.StackedInline):
 class FormTemplateAdmin(admin.ModelAdmin):
     form = FormTemplateForm
     inlines = [FieldSetInline, FieldTemplateInline, ]
-
+    save_on_top = True
     fieldsets = (
         (None, {
             'fields': (
@@ -229,7 +235,7 @@ class FormTemplateAdmin(admin.ModelAdmin):
         }),
         ('Advanced options', {
             'classes': ('collapse',),
-            'fields': ('header', 'footer'),
+            'fields': (('background_color', 'text_color'),'header', 'footer'),
         }),
     )
 
