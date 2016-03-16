@@ -6,7 +6,7 @@
         <a href="{% url opts|admin_urlname:'history' original.pk|admin_urlquote %}" class="historylink">{% trans "History" %}</a>
     </li>
     <li>
-        <a href="{% url 'admin:builder_formtemplate_change' original.form_template.pk %}"  class="viewsitelink">Go to Form Template</a>
+        <a href="{% url 'admin:builder_formtemplate_change' original.form_template.pk %}"  class="viewsitelink">Go to <strong>{{ original.form_template }}</strong></a>
     </li>
     {% if has_absolute_url %}
         <li>

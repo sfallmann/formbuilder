@@ -74,10 +74,16 @@ class FormTemplate(models.Model):
         related_name="form_templates",
     )
 
-    login_required = models.BooleanField(default=False)
+    login_required = models.BooleanField(
+        default=False,
+        help_text="Not fully implemented yet"
+
+    )
 
     notification_list = ArrayField(
-        models.EmailField(max_length=100, blank=True)
+        models.EmailField(max_length=100, blank=True),
+        help_text="List of comma seperated email addresses that will be sent"\
+            " a notification when the form has been submitted"
     )
 
     background_color = RGBColorField(default="#FFFFFF")
@@ -133,9 +139,15 @@ class FieldSet(models.Model):
     )
     name = models.CharField(
         max_length=30, validators=[is_alpha_num_nospace, is_lower])
-    label = models.CharField(max_length=250, blank=True)
+    label = models.CharField(
+        max_length=250, blank=True,
+        help_text="Text that will display in the form"
+    )
     position = models.PositiveIntegerField(default=None, null=True, blank=True)
-    help_text = models.CharField(max_length=500, blank=True)
+    legend = models.CharField(
+        max_length=500, blank=True,
+        help_text="Defines a caption for the fieldset"
+    )
 
     class Meta:
         unique_together = (("name", "form_template"),)

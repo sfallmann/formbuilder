@@ -282,7 +282,7 @@ class Form(forms.Form):
 
             values = []
 
-            values =[str(fset.help_text),]
+            values =[str(fset.legend),]
 
             for t in _templates:
                 if t.field_type in self.exclusions:

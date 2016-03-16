@@ -11,7 +11,7 @@
     </li>
     {% if has_absolute_url %}
         <li>
-            <a target="popup" href="#" onclick=popupView("{% url 'admin:view_on_site' content_type_id original.pk %}"); class="viewsitelink">{% trans "View on Site" %}</a>
+            <a target="popup" href="#" onclick=popupView("{% url 'admin:view_on_site' content_type_id original.pk %}"); class="historylink">{% trans "View on Site" %}</a>
         </li>
     {% endif %}
 

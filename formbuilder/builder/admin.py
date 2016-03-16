@@ -92,6 +92,8 @@ class FieldTemplateAdmin(admin.ModelAdmin):
     ordering = (
         'field_set', 'form_template', 'position', 'field_type', 'name')
     list_filter = ('form_template', 'field_set',)
+    save_on_top = True
+    save_on_bottom = False
 
     def get_form(self, request, obj, **kwargs):
 
@@ -211,7 +213,7 @@ class FieldSetInline(admin.StackedInline):
         }),
         ('Advanced options', {
             'classes': ('collapse',),
-            'fields': ('help_text',),
+            'fields': ('legend',),
         }),
     )
     def get_queryset(self, request):
