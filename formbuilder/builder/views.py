@@ -90,7 +90,7 @@ def formtemplate_details(request, id):
                 % 'reCAPTCHA failed. Please try again.'
 
             return render(
-                request, 'form.html', {
+                request, f.template, {
                     "form": f,
                     "header": mark_safe(template_.header),
                     "recaptcha_error": recaptcha_error
@@ -98,7 +98,7 @@ def formtemplate_details(request, id):
             )
 
     return render(
-        request, 'form.html', {
+        request, f.template, {
             "form": f,
             "header": mark_safe(template_.header)
         }

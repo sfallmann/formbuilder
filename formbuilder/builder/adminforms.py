@@ -160,9 +160,11 @@ class FieldTemplateForm(forms.ModelForm):
     def clean(self):
 
         cleaned_data = super(FieldTemplateForm, self).clean()
-
+        if "field_set" in cleaned_data:
+            field_set = cleaned_data["field_set"]
+            form_template = field_set.form_template
         field_type = cleaned_data['field_type']
-        form_template = cleaned_data['form_template']
+
         name = cleaned_data['name']
 
         type_list = [

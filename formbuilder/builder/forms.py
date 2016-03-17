@@ -15,11 +15,7 @@ from helper.constants import field_types
 FILE_LABEL = "<label for='{name}' class='control-label'>{label}</label>"
 FILE_HTML = "<input name='{name}' id='{name}' type=file id='{name}'"\
                 "{multiple} data-maxfiles='{maxfiles}'"\
-                    "class='form-control {css_class}'/>"
-DROPZONE = "<div id='dz' name={name} class='add-dz col-sm-12'/></div>"\
-                "<div class='clicker dz-default dz-message col-sm-12'><img src='http://www.erca.cc/events/images/dropzone_logo.jpg' "\
-                "class='img-responsive'><div class='dz-preview'></div></div>"
-
+                    "class='form-control form-style {css_class}'/>"
 
 
 
@@ -31,13 +27,21 @@ class Form(forms.Form):
         super(Form, self).__init__(*args, **kwargs)
 
         self.exclusions = [
-            "html", "file", "dropzone"
+            "html", "file"
         ]
-
+        self.template = "fileinput_form.html"
         self.confirmation_keys = []
 
         self.get_absolute_url = obj.get_absolute_url
         self.helper = FormHelper()
+
+        self.helper.form_id = "fb-form"
+        self.helper.form_method = 'post'
+        self.helper.form_action = obj.get_absolute_url()
+        self.helper.form_class = "form-style"
+        self.helper.background_color = obj.background_color
+        self.helper.text_color = obj.text_color
+
 
         field_templates = obj.field_templates.all().order_by(
             'field_set', 'position')
@@ -49,14 +53,6 @@ class Form(forms.Form):
         layout = self.helper.layout = Layout()
 
         self.create_fieldsets(obj)
-        self.helper.form_id = "xform"
-        self.helper.form_method = 'post'
-        self.helper.form_action = obj.get_absolute_url()
-        self.helper.background_color = obj.background_color
-        self.helper.text_color = obj.text_color
-
-        form_style = "background-color: %s; color: %s"\
-            % (obj.background_color, obj.background_color)
 
         self.helper.attrs = {
             'enctype': 'multipart/form-data',
@@ -68,7 +64,7 @@ class Form(forms.Form):
         layout.append(HTML("{{recaptcha_error|safe}}"))
 
         layout.append(HTML(recaptcha))
-        layout.append(HTML("<hr/>"))
+        layout.append(HTML("<br/>"))
 
         layout.append(ButtonHolder
                       (Submit('submit', 'Submit', css_class='button white')))
@@ -169,7 +165,7 @@ class Form(forms.Form):
 
             attrs.update({
                 'id': f.name.lower(),
-                'class': 'form-control %s',
+                'class': 'form-control form-style',
                 'name': f.name.lower(),
                 'type': f.field_type
             })
@@ -187,7 +183,7 @@ class Form(forms.Form):
 
             attrs.update({
                 'id': f.name.lower(),
-                'class': 'form-control',
+                'class': 'form-control form-style',
                 'name': f.name.lower(),
             })
 
@@ -232,6 +228,9 @@ class Form(forms.Form):
 
         elif f.field_type == field_types.DROPZONE:
 
+            self.template = "dropzone_form.html"
+            self.helper.form_class += " dropzone"
+
             return forms.CharField(
                 widget=forms.TextInput(
                     attrs={
@@ -244,9 +243,6 @@ class Form(forms.Form):
                 ),
                 required=False,
             )
-
-
-            return _field
 
 
     def create_html(self, template):

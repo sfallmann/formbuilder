@@ -1,0 +1,88 @@
+{% extends "base_form.html" %}
+{% block header_css_scripts %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/4.3.0/min/dropzone.min.css">
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/dropzone/4.3.0/min/dropzone.min.js'></script>
+<style>
+
+    label {
+        font-size: 1.05em;
+    }
+
+
+
+    form {
+        min-width: 350px;
+        border: 2px;
+        border-radius: 5px;
+        border-style: solid;
+        padding: 10px;
+    }
+
+
+    .form-style, .form-style label {
+        background-color: {{ form.helper.background_color }};
+        color: {{ form.helper.text_color }};
+    }
+
+</style>
+{% endblock %}
+
+{% block container %}
+    <div class="row">
+        <div class="col-md-12">
+            {{ header }}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            {% load crispy_forms_tags %}
+            {% crispy form form.helper %}
+        </div>
+    </div>
+    <div class="row">
+
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            {{ footer }}
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+        $(".buttonHolder").after("<hr/><div class='col-sm-12 dz-preview' id='dz-preview-div'></div>");
+
+
+        Dropzone.options.fbForm = {
+            autoProcessQueue: false,
+            previewsContainer: "#dz-preview-div",
+            addRemoveLinks: true,
+            init: function(){
+
+                var fileCount = 0;
+                var self = this;
+                var message = "Filenames can only contain alphanumeric characters, spaces, underscores, dashes, ";
+                message += " and a period before the file extension! The file has been removed.  Please rename the file.";
+                this.on("addedfile", function(file){
+                    fileCount++;
+                    if (!file.name.match(/^[_-\s\d\w\.]*$/)) {
+                        alert(message);
+                        self.removeFile(file);
+                    }
+                    fileCount++;
+                    console.log(file)
+
+                });
+                this.on("removedFile", function(file){
+                    fileCount--;
+                });
+
+            }
+    }
+
+
+</script>
+
+
+{% endblock %}

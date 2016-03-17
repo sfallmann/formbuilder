@@ -17,9 +17,9 @@ from helper.constants import field_types
 class DictBase(models.Model):
 
     key = models.CharField(
-        max_length=32, unique=True, validators=[is_alpha_num_words, is_lower]
+        max_length=32, validators=[is_alpha_num_words, is_lower]
     )
-    value = models.CharField(max_length=255, unique=True)
+    value = models.CharField(max_length=255)
 
     class Meta:
         abstract = True
@@ -190,6 +190,7 @@ class FieldTemplate(models.Model):
         FormTemplate,
         related_name="field_templates",
         on_delete=models.CASCADE,
+        editable=False
     )
     field_type = models.CharField(
         max_length=20, choices=FIELD_TYPE_CHOICES, default=field_types.TEXT)
@@ -283,7 +284,7 @@ class FieldChoice(DictBase):
 
 
     class Meta:
-        unique_together = ['key', 'field_template']
+        unique_together = [('key', 'field_template'),('value', 'field_template')]
 
     field_template = models.ForeignKey(
         FieldTemplate,
