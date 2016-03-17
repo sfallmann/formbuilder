@@ -16,9 +16,12 @@ FILE_LABEL = "<label for='{name}' class='control-label'>{label}</label>"
 FILE_HTML = "<input name='{name}' id='{name}' type=file id='{name}'"\
                 "{multiple} data-maxfiles='{maxfiles}'"\
                     "class='form-control {css_class}'/>"
-DROPZONE = "<div id='dz' name={name} class='add-dz col-sm-12' >Drop Files Here</div>"\
-                '<img class="img-responsive" id="dz-img" src="/media/uploads/2016/03/16/dropzone-js.png"/>'\
-                "<div class='dz-preview col-sm-12' id='dz-preview'></div>"
+DROPZONE = "<div id='dz' name={name} class='add-dz col-sm-12'/></div>"\
+                "<div class='clicker dz-default dz-message col-sm-12'><img src='http://www.erca.cc/events/images/dropzone_logo.jpg' "\
+                "class='img-responsive'><div class='dz-preview'></div></div>"
+
+
+
 
 
 class Form(forms.Form):
@@ -46,7 +49,7 @@ class Form(forms.Form):
         layout = self.helper.layout = Layout()
 
         self.create_fieldsets(obj)
-        self.helper.form_id = "form_%s" % obj.id
+        self.helper.form_id = "xform"
         self.helper.form_method = 'post'
         self.helper.form_action = obj.get_absolute_url()
         self.helper.background_color = obj.background_color

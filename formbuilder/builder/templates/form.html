@@ -27,15 +27,6 @@
   <![endif]-->
 </head>
 <style>
-    /*
-    .dropzone-previews {
-        width: 200px;
-    }
-
-    .dropzone {
-        border: none;
-    }
-    */
 
     form * {
 
@@ -46,8 +37,10 @@
         font-size: 1.05em;
     }
 
-    form {
+    /*
 
+    form {
+        min-width: 350px;
         border: 2px;
         border-radius: 5px;
         border-style: solid;
@@ -61,6 +54,8 @@
         color: {{ form.helper.text_color }};
     }
 
+*/
+
 </style>
 <body >
     <br/>
@@ -71,22 +66,18 @@
             </div>
         </div>
         <div class="row">
-
             <div class="col-md-12">
                 {% load crispy_forms_tags %}
                 {% crispy form form.helper %}
             </div>
-
         </div>
         <div class="row">
             <div class="col-md-12">
                 {{ footer }}
             </div>
-            {% include "snippet.html" %}
         </div>
     </div>
     <br/>
-
 
 </body>
 
@@ -106,19 +97,69 @@
 
     if ($("div").hasClass("add-dz")){
 
-        var dropZone = new Dropzone("form");
+        var formAction = $("#xform").attr("action");
 
-        Dropzone.options.dropZone = {
-            clickable: "#dz-img",
-            hiddenInputContainer: "div#dz",
-            //dictDefaultMessage: "#dz-img"
-        }
-        //var formId = "#" + form[0].id;
-        //var dropZone = new Dropzone(formId);
+        $("#xform").addClass("dropzone");
 
-        console.log(dropZone);
+        Dropzone.options.xform = {
+            maxFilesize: 5,
+            addRemoveLinks: true,
+            autoProcessQueue: false,
+            uploadMultiple: true,
+            parallelUploads: true,
+            clickable: '.clicker',
+            dictResponseError: 'Server not Configured',
+            acceptedFiles: ".png,.jpg,.gif,.bmp,.jpeg",
+            headers: {
+                'X-CSRF-Token': '{{ csrf_token }}'
+            },
+            init: function(){
+                    var self = this;
+                    // config
+                    self.on("error", function(file){ alert("error!");});
+                    self.options.addRemoveLinks = true;
+                    self.options.dictRemoveFile = "Delete";
+                    //New file added
+                    self.on("addedfile", function (file) {
+                    console.log('new file added ', file);
+                    });
+                    // Send file starts
+                    self.on("sending", function (file) {
+                    console.log('upload started', file);
+                    $('.meter').show();
+                    });
+
+                    // File upload Progress
+                    self.on("totaluploadprogress", function (progress) {
+                    console.log("progress ", progress);
+                    $('.roller').width(progress + '%');
+                    });
+
+                    self.on("queuecomplete", function (progress) {
+                    $('.meter').delay(999).slideUp(999);
+                    });
+
+                    // On removing file
+                    self.on("removedfile", function (file) {
+                    console.log(file);
+                    });
+
+                    $('#submit-id-submit').click(function(e){
+                        e.stopPropagation();
+                        e.preventDefault();
+
+                        self.processQueue();
+                    });
+
+
+                }
+        };
+
+
 
     }
+
+
 
 
 

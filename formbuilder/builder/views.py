@@ -47,16 +47,15 @@ def formtemplate_details(request, id):
     #  Pass the FormTemplate object into Form
     f = Form(obj=template_)
 
-    if request.method == "POST":
 
+    if request.method == "POST":
+        print "Posted data"
         recaptcha_passed = recaptcha_check(request)
 
         # Pass the FormTemplate object into Form with the posted data
         f = Form(template_, request.POST, request.FILES)
 
         #  Check if the data is valid
-
-
 
         if f.is_valid() and recaptcha_passed:
 
@@ -65,7 +64,7 @@ def formtemplate_details(request, id):
                 template_, f.clean_data_only, request.user)
 
             uploaded_file_list = []
-            print f.confirmation_list
+
             for rf in request.FILES:
 
                 file_list = request.FILES.getlist(rf)
@@ -73,7 +72,7 @@ def formtemplate_details(request, id):
                 for file_ in file_list:
                     uploaded_file_list.append(file_.name)
 
-                    if settings.DEBUG == False:
+                    if settings.DEBUG == True:
                         handle_uploaded_file(file_, str(formdata.pk))
 
                 formdata.data.update({
