@@ -37,6 +37,22 @@ class FormTemplateForm(forms.ModelForm):
             }
         )
 
+    def clean(self):
+
+        cleaned_data = super(FormTemplateForm, self).clean()
+        name = cleaned_data["name"]
+        dropzone = cleaned_data["dropzone"]
+
+        file_fields = FieldTemplate.objects.filter(
+            field_type=field_types.FILE,
+            form_template__name=name
+        )
+
+        if dropzone and file_fields:
+            raise ValidationError(
+                "You can't enable a dropzone on a form containing file fields."
+            )
+
 
 class FieldSetInlineForm(forms.ModelForm):
 
@@ -44,6 +60,7 @@ class FieldSetInlineForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(FieldSetInlineForm, self).__init__(*args, **kwargs)
+
 
         #  checking if this a new or previously created
         if "instance" in kwargs:
@@ -84,12 +101,15 @@ class FieldTemplateInlineForm(forms.ModelForm):
 
     model = FieldTemplate
 
+    # del self.fields['field_for_item'] for dynamic fields
+
     def __init__(self, *args, **kwargs):
 
         super(FieldTemplateInlineForm, self).__init__(*args, **kwargs)
 
         #  checking if this a new or previously created
         if "instance" in kwargs:
+
             f = kwargs["instance"]
 
             #  get the queryset of all FieldTemplates for the FormTemplate
@@ -114,9 +134,21 @@ class FieldTemplateInlineForm(forms.ModelForm):
             self.fields['position'].show_hidden_initial = True
 
         else:
+
             #  new instances have position disabled
             self.fields['position'].disabled = True
 
+    def clean(self):
+
+        cleaned_data = super(FieldTemplateInlineForm, self).clean()
+
+        form_template = cleaned_data["form_template"]
+        field_type = cleaned_data["field_type"]
+
+        if form_template.dropzone and field_type == field_types.FILE:
+            raise ValidationError(
+                "You can't add file fields to a form with a dropzone."
+            )
 
 class FieldTemplateForm(forms.ModelForm):
 
@@ -125,6 +157,8 @@ class FieldTemplateForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
 
         super(FieldTemplateForm, self).__init__(*args, **kwargs)
+
+        self.fields["field_set"].empty_label = None
 
         instance = kwargs.get('instance')
 
@@ -160,51 +194,14 @@ class FieldTemplateForm(forms.ModelForm):
     def clean(self):
 
         cleaned_data = super(FieldTemplateForm, self).clean()
+
         if "field_set" in cleaned_data:
             field_set = cleaned_data["field_set"]
-            form_template = field_set.form_template
-        field_type = cleaned_data['field_type']
+            form_template = field_set.form_template.dropzone
+            field_type = cleaned_data['field_type']
 
-        name = cleaned_data['name']
+            if field_set.form_template.dropzone and field_type == field_types.FILE:
+                raise ValidationError(
+                    "You can't add file fields to a form with a dropzone."
+                )
 
-        type_list = [
-            field_types.DROPZONE,
-            field_types.FILE
-        ]
-
-        dropzones = FieldTemplate.objects.filter(
-            form_template=form_template,
-            field_type=field_types.DROPZONE
-        ).exclude(
-            name=name,
-            form_template=form_template
-        )
-
-        file_and_dz = FieldTemplate.objects.filter(
-            Q(
-                field_type=field_types.DROPZONE,
-                form_template=form_template
-            )
-             |
-            Q(
-                field_type=field_types.FILE,
-                form_template=form_template
-            )
-
-        ).exclude(
-            name=name,
-            form_template=form_template
-        )
-
-        if field_type in type_list and dropzones:
-
-            raise ValidationError(
-                "You can't add file fields or dropzones to a form containing a dropzone"
-            )
-
-
-        if field_type == field_types.DROPZONE and file_and_dz:
-
-            raise ValidationError(
-                "You can't add a dropzone to a form containing a dropzone or file fields"
-            )

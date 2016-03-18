@@ -1,27 +1,22 @@
 {% extends "base_form.html" %}
 {% block header_css_scripts %}
 
-<style>
 
-    label {
-        font-size: 1.05em;
-    }
+{% endblock %}
+{% block scripts %}
+<script>
 
+    $(".accordion-toggle").addClass("collapsed").attr("aria-expanded","false").
+        append(" <span class='accordion-glyph glyphicon glyphicon-chevron-up'></span>").
+            click(function(){
+                var $span  = $(this).firstElementChild;
 
-
-    form {
-        min-width: 350px;
-        border: 2px;
-        border-radius: 5px;
-        border-style: solid;
-        padding: 10px;
-    }
+    });
+    $(".panel-collapse.collapse.in").removeClass("in").attr("aria-expanded","false");
 
 
-    .form-style, .form-style label {
-        background-color: {{ form.helper.background_color }};
-        color: {{ form.helper.text_color }};
-    }
 
-</style>
+</script>
+
+
 {% endblock %}

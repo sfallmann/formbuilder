@@ -22,77 +22,22 @@ class CategoryAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ("name",)}
 
 
-class FieldTemplateFormSet(BaseInlineFormSet):
-
-    def clean(self):
-        super(FieldTemplateFormSet, self).clean()
-
-        file_count = 0
-        dz_count = 0
-
-        #  Check through all the FieldSSet forms
-        for form in self.forms:
-            #  If the form doesn't have cleane_data continue
-            if not hasattr(form, 'cleaned_data'):
-                continue
-            #  If it's the "empty" FieldSet
-
-            #  clean the data
-            data = form.cleaned_data
-
-
-            type_list = [
-                field_types.DROPZONE,
-                field_types.FILE
-            ]
-
-            templates = FieldTemplate.objects.filter(
-                form_template=form.instance.form_template,
-                ).exclude(
-                pk=form.instance.pk
-            )
-
-            if form.instance.field_type == field_types.DROPZONE:
-                dz_count += 1
-
-            if form.instance.field_type == field_types.FILE:
-                file_count += 1
-
-            for t in templates:
-                print t.field_type
-                if t.field_type == field_types.FILE and data.get('field_type') == field_types.DROPZONE:
-                    raise ValidationError(
-                        "You can't add a file field since the form"\
-                            "has a dropzone"
-                    )
-
-                if t.field_type == field_types.DROPZONE and data.get('field_type') in type_list:
-                    raise ValidationError(
-                        "You can't add a dropzone since the form "\
-                            "has a dropzone or file field"
-                    )
-
-        if (dz_count and file_count) or dz_count > 1:
-            raise ValidationError(
-                "You can't add multiple dropzones or a dropzone with file fields."
-            )
-
-
-
 class FieldTemplateInline(admin.StackedInline):
     model = FieldTemplate
     form = FieldTemplateInlineForm
-    formset = FieldTemplateFormSet
     show_change_link = True
     extra = 0
+
     fieldsets = (
-        ("Options",
-         {  'classes': ("collapse",),
-            'fields': ('name', 'label',('field_type','position','css_class'),'field_set',)
+        (
+            "Options",
+            {
+                'classes': ("collapse",),
+                'fields': ('name', 'label',
+                           ('field_type','position','css_class'),'field_set',)
             }
         ),
     )
-
 
     def get_formset(self, request, obj, **kwargs):
 
@@ -110,7 +55,7 @@ class FieldTemplateInline(admin.StackedInline):
         return super(
             FieldTemplateInline, self).get_formset(request, obj, **kwargs)
 
-    #  order the fields by field set membership and then position
+
     def get_queryset(self, request):
             return super(
                 FieldTemplateInline, self
@@ -180,7 +125,7 @@ class FieldTemplateAdmin(admin.ModelAdmin):
         ]
 
         #  if this is for an existing FieldTemplate
-        print kwargs
+
         if obj:
             #  define the fields common to all FieldTemplates
             #  TODO:  Need to make this into a constant
@@ -223,7 +168,7 @@ class FieldSetFormSet(BaseInlineFormSet):
 
         #  Check through all the FieldSSet forms
         for form in self.forms:
-            #  If the form doesn't have cleane_data continue
+            #  If the form doesn't have cleaned_data continue
             if not hasattr(form, 'cleaned_data'):
                 continue
             #  If it's the "empty" FieldSet
@@ -281,11 +226,7 @@ class FieldSetInline(admin.StackedInline):
 
     fieldsets = (
         (None, {
-            'fields': (('name', 'label', 'position'))
-        }),
-        ('Advanced options', {
-            'classes': ('collapse',),
-            'fields': ('legend',),
+            'fields': (('name', 'label'), ('position', 'accordion'))
         }),
     )
     def get_queryset(self, request):
@@ -305,6 +246,7 @@ class FormTemplateAdmin(admin.ModelAdmin):
                     'category',
                     'notification_list',
                     'login_required',
+                    'dropzone',
                 )
         }),
         ('Advanced options', {

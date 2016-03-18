@@ -2,6 +2,7 @@ import json
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit
 from crispy_forms.layout import HTML, Div
+from crispy_forms.bootstrap import Accordion, AccordionGroup, Tab
 from django import forms
 from django.conf import settings
 from django.utils.html import format_html
@@ -29,7 +30,7 @@ class Form(forms.Form):
         self.exclusions = [
             "html", "file"
         ]
-        self.template = "fileinput_form.html"
+
         self.confirmation_keys = []
 
         self.get_absolute_url = obj.get_absolute_url
@@ -38,10 +39,16 @@ class Form(forms.Form):
         self.helper.form_id = "fb-form"
         self.helper.form_method = 'post'
         self.helper.form_action = obj.get_absolute_url()
-        self.helper.form_class = "form-style"
+
         self.helper.background_color = obj.background_color
         self.helper.text_color = obj.text_color
 
+        if obj.dropzone:
+            self.template = "dropzone_form.html"
+            self.helper.form_class = "form-style dropzone"
+        else:
+            self.template = "fileinput_form.html"
+            self.helper.form_class = "form-style"
 
         field_templates = obj.field_templates.all().order_by(
             'field_set', 'position')
@@ -58,7 +65,7 @@ class Form(forms.Form):
             'enctype': 'multipart/form-data',
         }
 
-        recaptcha = '<hr/><div class="g-recaptcha" data-sitekey="%s">'\
+        recaptcha = '<div class="g-recaptcha" data-sitekey="%s">'\
             '</div>' % settings.RECAPTCHA_SITEKEY
 
         layout.append(HTML("{{recaptcha_error|safe}}"))
@@ -115,13 +122,11 @@ class Form(forms.Form):
         empty_choice = "No choices were added to this field!"
 
         other_tags = [
-
+            field_types.CHECKBOX,
             field_types.FILE,
             field_types.RADIO,
             field_types.SELECT,
             field_types.TEXT_AREA,
-            field_types.DROPZONE
-
         ]
 
         if f.autocomplete:
@@ -179,6 +184,23 @@ class Form(forms.Form):
                 label=f.label,
                 help_text=f.help_text
             )
+        elif f.field_type == field_types.CHECKBOX:
+
+            attrs.update({
+                'id': f.name.lower(),
+                'class': 'form-style',
+                'name': f.name.lower(),
+            })
+
+            return forms.BooleanField(
+                widget=forms.CheckboxInput(
+                    attrs=attrs
+                ),
+                required=False,
+                label=f.label,
+                help_text=f.help_text
+            )
+
         elif f.field_type == field_types.TEXT_AREA:
 
             attrs.update({
@@ -226,23 +248,6 @@ class Form(forms.Form):
 
             return _field
 
-        elif f.field_type == field_types.DROPZONE:
-
-            self.template = "dropzone_form.html"
-            self.helper.form_class += " dropzone"
-
-            return forms.CharField(
-                widget=forms.TextInput(
-                    attrs={
-                        "type": "hidden",
-                        "name": f.name,
-                        "id": "add-dropzone",
-                        "required": f.required,
-                        "data-limit": f.maxvalue
-                    }
-                ),
-                required=False,
-            )
 
 
     def create_html(self, template):
@@ -272,11 +277,6 @@ class Form(forms.Form):
 
             return file_label + file_html
 
-        elif template.field_type == field_types.DROPZONE:
-
-            return DROPZONE.format(
-                name=template.name
-            )
 
 
     def create_fieldsets(self, obj):
@@ -289,7 +289,7 @@ class Form(forms.Form):
 
             values = []
 
-            values =[str(fset.legend),]
+            values =[str(fset.label),]
 
             for t in _templates:
                 if t.field_type in self.exclusions:
@@ -304,13 +304,15 @@ class Form(forms.Form):
                             css_class=t.css_class
                         )
                     )
-            if values:
 
-                if fset.label:
-                    self.helper.layout.append(
-                        HTML("<h2>%s</h2>" % fset.label)
+            if fset.accordion:
+                self.helper.layout.append(
+                    Accordion(
+                        AccordionGroup(*values),
                     )
-
-
+                )
+            else:
                 self.helper.layout.append(Fieldset(*values))
+
+            self.helper.layout.append(HTML("<hr/>"))
 

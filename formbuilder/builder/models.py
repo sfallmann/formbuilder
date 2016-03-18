@@ -6,6 +6,7 @@ from django.core.urlresolvers import reverse
 from django.core import serializers
 from django.contrib.contenttypes.models import ContentType
 from django.http import JsonResponse
+from django.conf import settings
 from colorful.fields import RGBColorField
 from helper.validators import is_lower, min_20, max_files
 from helper.validators import is_alpha_num, is_alpha, is_alpha_num_words
@@ -86,6 +87,10 @@ class FormTemplate(models.Model):
             " a notification when the form has been submitted"
     )
 
+    dropzone = models.BooleanField(
+        default=False,
+        help_text="A dropzone is an area on the form where files can be dropped for upload"
+    )
     background_color = RGBColorField(default="#FFFFFF")
     text_color = RGBColorField(default="#000000")
 
@@ -140,14 +145,11 @@ class FieldSet(models.Model):
     name = models.CharField(
         max_length=30, validators=[is_alpha_num_nospace, is_lower])
     label = models.CharField(
-        max_length=250, blank=True,
+        max_length=100, blank=True,
         help_text="Text that will display in the form"
     )
     position = models.PositiveIntegerField(default=None, null=True, blank=True)
-    legend = models.CharField(
-        max_length=500, blank=True,
-        help_text="Defines a caption for the fieldset"
-    )
+    accordion = models.BooleanField(default=False)
 
     class Meta:
         unique_together = (("name", "form_template"),)

@@ -20,7 +20,7 @@ DROPZONE = "dropzone"
 def as_list():
 
     return [
-        #CHECKBOX,
+        CHECKBOX,
         DATE,
         DATE_TIME,
         DATE_TIME_LOCAL,
@@ -65,12 +65,14 @@ CHOICE_ATTRS = [
 FILE_ATTRS = [
     "accept",
     "disabled",
+    "help_text",
     "required",
     "maxfiles"
 ]
 
 TEXT_AREA_ATTRS = [
     "autofocus",
+    "help_text",
     "cols",
     "rows",
     "disabled",
@@ -85,15 +87,12 @@ HTML_ATTRS = [
     "html"
 ]
 
-DROPZONE_ATTRS = {
-    #"accept",
-    #"disabled",
-    "required",
-    "maxfiles"
-}
+CHECKBOX_ATTRS = [
+    "help_text",
+]
 
 ATTRS = {
-
+    CHECKBOX: CHECKBOX_ATTRS,
     DATE: NUM_ATTRS,
     DATE_TIME: NUM_ATTRS,
     DATE_TIME_LOCAL: NUM_ATTRS,

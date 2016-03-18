@@ -15,10 +15,67 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <script src='https://www.google.com/recaptcha/api.js'></script>
+    <link href='https://fonts.googleapis.com/css?family=Noto+Sans:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
 
+
+<style>
+
+    label {
+        font-size: 1.05em;
+    }
+
+    form * {
+        font-family: 'Noto Sans', sans-serif;
+    }
+
+    form {
+        min-width: 350px;
+        border: 2px;
+        border-radius: 5px;
+        border-style: solid;
+        padding: 10px;
+    }
+
+
+    .form-style, .form-style label {
+        background-color: {{ form.helper.background_color }};
+        color: {{ form.helper.text_color }};
+    }
+
+
+    hr {
+        color: {{ form.helper.text_color }};
+        background-color: {{ form.helper.background_color }};
+        height: 0px;
+        border: 1px {{ form.helper.text_color }} double;
+        border-radius: 50px;
+    }
+
+    .fieldset-label {
+        text-shadow: 1px 4px 8px {{ form.helper.text_color }};
+    }
+
+    .accordion-toggle {
+
+        font-style: italic;
+    }
+
+    .accordion-toggle.collapsed {
+
+        font-weight: bold;
+        font-style: normal;
+    }
+
+    .glyphicon.glyphicon-chevron-down, .glyphicon.glyphicon-chevron-up {
+
+        font-size: .75em;
+
+    }
+
+</style>
 
 {% block header_css_scripts %}
-    <link href='https://fonts.googleapis.com/css?family=Noto+Sans:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
+
 {% endblock %}
   <!--[if lt IE 9]>
   <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
