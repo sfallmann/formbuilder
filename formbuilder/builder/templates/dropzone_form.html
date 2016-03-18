@@ -1,7 +1,15 @@
 {% extends "base_form.html" %}
 {% block header_css_scripts %}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/4.3.0/min/dropzone.min.css">
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/dropzone/4.3.0/min/dropzone.min.js'></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/4.3.0/min/dropzone.min.css">
+<script src='https://cdnjs.cloudflare.com/ajax/libs/dropzone/4.3.0/min/dropzone.min.js'></script>
+<style>
+
+    #clickable:hover {
+        cursor: pointer;
+    }
+
+
+</style>
 {% endblock %}
 
 {% block container %}
@@ -24,39 +32,70 @@
             {{ footer }}
         </div>
     </div>
+
 {% endblock %}
 
 {% block scripts %}
 <script>
-        $(".buttonHolder").after("<hr/><div class='col-sm-12 dz-preview' id='dz-preview-div'></div>");
 
 
-        Dropzone.options.fbForm = {
-            autoProcessQueue: false,
-            previewsContainer: "#dz-preview-div",
-            addRemoveLinks: true,
-            init: function(){
 
-                var fileCount = 0;
-                var self = this;
-                var message = "Filenames can only contain alphanumeric characters, spaces, underscores, dashes, ";
-                message += " and a period before the file extension! The file has been removed.  Please rename the file.";
-                this.on("addedfile", function(file){
-                    fileCount++;
-                    if (!file.name.match(/^[_-\s\d\w\.]*$/)) {
-                        alert(message);
-                        self.removeFile(file);
-                    }
-                    fileCount++;
-                    console.log(file)
 
-                });
-                this.on("removedFile", function(file){
-                    fileCount--;
-                });
+    $(".buttonHolder").
+        after("<div id='clickable'></div>").
+            after("<hr/><div class='col-sm-12 dz-preview' id='dz-preview-div'></div>");
 
-            }
+
+
+
+
+
+
+
+    Dropzone.options.fbForm = {
+        init: function(){
+
+            var $submit = $("#submit-id-submit");
+
+
+            $(".dz-default.dz-message").detach().appendTo("#clickable");
+
+            var self = this;
+
+            var fileCount = 0;
+
+            var message = "Filenames can only contain alphanumeric characters, spaces, underscores, dashes, ";
+            message += " and a period before the file extension! The file has been removed.  Please rename the file.";
+
+            this.on("addedfile", function(file){
+                fileCount++;
+                if (!file.name.match(/^[_-\s\d\w\.]*$/)) {
+                    alert(message);
+                    self.removeFile(file);
+                }
+                fileCount++;
+                console.log(file)
+
+            });
+            this.on("removedFile", function(file){
+                fileCount--;
+            });
+
+            $submit.click(function(e){
+                //e.stopPropagation();
+               // e.preventDefault();
+            });
+
+
+
+        },
+        autoProcessQueue: false,
+        previewsContainer: "#dz-preview-div",
+        addRemoveLinks: true,
+        clickable: "#clickable",
+        dictDefaultMessage: '<img class="img-responsive" src="/static/img/dzimage.png">'
     }
+
 
 
 </script>

@@ -16,17 +16,16 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <script src='https://www.google.com/recaptcha/api.js'></script>
     <link href='https://fonts.googleapis.com/css?family=Noto+Sans:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
-
+    <link rel="stylesheet" href="/static/css/intl-tel-input/intlTelInput.css">
 
 <style>
+
+    html { visibility:hidden; }
 
     label {
         font-size: 1.05em;
     }
 
-    form * {
-        font-family: 'Noto Sans', sans-serif;
-    }
 
     form {
         min-width: 350px;
@@ -40,6 +39,7 @@
     .form-style, .form-style label {
         background-color: {{ form.helper.background_color }};
         color: {{ form.helper.text_color }};
+        font-family: 'Noto Sans', sans-serif;
     }
 
 
@@ -61,7 +61,6 @@
     }
 
     .accordion-toggle.collapsed {
-
         font-weight: bold;
         font-style: normal;
     }
@@ -71,6 +70,12 @@
         font-size: .75em;
 
     }
+
+    a.accordion-toggle:hover {
+        cursor: pointer;
+    }
+
+    .iti-flag {background-image: url("/static/img/flags.png");}
 
 </style>
 
@@ -104,14 +109,41 @@
     {% endblock %}
     </div>
     <br/>
-
+    <script src='/static/js/lib/countries/countries.js'></script>
+    <script src="/static/js/lib/intl-tel-input/intlTelInput.min.js"></script>
+    <script src="/static/js/lib/intl-tel-input/utils.js"></script>
     <script>
         $(window).load(function() {
             console.log("Form resetting!");
             $('form').get(0).reset(); //clear form data on page load
         });
-    </script>
 
+        $(".accordion-toggle").addClass("collapsed").attr("aria-expanded","false");
+        $(".panel-collapse.collapse.in").removeClass("in").attr("aria-expanded","false");
+
+        var $countrySelects = $(".country-select");
+
+        $countrySelects.each(function(index, el){
+
+            var id = $(el).attr("id");
+            populateCountries(id);
+
+        });
+
+        var $phoneSelects = $("input[type=tel]");
+
+        $phoneSelects.each(function(index, el){
+
+            var id = "#" + $(el).attr("id");
+
+            $(id).intlTelInput();
+        });
+
+        $(document).ready(function() {
+            document.getElementsByTagName("html")[0].style.visibility = "visible";
+        });
+
+    </script>
 {% block scripts %}
 
 {% endblock %}

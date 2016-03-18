@@ -112,8 +112,6 @@ def intialize_fieldset_values(sender, instance, **kwargs):
         #  Set the new instances position to fields.count + 1
         instance.position = fieldsets.count() + 1
 
-        if instance.name != settings.EMPTY_FIELDSET:
-            instance.label = instance.name.title()
 
     #  For an existing FieldSet instance
     else:

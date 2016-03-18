@@ -32,7 +32,7 @@ class FieldTemplateInline(admin.StackedInline):
         (
             "Options",
             {
-                'classes': ("collapse",),
+                #'classes': ("collapse",),
                 'fields': ('name', 'label',
                            ('field_type','position','css_class'),'field_set',)
             }
@@ -93,16 +93,16 @@ class FieldTemplateAdmin(admin.ModelAdmin):
     list_display = (
         'name',
         'label',
-        'field_type',
         'field_set',
+        'css_class',
         'position',
         'form_template',
         'form_template_link',
     )
 
-    list_editable =('label', 'field_set', 'position')
+    list_editable =('label', 'field_set', 'css_class', 'position')
     ordering = (
-        'field_set', 'form_template', 'position', 'field_type', 'name')
+        'field_set', 'form_template', 'position', 'name')
     list_filter = ('form_template', 'field_set',)
     save_on_top = True
     show_add_link = False

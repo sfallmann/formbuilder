@@ -12,6 +12,7 @@ PASSWORD = "password"
 RADIO = "radio"
 SELECT = "select"
 TEL = "tel"
+COUNTRY = "country"
 TEXT = "text"
 TEXT_AREA = "textarea"
 URL = "url"
@@ -33,6 +34,7 @@ def as_list():
         RADIO,
         SELECT,
         TEL,
+        COUNTRY,
         TEXT,
         TEXT_AREA,
         URL,
@@ -52,6 +54,13 @@ COMMON_ATTRS = [
     "required",
     #"value",
     ]
+
+COUNTRY_ATTRS = [
+    "help_text",
+    "autocomplete",
+    "placeholder",
+    "required",
+]
 
 NUM_ATTRS = COMMON_ATTRS + [
     "minvalue",
@@ -79,7 +88,7 @@ TEXT_AREA_ATTRS = [
     "maxlength",
     "placeholder",
     "readonly",
-    "required",
+    #"required",
     #"value",
 ]
 
@@ -104,6 +113,7 @@ ATTRS = {
     RADIO: CHOICE_ATTRS,
     SELECT: CHOICE_ATTRS,
     TEL: COMMON_ATTRS,
+    COUNTRY: COUNTRY_ATTRS,
     TEXT: COMMON_ATTRS,
     TEXT_AREA: TEXT_AREA_ATTRS,
     URL: COMMON_ATTRS,

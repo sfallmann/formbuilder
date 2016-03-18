@@ -49,42 +49,12 @@ def formtemplate_details(request, id):
 
 
     if request.method == "POST":
-        print "Posted data"
-        recaptcha_passed = recaptcha_check(request)
-
         # Pass the FormTemplate object into Form with the posted data
         f = Form(template_, request.POST, request.FILES)
 
-        #  Check if the data is valid
+        recaptcha_passed = recaptcha_check(request)
 
-        if f.is_valid() and recaptcha_passed:
-
-            #  Create the FormData object with the posted data
-            formdata = create_formdata(
-                template_, f.clean_data_only, request.user)
-
-            uploaded_file_list = []
-
-            for rf in request.FILES:
-
-                file_list = request.FILES.getlist(rf)
-
-                for file_ in file_list:
-                    uploaded_file_list.append(file_.name)
-
-                    if settings.DEBUG == True:
-                        handle_uploaded_file(file_, str(formdata.pk))
-
-                formdata.data.update({
-                        "files": uploaded_file_list
-                    })
-
-                formdata.save()
-
-            #  Redirect to view to display the save data
-            return redirect(formtemplate_results, formdata.id)
-
-        else:
+        if not recaptcha_passed:
 
             recaptcha_error = "<hr/><h4 class='alert alert-danger'>%s</h4>"\
                 % 'reCAPTCHA failed. Please try again.'
@@ -93,16 +63,145 @@ def formtemplate_details(request, id):
                 request, f.template, {
                     "form": f,
                     "header": mark_safe(template_.header),
-                    "recaptcha_error": recaptcha_error
+                    "footer": mark_safe(template_.footer),
+                    "recaptcha_error": recaptcha_error,
                 }
             )
+
+        else:
+
+            #  Check if the data is valid
+
+            if f.is_valid():
+
+                #  Create the FormData object with the posted data
+                formdata = create_formdata(
+                    template_, f.clean_data_only, request.user)
+
+                uploaded_file_list = []
+
+                for rf in request.FILES:
+
+                    file_list = request.FILES.getlist(rf)
+
+                    for file_ in file_list:
+                        uploaded_file_list.append(file_.name)
+
+                        if settings.DEBUG == True:
+                            handle_uploaded_file(file_, str(formdata.pk))
+
+                    formdata.data.update({
+                            "files": uploaded_file_list
+                        })
+
+                    formdata.save()
+
+                #  Redirect to view to display the save data
+                return redirect(formtemplate_results, formdata.id)
+
+            else:
+
+                return render(
+                    request, f.template, {
+                        "form": f,
+                        "header": mark_safe(template_.header),
+                        "footer": mark_safe(template_.footer),
+                    }
+                )
 
     return render(
         request, f.template, {
             "form": f,
-            "header": mark_safe(template_.header)
+            "header": mark_safe(template_.header),
+            "footer": mark_safe(template_.footer),
         }
     )
+
+
+def formtemplate_details_ajax(request, id):
+    '''
+    formtemplate_details(request, id):
+
+        View for displaying and capturing the form
+        created from a FormTemplate.
+    '''
+
+    #  Get the FormTemplate object by id
+    template_ = FormTemplate.objects.get(id=id)
+
+    #  Pass the FormTemplate object into Form
+    f = Form(obj=template_)
+
+
+    if request.method == "POST":
+        # Pass the FormTemplate object into Form with the posted data
+        f = Form(template_, request.POST, request.FILES)
+
+        recaptcha_passed = recaptcha_check(request)
+
+        if not recaptcha_passed:
+
+            recaptcha_error = "<hr/><h4 class='alert alert-danger'>%s</h4>"\
+                % 'reCAPTCHA failed. Please try again.'
+
+            return render(
+                request, f.template, {
+                    "form": f,
+                    "header": mark_safe(template_.header),
+                    "footer": mark_safe(template_.footer),
+                    "recaptcha_error": recaptcha_error,
+                }
+            )
+
+        else:
+
+            #  Check if the data is valid
+
+            if f.is_valid():
+
+                #  Create the FormData object with the posted data
+                formdata = create_formdata(
+                    template_, f.clean_data_only, request.user)
+
+                uploaded_file_list = []
+
+                for rf in request.FILES:
+
+                    file_list = request.FILES.getlist(rf)
+
+                    for file_ in file_list:
+                        uploaded_file_list.append(file_.name)
+
+                        if settings.DEBUG == True:
+                            handle_uploaded_file(file_, str(formdata.pk))
+
+                    formdata.data.update({
+                            "files": uploaded_file_list
+                        })
+
+                    formdata.save()
+
+                #  Redirect to view to display the save data
+                return redirect(formtemplate_results, formdata.id)
+
+            else:
+
+                return render(
+                    request, f.template, {
+                        "form": f,
+                        "header": mark_safe(template_.header),
+                        "footer": mark_safe(template_.footer),
+                    }
+                )
+
+    return render(
+        request, f.template, {
+            "form": f,
+            "header": mark_safe(template_.header),
+            "footer": mark_safe(template_.footer),
+        }
+    )
+
 
 
 def handle_uploaded_file(f, folder):

@@ -38,17 +38,18 @@ class Form(forms.Form):
 
         self.helper.form_id = "fb-form"
         self.helper.form_method = 'post'
-        self.helper.form_action = obj.get_absolute_url()
 
         self.helper.background_color = obj.background_color
         self.helper.text_color = obj.text_color
-
+        self.helper.form_action = obj.get_absolute_url()
         if obj.dropzone:
             self.template = "dropzone_form.html"
             self.helper.form_class = "form-style dropzone"
+
         else:
             self.template = "fileinput_form.html"
             self.helper.form_class = "form-style"
+
 
         field_templates = obj.field_templates.all().order_by(
             'field_set', 'position')
@@ -122,6 +123,8 @@ class Form(forms.Form):
         empty_choice = "No choices were added to this field!"
 
         other_tags = [
+            #field_types.PHONE,
+            field_types.COUNTRY,
             field_types.CHECKBOX,
             field_types.FILE,
             field_types.RADIO,
@@ -248,6 +251,24 @@ class Form(forms.Form):
 
             return _field
 
+        elif f.field_type == field_types.COUNTRY:
+
+            attrs.update({
+                'id': f.name.lower(),
+                'class': 'country-select',
+                'name': f.name.lower(),
+            })
+
+            _field = forms.ChoiceField(
+                required=False,
+                label=f.label,
+                help_text=f.help_text
+            )
+
+            _field.widget.attrs.update(attrs)
+
+            return _field
+
 
 
     def create_html(self, template):
@@ -288,8 +309,10 @@ class Form(forms.Form):
             #values = ["<p style='font-size=2em;'>%s</p>" % str(fset.label)]
 
             values = []
-
-            values =[str(fset.label),]
+            if fset.accordion:
+                values =[str(fset.label + " (click)"),]
+            else:
+                values =[str(fset.label),]
 
             for t in _templates:
                 if t.field_type in self.exclusions:
@@ -314,5 +337,5 @@ class Form(forms.Form):
             else:
                 self.helper.layout.append(Fieldset(*values))
 
-            self.helper.layout.append(HTML("<hr/>"))
+            #self.helper.layout.append(HTML("<hr/>"))
 

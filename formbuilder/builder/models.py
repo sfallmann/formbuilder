@@ -110,9 +110,15 @@ class FormTemplate(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        return reverse(
-            'formtemplate_details',
-            args=[str(self.id)])
+
+        if self.dropzone:
+            return reverse(
+                'formtemplate_details_ajax',
+                args=[str(self.id)])
+        else:
+            return reverse(
+                'formtemplate_details',
+                args=[str(self.id)])
 
     def get_admin_change_url(self):
         content_type = ContentType.objects.get_for_model(self.__class__)
@@ -146,7 +152,8 @@ class FieldSet(models.Model):
         max_length=30, validators=[is_alpha_num_nospace, is_lower])
     label = models.CharField(
         max_length=100, blank=True,
-        help_text="Text that will display in the form"
+        help_text="defines a caption for the fieldset element; "\
+            "represents the legend html tag"
     )
     position = models.PositiveIntegerField(default=None, null=True, blank=True)
     accordion = models.BooleanField(default=False)
@@ -211,7 +218,11 @@ class FieldTemplate(models.Model):
 
 
     label = models.CharField(max_length=50, blank=True)
-
+    use_as_prefix = models.BooleanField(
+        default=False,
+        help_text="The value of this field will be added as a prefix to"\
+            "file and folder names."
+    )
     send_confirmation = models.BooleanField(default=True)
     help_text = models.CharField(max_length=500, blank=True)
     # Common tag attributes
@@ -220,7 +231,7 @@ class FieldTemplate(models.Model):
         null=True, blank=True, default=100, validators=[min_20, ])
     placeholder = models.TextField(blank=True)
     readonly = models.BooleanField(default=False)
-    required = models.BooleanField(default=True)
+    required = models.BooleanField(default=False)
 
     # HTML Input tag attributes
     autocomplete = models.BooleanField(default=True)
@@ -233,7 +244,7 @@ class FieldTemplate(models.Model):
 
     # HTML Textarea tag attributes
     cols = models.PositiveIntegerField(null=True, blank=True)
-    rows = models.PositiveIntegerField(null=True, blank=True)
+    rows = models.PositiveIntegerField(null=True, blank=True, default=6)
 
     html = models.TextField(blank=True)
 
