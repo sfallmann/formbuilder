@@ -1,5 +1,5 @@
 <!doctype html>
-
+{% load static %}
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -14,9 +14,9 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-    <script src='https://www.google.com/recaptcha/api.js'></script>
+    <script src='https://www.google.com/recaptcha/api.js?onload=callback'></script>
     <link href='https://fonts.googleapis.com/css?family=Noto+Sans:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" href="/static/css/intl-tel-input/intlTelInput.css">
+    <link rel="stylesheet" href="{% static 'intl-tel-input/build/css/intlTelInput.css' %}">
 
 <style>
 
@@ -75,7 +75,7 @@
         cursor: pointer;
     }
 
-    .iti-flag {background-image: url("/static/img/flags.png");}
+    .iti-flag {background-image: url("{% static 'intl-tel-input/build/img/flags.png' %}");}
 
 </style>
 
@@ -109,26 +109,27 @@
     {% endblock %}
     </div>
     <br/>
-    <script src='/static/js/lib/countries/countries.js'></script>
-    <script src="/static/js/lib/intl-tel-input/intlTelInput.min.js"></script>
-    <script src="/static/js/lib/intl-tel-input/utils.js"></script>
+    <script src="{% static 'intl-tel-input/build/js/intlTelInput.min.js' %}"></script>
+    <script src="{% static 'intl-tel-input/build/js/utils.js' %}"></script>
     <script>
         $(window).load(function() {
             console.log("Form resetting!");
             $('form').get(0).reset(); //clear form data on page load
         });
 
+       var callback = function() {
+          grecaptcha.render('id-g-recaptcha', {
+             'sitekey': "6LcyMBoTAAAAAOLSi90hQ33PFhQg6ejClya9Vv88",
+             'expired-callback': expCallback
+           });
+       };
+       var expCallback = function() {
+          grecaptcha.reset();
+       };
+
+
         $(".accordion-toggle").addClass("collapsed").attr("aria-expanded","false");
         $(".panel-collapse.collapse.in").removeClass("in").attr("aria-expanded","false");
-
-        var $countrySelects = $(".country-select");
-
-        $countrySelects.each(function(index, el){
-
-            var id = $(el).attr("id");
-            populateCountries(id);
-
-        });
 
         var $phoneSelects = $("input[type=tel]");
 

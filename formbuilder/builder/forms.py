@@ -33,7 +33,7 @@ class Form(forms.Form):
 
         self.confirmation_keys = []
 
-        self.get_absolute_url = obj.get_absolute_url
+
         self.helper = FormHelper()
 
         self.helper.form_id = "fb-form"
@@ -41,7 +41,9 @@ class Form(forms.Form):
 
         self.helper.background_color = obj.background_color
         self.helper.text_color = obj.text_color
+        self.get_absolute_url = obj.get_absolute_url
         self.helper.form_action = obj.get_absolute_url()
+
         if obj.dropzone:
             self.template = "dropzone_form.html"
             self.helper.form_class = "form-style dropzone"
@@ -66,7 +68,7 @@ class Form(forms.Form):
             'enctype': 'multipart/form-data',
         }
 
-        recaptcha = '<div class="g-recaptcha" data-sitekey="%s">'\
+        recaptcha = '<div id="id-g-recaptcha" class="g-recaptcha" data-sitekey="%s">'\
             '</div>' % settings.RECAPTCHA_SITEKEY
 
         layout.append(HTML("{{recaptcha_error|safe}}"))
@@ -260,8 +262,10 @@ class Form(forms.Form):
             })
 
             _field = forms.ChoiceField(
+                choices=settings.COUNTRIES_TUPLES,
                 required=False,
                 label=f.label,
+                initial="USA",
                 help_text=f.help_text
             )
 

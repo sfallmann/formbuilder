@@ -118,6 +118,7 @@ def formtemplate_details(request, id):
     )
 
 
+
 def formtemplate_details_ajax(request, id):
     '''
     formtemplate_details(request, id):
@@ -132,75 +133,96 @@ def formtemplate_details_ajax(request, id):
     #  Pass the FormTemplate object into Form
     f = Form(obj=template_)
 
+    if request.method == "GET":
+
+        return render(
+            request, f.template, {
+                "form": f,
+                "header": mark_safe(template_.header),
+                "footer": mark_safe(template_.footer),
+            }
+        )
 
     if request.method == "POST":
-        # Pass the FormTemplate object into Form with the posted data
-        f = Form(template_, request.POST, request.FILES)
 
-        recaptcha_passed = recaptcha_check(request)
+        if request.is_ajax():
 
-        if not recaptcha_passed:
-
-            recaptcha_error = "<hr/><h4 class='alert alert-danger'>%s</h4>"\
-                % 'reCAPTCHA failed. Please try again.'
-
-            return render(
-                request, f.template, {
-                    "form": f,
-                    "header": mark_safe(template_.header),
-                    "footer": mark_safe(template_.footer),
-                    "recaptcha_error": recaptcha_error,
-                }
-            )
-
-        else:
-
-            #  Check if the data is valid
+            # Pass the FormTemplate object into Form with the posted data
+            f = Form(template_, request.POST, request.FILES)
 
             if f.is_valid():
 
-                #  Create the FormData object with the posted data
-                formdata = create_formdata(
-                    template_, f.clean_data_only, request.user)
 
-                uploaded_file_list = []
+                print request.FILES
 
-                for rf in request.FILES:
+                print f.clean_data_only
 
-                    file_list = request.FILES.getlist(rf)
-
-                    for file_ in file_list:
-                        uploaded_file_list.append(file_.name)
-
-                        if settings.DEBUG == True:
-                            handle_uploaded_file(file_, str(formdata.pk))
-
-                    formdata.data.update({
-                            "files": uploaded_file_list
-                        })
-
-                    formdata.save()
-
-                #  Redirect to view to display the save data
-                return redirect(formtemplate_results, formdata.id)
+                return ajax_response(200, "success")
 
             else:
 
-                return render(
-                    request, f.template, {
-                        "form": f,
-                        "header": mark_safe(template_.header),
-                        "footer": mark_safe(template_.footer),
-                    }
-                )
+                return ajax_response(400, "fail")
 
-    return render(
-        request, f.template, {
-            "form": f,
-            "header": mark_safe(template_.header),
-            "footer": mark_safe(template_.footer),
-        }
-    )
+            '''
+                if not f.is_valid():
+
+
+                    #  Create the FormData object with the posted data
+                    formdata = create_formdata(
+                        template_, f.clean_data_only, request.user)
+
+                    uploaded_file_list = []
+
+                    for rf in request.FILES:
+
+                        file_list = request.FILES.getlist(rf)
+
+                        for file_ in file_list:
+                            uploaded_file_list.append(file_.name)
+
+                            if settings.DEBUG == True:
+                                handle_uploaded_file(file_, str(formdata.pk))
+
+                        formdata.data.update({
+                                "files": uploaded_file_list
+                            })
+
+                        formdata.save()
+
+                    #  Redirect to view to display the save data
+                    return redirect(formtemplate_results, formdata.id)
+
+                else:
+
+                    return render(
+                        request, f.template, {
+                            "form": f,
+                            "header": mark_safe(template_.header),
+                            "footer": mark_safe(template_.footer),
+                        }
+                    )
+            '''
+        else:
+
+            print request
+
+            code = 400
+            message = "Not ajax!"
+
+            ajax_response(code, message)
+
+
+
+def ajax_response(code, message):
+
+    context = {
+        'status': code, "message": message
+    }
+
+    response = HttpResponse(json.dumps(context), content_type="application/json")
+
+    response.status_code = code
+    return response
 
 
 
@@ -225,6 +247,26 @@ def make_folder(folder):
         except OSError:
             error = "Error on creating file folder"
 
+
+def recaptcha_check_ajax(request):
+
+    secret = settings.RECAPTCHA_SECRET
+    ip = get_client_ip(request)
+
+    print request.POST
+
+    response = request.POST["g-recaptcha-response"]
+    url = 'https://www.google.com/recaptcha/api/siteverify'
+
+    data = {
+        "secret": secret,
+        "remoteip": ip,
+        "response": response
+    }
+
+    r = requests.post(url, data=data)
+
+    return HttpResponse(r)
 
 def recaptcha_check(request):
 

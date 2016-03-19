@@ -28,7 +28,11 @@ RECAPTCHA_SECRET = json.loads(
 RECAPTCHA_SITEKEY = json.loads(
     open(SECRETS, 'r').read())['RECAPTCHA_SITEKEY']
 
+COUNTRIES_JSONFILE = os.path.join(BASE_DIR, 'countries.json')
+COUNTRIES_LIST = json.loads(
+    open(COUNTRIES_JSONFILE, 'r').read())['COUNTRIES']
 
+COUNTRIES_TUPLES = [(c,c) for c in COUNTRIES_LIST]
 
 # Application definition
 
@@ -48,6 +52,7 @@ INSTALLED_APPS = [
     'ckeditor',
     'ckeditor_uploader',
     'social.apps.django_app.default',
+    'djangobower',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -166,8 +171,19 @@ USE_L10N = True
 
 USE_TZ = True
 
+
+BOWER_COMPONENTS_ROOT = BASE_DIR +"/components/"
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'djangobower.finders.BowerFinder',
+]
+
+
+
 
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR + STATIC_URL
