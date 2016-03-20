@@ -60,7 +60,7 @@ def formtemplate_details(request, id):
                 % 'reCAPTCHA failed. Please try again.'
 
             return render(
-                request, f.template, {
+                request, f.html_template, {
                     "form": f,
                     "header": mark_safe(template_.header),
                     "footer": mark_safe(template_.footer),
@@ -110,7 +110,7 @@ def formtemplate_details(request, id):
                 )
 
     return render(
-        request, f.template, {
+        request, f.html_template, {
             "form": f,
             "header": mark_safe(template_.header),
             "footer": mark_safe(template_.footer),
@@ -128,18 +128,18 @@ def formtemplate_details_ajax(request, id):
     '''
 
     #  Get the FormTemplate object by id
-    template_ = FormTemplate.objects.get(id=id)
+    form_template = FormTemplate.objects.get(id=id)
 
     #  Pass the FormTemplate object into Form
-    f = Form(obj=template_)
+    form = Form(obj=form_template)
 
     if request.method == "GET":
 
         return render(
-            request, f.template, {
-                "form": f,
-                "header": mark_safe(template_.header),
-                "footer": mark_safe(template_.footer),
+            request, form.html_template, {
+                "form": form,
+                "header": mark_safe(form_template.header),
+                "footer": mark_safe(form_template.footer),
             }
         )
 
@@ -148,28 +148,52 @@ def formtemplate_details_ajax(request, id):
         if request.is_ajax():
 
             # Pass the FormTemplate object into Form with the posted data
-            f = Form(template_, request.POST, request.FILES)
+            form = Form(form_template, request.POST, request.FILES)
 
-            if f.is_valid():
+            if form.is_valid():
 
+                uploaded_file_list = []
 
-                print request.FILES
+                #  Create the FormData object with the posted data
+                formdata = create_formdata(
+                   form_template, form.clean_data_only, request.user)
 
-                print f.clean_data_only
+                for file_list in request.FILES:
 
-                return ajax_response(200, "success")
+                    files = request.FILES.getlist(file_list)
+
+                    for f in files:
+
+                        uploaded_file_list.append(f.name)
+
+                        if settings.DEBUG == False:
+                            transfer_success = handle_uploaded_file(f, str(formdata.pk))
+
+                    formdata.data.update({
+                            "files": uploaded_file_list
+                        })
+
+                    formdata.save()
+
+                data = {
+                    "message": "Submission was successful!",
+                    "redirect": formdata.get_absolute_url()
+                }
+
+                return ajax_response(200, data)
 
             else:
 
-                return ajax_response(400, "fail")
+                data = {"message": "Form invalid. Refresh the page and try again."}
+
+                return ajax_response(400, data)
 
             '''
                 if not f.is_valid():
 
 
-                    #  Create the FormData object with the posted data
-                    formdata = create_formdata(
-                        template_, f.clean_data_only, request.user)
+
+
 
                     uploaded_file_list = []
 
@@ -204,20 +228,17 @@ def formtemplate_details_ajax(request, id):
             '''
         else:
 
-            print request
-
-            code = 400
-            message = "Not ajax!"
-
-            ajax_response(code, message)
+            HttpRepsone("Not an ajax request")
 
 
 
-def ajax_response(code, message):
+def ajax_response(code, data):
 
     context = {
-        'status': code, "message": message
+        'status': code
     }
+
+    context.update(**data)
 
     response = HttpResponse(json.dumps(context), content_type="application/json")
 
@@ -230,13 +251,20 @@ def handle_uploaded_file(f, folder):
 
     path = os.path.join(UPLOAD_FOLDER, ("%s/" % folder))
 
-    make_folder(path)
+    new_folder = make_folder(path)
 
-    filepath = os.path.join(path, f._name)
+    if new_folder:
 
-    with open(filepath, 'wb+') as destination:
-        for chunk in f.chunks():
-            destination.write(chunk)
+        filepath = os.path.join(path, f._name)
+
+        try:
+            with open(filepath, 'wb+') as destination:
+                for chunk in f.chunks():
+                    destination.write(chunk)
+
+        except:
+            #TODO logging and specific exceptions
+            return False
 
 
 def make_folder(folder):
@@ -244,29 +272,34 @@ def make_folder(folder):
     if not os.path.exists(folder):
         try:
             os.makedirs(folder)
-        except OSError:
-            error = "Error on creating file folder"
 
+        except OSError:
+
+            #  TODO:  Add logging
+            #  "Error on creating file folder"
+            return False
+
+    return True
 
 def recaptcha_check_ajax(request):
 
     secret = settings.RECAPTCHA_SECRET
     ip = get_client_ip(request)
 
-    print request.POST
-
-    response = request.POST["g-recaptcha-response"]
+    recaptcha_response = request.POST["g-recaptcha-response"]
     url = 'https://www.google.com/recaptcha/api/siteverify'
 
     data = {
         "secret": secret,
         "remoteip": ip,
-        "response": response
+        "response": recaptcha_response
     }
 
     r = requests.post(url, data=data)
 
-    return HttpResponse(r)
+    response = HttpResponse(r, content_type="application/json")
+
+    return response
 
 def recaptcha_check(request):
 

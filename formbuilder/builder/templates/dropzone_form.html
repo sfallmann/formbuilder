@@ -4,39 +4,46 @@
 <script src='https://cdnjs.cloudflare.com/ajax/libs/dropzone/4.3.0/min/dropzone.min.js'></script>
 <style>
 
+
+
     #clickable:hover {
         cursor: pointer;
     }
 
+    .dz-filename {
+        font-weight: bold;
+        margin-top: 45px;
+    }
+
+    .dz-error-message {
+        margin-top: 20px;
+    }
+
+    .dz-remove {
+        margin-top: 5px;
+        font-weight: bold;
+    }
+
+    a.dz-remove.btn.btn-danger:hover {
+        text-decoration: none;
+    }
+
+    #dz-preview-div {
+        margin: 0px;
+        padding: 0px;
+    }
 
 </style>
 {% endblock %}
 
-{% block container %}
-    <div class="row">
-        <div class="col-md-12">
-            {{ header }}
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-12">
-            {% load crispy_forms_tags %}
-            {% crispy form form.helper %}
-        </div>
-    </div>
-    <div class="row">
-        <div id="error-div" class="col-md-12"></div>
-    </div>
-    <div class="row">
-        <div class="col-md-12">
-            {{ footer }}
-        </div>
-    </div>
-
-{% endblock %}
-
 {% block scripts %}
 <script>
+
+(function(){
+
+    $("body").bind("DOMSubtreeModified", function() {
+        $(this).find(".dz-remove").addClass('btn btn-danger');
+    });
 
     function getCookie(name)
     {
@@ -60,7 +67,7 @@
     //  Add the clickable and preview divs for the dropzone
     $(".buttonHolder").
         after("<div id='clickable'></div>").
-            after("<hr/><div class='col-sm-12 dz-preview' id='dz-preview-div'></div>");
+            after("<hr/><div class='dz-preview' id='dz-preview-div'></div>");
 
     Dropzone.options.fbForm = {
         init: function(){
@@ -90,7 +97,8 @@
             //  Stop the form from submitting when the button is clicked
             $submit.click(function(e){
 
-                $errorDiv.html("");
+                clearErrors();
+
                 e.stopPropagation();
                 e.preventDefault();
 
@@ -98,20 +106,35 @@
 
             });
 
-
             this.processForm = function(){
 
                 if (self.getQueuedFiles().length > 0) {
+
+                    $submit.attr("disabled", "true");
                     self.processQueue();
                 }
                 else {
+
+                    $submit.attr("disabled");
+
                     $.ajax({
 
                         url: $formAction,
                         method: "POST",
                         data: $form.serialize(),
-                        success: function(xhr){
-                            console.log(xhr);
+                        success: function(response){
+
+                            if (repsonse.status == 200){
+
+                                $submit.removeAttr("disabled");
+                                window.location = response.redirect;
+                            }
+                            else {
+
+                                $submit.removeAttr("disabled");
+                                // TODO - real error logging
+                                console.log("error");
+                            }
 
                         },
                         error: function(xhr){
@@ -136,20 +159,19 @@
                                 xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
                             }
                         },
-                        success: function(xhr){
+                        success: function(response){
 
-                            var obj = JSON.parse(xhr);
-
-                            if (obj.success){
+                            if (response.success){
                                 $form.trigger("recaptcha:success");
                             }
                             else {
 
-                                $form.trigger("recaptcha:fail", obj);
+                                $form.trigger("recaptcha:fail", response);
                             }
                         },
                         error: function(xhr){
-                            $errorDiv.html("There was a problem sending the recaptcha check to the server");
+                            var messsage = "There was a problem sending the recaptcha check to the server"
+                            displayError(message);
                         }
                     });
             };
@@ -162,15 +184,19 @@
                     console.log(event);
                     self.processForm();
                 },
-                "recaptcha:fail": function(event, obj){
+                "recaptcha:fail": function(event, response){
                     console.log("recaptcha:fail triggered");
-                    var errors = obj["error-codes"];
+
+                    var errors = response["error-codes"];
+
                     for (var i=0; i< errors.length; i++){
+
                         console.log(errors[i]);
-                        $errorDiv.html("<h4 class='alert alert-danger'>reCaptcha Error: {e}</h4>".replace("{e}",errors[i]));
+                        var message = "reCaptcha Error: " + errors[i];
+
+                        displayError(message);
                     }
 
-                    self.processForm();
                 }
             });
 
@@ -178,7 +204,7 @@
             this.on("addedfile", function(file){
                 fileCount++;
                 if (!file.name.match(/^[_-\s\d\w\.]*$/)) {
-                    alert(fileValidationMessage);
+                    displayError(fileValidationMessage);
                     self.removeFile(file);
                 }
                 fileCount++;
@@ -193,13 +219,33 @@
 
             this.on("error", function(file, response, xhrObject){
 
+                $submit.removeAttr("disabled");
                 console.log(file, response, xhrObject);
 
             });
 
             this.on("success", function(file, response, xhrObject){
 
+                console.log("Dropzone success..")
                 console.log(file, response);
+
+            });
+
+            this.on("successmultiple", function(file, response, xhrObject){
+
+
+
+                console.log("Dropzone successmultiple..")
+                console.log(file, response);
+
+                var complete = function(){
+
+                    //$submit.removeAttr("disabled");
+                    window.location = response.redirect;
+                }
+
+                setTimeout(complete, 1750);
+
 
             });
 
@@ -213,14 +259,12 @@
         uploadMultiple: true,
         parallelUploads: 10,
         maxFiles: 10,
-        dictResponseError: "There was an error processing your request"
+        maxFilesize: 50,
+        dictResponseError: "There was an error processing your request",
+        dictCancelUpload: ""
     }
 
-
-
-
-
-
+    })();
 </script>
 
 

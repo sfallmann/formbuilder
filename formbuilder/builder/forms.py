@@ -45,11 +45,11 @@ class Form(forms.Form):
         self.helper.form_action = obj.get_absolute_url()
 
         if obj.dropzone:
-            self.template = "dropzone_form.html"
+            self.html_template = "dropzone_form.html"
             self.helper.form_class = "form-style dropzone"
 
         else:
-            self.template = "fileinput_form.html"
+            self.html_template = "fileinput_form.html"
             self.helper.form_class = "form-style"
 
 

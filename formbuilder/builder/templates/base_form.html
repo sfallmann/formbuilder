@@ -20,7 +20,11 @@
 
 <style>
 
-    html { visibility:hidden; }
+
+    body {
+        visibility:hidden;
+        background-color: darkslategrey;
+    }
 
     label {
         font-size: 1.05em;
@@ -77,6 +81,11 @@
 
     .iti-flag {background-image: url("{% static 'intl-tel-input/build/img/flags.png' %}");}
 
+    .fb-error {
+        color: red;
+        font-weight: bolder;
+    }
+
 </style>
 
 {% block header_css_scripts %}
@@ -87,6 +96,14 @@
   <![endif]-->
 </head>
 <body >
+
+<script>
+    $(window).load(function() {
+        console.log("resetting form...");
+        $('form').get(0).reset(); //clear form data on page load
+    });
+</script>
+
     <br/>
     <div class="container">
     {% block container %}
@@ -102,6 +119,9 @@
             </div>
         </div>
         <div class="row">
+            <div id="error-div" class="col-md-12"></div>
+        </div>
+        <div class="row">
             <div class="col-md-12">
                 {{ footer }}
             </div>
@@ -112,20 +132,31 @@
     <script src="{% static 'intl-tel-input/build/js/intlTelInput.min.js' %}"></script>
     <script src="{% static 'intl-tel-input/build/js/utils.js' %}"></script>
     <script>
-        $(window).load(function() {
-            console.log("Form resetting!");
-            $('form').get(0).reset(); //clear form data on page load
-        });
 
-       var callback = function() {
-          grecaptcha.render('id-g-recaptcha', {
+        window.clearErrors = function(){
+            $("#error-div").empty();
+        }
+
+        window.displayError = function(message){
+
+            var html =  '<div class="alert alert-danger">' +
+                        '<a class="close" data-dismiss="alert">×</a>' +
+                        '<strong>' + message + '</strong>'
+                        '</div>';
+
+            console.log(message);
+            $("#error-div").append(html);
+        }
+
+        var callback = function() {
+            grecaptcha.render('id-g-recaptcha', {
              'sitekey': "6LcyMBoTAAAAAOLSi90hQ33PFhQg6ejClya9Vv88",
              'expired-callback': expCallback
-           });
-       };
-       var expCallback = function() {
-          grecaptcha.reset();
-       };
+            });
+        };
+        var expCallback = function() {
+            grecaptcha.reset();
+        };
 
 
         $(".accordion-toggle").addClass("collapsed").attr("aria-expanded","false");
@@ -140,8 +171,15 @@
             $(id).intlTelInput();
         });
 
+        // delay setting all elemnts to visible to allow the page to be fully loaded before displaying
         $(document).ready(function() {
-            document.getElementsByTagName("html")[0].style.visibility = "visible";
+
+            var showPage = function(){
+                document.getElementsByTagName("body")[0].style.visibility = "visible";
+            }
+
+            setTimeout(showPage, 250);
+
         });
 
     </script>
