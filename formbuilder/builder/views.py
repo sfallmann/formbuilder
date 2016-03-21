@@ -20,6 +20,7 @@ and displaying the captured\saved results
 '''
 
 
+
 def formtemplate_results(request, id):
     '''
     formtemplate_results(request, id):
@@ -29,9 +30,14 @@ def formtemplate_results(request, id):
 
     # Get the FormData object by id
     results = FormData.objects.get(id=id)
-
-    return HttpResponse(json.dumps(results.data))
-
+    form = Form(results.form_template,results.data["data"])
+    form.is_valid()
+    #return HttpResponse(json.dumps(results.data))
+    return render(
+        request, "results.html", {
+            "form": form,
+        }
+    )
 
 def formtemplate_details(request, id):
     '''
@@ -42,81 +48,50 @@ def formtemplate_details(request, id):
     '''
 
     #  Get the FormTemplate object by id
-    template_ = FormTemplate.objects.get(id=id)
+    form_template = FormTemplate.objects.get(id=id)
 
     #  Pass the FormTemplate object into Form
-    f = Form(obj=template_)
+    form = Form(obj=form_template)
 
 
     if request.method == "POST":
         # Pass the FormTemplate object into Form with the posted data
-        f = Form(template_, request.POST, request.FILES)
+        form = Form(form_template, request.POST, request.FILES)
 
             #  Check if the data is valid
 
-        if f.is_valid():
+        if form.is_valid():
 
             #  Create the FormData object with the posted data
 
-            uploaded_file_list = []
-            '''
-            data_dict = OrderedDict()
+            data_bundle = {
+                "request": request,
+                "form_data": form.clean_data_only,
+                "form_template": form_template
+            }
 
-            for fs in template_.fieldsets.all():
-
-                fs_dict = OrderedDict()
-                field_templates = FieldTemplate.objects.filter(field_set=fs).order_by("position")
-
-                if field_templates:
-                    for ft in field_templates:
-                        if ft.name in f.clean_data_only.keys():
-
-                            fs_dict[ft.name] = f.clean_data_only[ft.name]
-
-                if fs_dict:
-                    data_dict[fs.name] = fs_dict
-            '''
-
-            formdata = create_formdata(
-                template_,  json.dumps(clean_data_only), request.user)
-
-            for rf in request.FILES:
-
-                file_list = request.FILES.getlist(rf)
-
-                for file_ in file_list:
-                    uploaded_file_list.append(file_.name)
-
-                    if settings.DEBUG == True:
-                        handle_uploaded_file(file_, str(formdata.pk))
-
-                formdata.data.update({
-                        "files": uploaded_file_list
-                    })
-
-                formdata.save()
+            form_response = prepare_data_files(data_bundle)
 
             #  Redirect to view to display the save data
-            return redirect(formtemplate_results, formdata.id)
+            return redirect(formtemplate_results, form_response.id)
 
         else:
 
             return render(
-                request, f.template, {
-                    "form": f,
-                    "header": mark_safe(template_.header),
-                    "footer": mark_safe(template_.footer),
+                request, form.template, {
+                    "form": form,
+                    "header": mark_safe(form_template.header),
+                    "footer": mark_safe(form_template.footer),
                 }
             )
 
     return render(
-        request, f.html_template, {
-            "form": f,
-            "header": mark_safe(template_.header),
-            "footer": mark_safe(template_.footer),
+        request, form.html_template, {
+            "form": form,
+            "header": mark_safe(form_template.header),
+            "footer": mark_safe(form_template.footer),
         }
     )
-
 
 
 def formtemplate_details_ajax(request, id):
@@ -155,7 +130,7 @@ def formtemplate_details_ajax(request, id):
                 uploaded_file_list = []
 
                 #  Create the FormData object with the posted data
-                formdata = create_formdata(
+                formdata = format_formdata(
                    form_template, form.clean_data_only, request.user)
 
                 for file_list in request.FILES:
@@ -230,6 +205,73 @@ def formtemplate_details_ajax(request, id):
 
             HttpRepsone("Not an ajax request")
 
+
+def prepare_data_files(data_bundle):
+
+    request = data_bundle['request']
+    form_data = data_bundle['form_data']
+    form_template = data_bundle['form_template']
+
+    all_files = request.FILES
+    user = request.user
+
+    uploaded_filename_list = []
+
+    data = {
+        "category": 	form_template.category.name,
+        "name": 		form_template.name,
+        "data":			form_data,
+    }
+
+    if user.is_authenticated():
+        data.update({
+                "user": {
+                    "username": user.username,
+                    "first_name": user.first_name,
+                    "last_name": user.last_name,
+                    "email": user.email
+                }
+            })
+
+    form_response = FormData.objects.create(form_template=form_template, data=data)
+
+    for file_list in all_files:
+
+        files = request.FILES.getlist(file_list)
+
+        for f in files:
+            uploaded_filename_list.append(f.name)
+
+            if settings.DEBUG == True:
+                handle_uploaded_file(f, str(form_response.pk))
+
+        form_response.data.update({
+                "files": uploaded_filename_list
+            })
+
+    form_response.save()
+
+    return form_response
+
+def format_formdata(form, results, user):
+
+    data = {
+        "category": 	form.category.name,
+        "name": 		form.name,
+        "data":			results,
+    }
+
+    if user.is_authenticated():
+        data.update({
+                "user": {
+                    "username": user.username,
+                    "first_name": user.first_name,
+                    "last_name": user.last_name,
+                    "email": user.email
+                }
+            })
+
+    return FormData.objects.create(form_template=form, data=data)
 
 
 def ajax_response(code, data):
@@ -330,24 +372,3 @@ def get_client_ip(request):
     else:
         ip = request.META.get('REMOTE_ADDR')
     return ip
-
-
-def create_formdata(form, results, user):
-
-    data = {
-        "category": 	form.category.name,
-        "name": 		form.name,
-        "data":			results,
-    }
-
-    if user.is_authenticated():
-        data.update({
-                "user": {
-                    "username": user.username,
-                    "first_name": user.first_name,
-                    "last_name": user.last_name,
-                    "email": user.email
-                }
-            })
-
-    return FormData.objects.create(form_template=form, data=data)

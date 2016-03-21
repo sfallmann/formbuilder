@@ -16,7 +16,7 @@ COUNTRY = "country"
 TEXT = "text"
 TEXT_AREA = "textarea"
 URL = "url"
-DROPZONE = "dropzone"
+
 
 def as_list():
 
@@ -39,7 +39,6 @@ def as_list():
         TEXT_AREA,
         URL,
         FILE,
-        DROPZONE
     ]
 
 COMMON_ATTRS = [
@@ -54,6 +53,10 @@ COMMON_ATTRS = [
     "required",
     #"value",
     ]
+
+EMAIL_ATTRS = COMMON_ATTRS + [
+    "send_confirmation",
+]
 
 COUNTRY_ATTRS = [
     "help_text",
@@ -105,7 +108,7 @@ ATTRS = {
     DATE: NUM_ATTRS,
     DATE_TIME: NUM_ATTRS,
     DATE_TIME_LOCAL: NUM_ATTRS,
-    EMAIL: COMMON_ATTRS,
+    EMAIL: EMAIL_ATTRS,
     HIDDEN: COMMON_ATTRS,
     HTML: HTML_ATTRS,
     MONTH: NUM_ATTRS,
@@ -118,7 +121,6 @@ ATTRS = {
     TEXT_AREA: TEXT_AREA_ATTRS,
     URL: COMMON_ATTRS,
     FILE: FILE_ATTRS,
-    DROPZONE: FILE_ATTRS
 }
 
 

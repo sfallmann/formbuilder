@@ -55,7 +55,11 @@ class FieldTemplateInline(admin.StackedInline):
     form = FieldTemplateInlineForm
     show_change_link = True
     extra = 0
-
+    fieldsets = (
+        (None, {
+            'fields': (('name', 'label'), ('field_set','field_type','position','css_class','use_as_prefix')),
+        }),
+    )
 
     def get_formset(self, request, obj, **kwargs):
 
@@ -114,16 +118,15 @@ class FieldTemplateAdmin(admin.ModelAdmin):
     form = FieldTemplateForm
     list_display = (
         'name',
-        'label',
-        'field_type',
         'field_set',
         'css_class',
         'use_as_prefix',
         'position',
+        'required',
         'form_template_link',
     )
 
-    list_editable =('label', 'field_set', 'css_class', 'position')
+    list_editable =('css_class', 'position', 'required')
     ordering = (
         'field_set', 'form_template', 'position', 'name')
     list_filter = ('form_template', 'field_set',)
@@ -249,7 +252,7 @@ class FieldSetInline(admin.StackedInline):
 
     fieldsets = (
         (None, {
-            'fields': (('name', 'label', 'position'), 'accordion'),
+            'fields': (('name', 'label'), ('position', 'accordion')),
         }),
     )
     def get_queryset(self, request):

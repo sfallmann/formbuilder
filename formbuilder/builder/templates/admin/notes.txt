@@ -95,3 +95,23 @@
             /* Maybe display some more file information on your page */
         });
     })
+
+
+
+                '''
+            data_dict = OrderedDict()
+
+            for fs in template_.fieldsets.all():
+
+                fs_dict = OrderedDict()
+                field_templates = FieldTemplate.objects.filter(field_set=fs).order_by("position")
+
+                if field_templates:
+                    for ft in field_templates:
+                        if ft.name in f.clean_data_only.keys():
+
+                            fs_dict[ft.name] = f.clean_data_only[ft.name]
+
+                if fs_dict:
+                    data_dict[fs.name] = fs_dict
+            '''

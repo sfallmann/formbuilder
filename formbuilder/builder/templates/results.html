@@ -1,5 +1,5 @@
 <!doctype html>
-
+{% load static %}
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -15,5 +15,17 @@
 
 <body>
 
+    {% for f in form %}
+        {% if f.value %}
+            <p>{{ f.label | safe }}: {{ f.value }} </p>
+        {% endif %}
+    {% endfor %}
+    <p> send confirmation email to:
+    {% for email in form.confirmation_list %}
+        {{ email }},
+        {% if email == form.confirmation_list|last %}
+        {{ email }}
+        {% endif %}
+        {% endfor %}</p>
 </body>
 </html>

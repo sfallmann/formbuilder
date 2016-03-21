@@ -97,7 +97,7 @@ class Form(forms.Form):
         for key in cleaned_data.keys():
 
             if key in self.confirmation_keys:
-                self.confirmation_list.append(cleaned_data[key])
+                self.confirmation_list.append(str(cleaned_data[key]))
 
             is_file = False
 

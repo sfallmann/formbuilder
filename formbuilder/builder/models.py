@@ -224,7 +224,7 @@ class FieldTemplate(models.Model):
         help_text="The value of this field will be added as a prefix to"\
             "file and folder names."
     )
-    send_confirmation = models.BooleanField(default=True)
+    send_confirmation = models.BooleanField(default=False)
     help_text = models.CharField(max_length=500, blank=True)
     # Common tag attributes
     autofocus = models.BooleanField(default=False)
