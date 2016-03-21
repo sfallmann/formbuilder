@@ -1,7 +1,14 @@
 {% extends "admin/change_form.html" %}
 {% load i18n admin_urls %}
 {% block object-tools-items %}
-
+<style>
+    .errorlist li{
+        color: white;
+        background-color: red;
+        font-size: 1.15em;
+        font-weight: bold;
+    }
+</style>
     <li>
         <a href="{% url opts|admin_urlname:'history' original.pk|admin_urlquote %}" class="historylink">{% trans "History" %}</a>
     </li>

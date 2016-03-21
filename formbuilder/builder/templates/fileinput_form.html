@@ -1,10 +1,32 @@
 {% extends "base_form.html" %}
+{% load static %}
 {% block header_css_scripts %}
 
 
 {% endblock %}
 {% block scripts %}
+<script>
+    fb.$form.on({
+        "recaptcha:success": function(event){
+            console.log("recaptcha:success triggered");
+            console.log(event);
+            fb.$submit.unbind("click");
+            fb.$submit.trigger("click");
+        },
+        "recaptcha:fail": function(event, response){
+            console.log("recaptcha:fail triggered");
 
+            var errors = response["error-codes"];
 
+            for (var i=0; i< errors.length; i++){
 
+                console.log(errors[i]);
+                var message = "reCaptcha Error: " + errors[i];
+
+                fb.displayError(message);
+            }
+
+        }
+    });
+</script>
 {% endblock %}

@@ -1,12 +1,12 @@
 import os
 import json
 import requests
-import collections
+from collections import OrderedDict
 from django.core.files.storage import FileSystemStorage
 from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect
-from .models import FormTemplate, FormData
+from .models import FormTemplate, FormData, FieldTemplate
 from .forms import Form
 from django.conf import settings
 from django.utils.html import mark_safe
@@ -52,8 +52,8 @@ def formtemplate_details(request, id):
         # Pass the FormTemplate object into Form with the posted data
         f = Form(template_, request.POST, request.FILES)
 
-        recaptcha_passed = recaptcha_check(request)
-
+        #recaptcha_passed = recaptcha_check(request)
+        recaptcha_passed = True
         if not recaptcha_passed:
 
             recaptcha_error = "<hr/><h4 class='alert alert-danger'>%s</h4>"\
@@ -75,10 +75,32 @@ def formtemplate_details(request, id):
             if f.is_valid():
 
                 #  Create the FormData object with the posted data
-                formdata = create_formdata(
-                    template_, f.clean_data_only, request.user)
+
+
+
 
                 uploaded_file_list = []
+
+                data_dict = OrderedDict()
+
+                for fs in template_.fieldsets.all():
+
+                    fs_dict = OrderedDict()
+                    field_templates = FieldTemplate.objects.filter(field_set=fs).order_by("position")
+
+                    if field_templates:
+                        for ft in field_templates:
+                            if ft.name in f.clean_data_only.keys():
+
+                                fs_dict[ft.name] = f.clean_data_only[ft.name]
+
+                    if fs_dict:
+                        data_dict[fs.name] = fs_dict
+
+                print json.dumps(data_dict)
+                formdata = create_formdata(
+                    template_,  json.dumps(data_dict), request.user)
+                print f.cleaned_data
 
                 for rf in request.FILES:
 
@@ -152,6 +174,18 @@ def formtemplate_details_ajax(request, id):
 
             if form.is_valid():
 
+
+                for fs in form_template.fieldsets.all():
+
+                    print "------------------------"
+                    print fs.name
+
+                    for k, v in form.clean_data_only:
+
+                        if hasattr(fs, k):
+                            print k, v
+
+
                 uploaded_file_list = []
 
                 #  Create the FormData object with the posted data
@@ -173,7 +207,7 @@ def formtemplate_details_ajax(request, id):
                             "files": uploaded_file_list
                         })
 
-                    formdata.save()
+                formdata.save()
 
                 data = {
                     "message": "Submission was successful!",

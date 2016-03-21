@@ -147,6 +147,7 @@ class FieldSet(models.Model):
         FormTemplate,
         related_name="fieldsets",
         on_delete=models.CASCADE,
+        editable=False
     )
     name = models.CharField(
         max_length=30, validators=[is_alpha_num_nospace, is_lower])

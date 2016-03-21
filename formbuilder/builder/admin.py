@@ -22,24 +22,45 @@ class CategoryAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ("name",)}
 
 
+class FieldTemplateFormSet(BaseInlineFormSet):
+
+    def clean(self):
+        super(FieldTemplateFormSet, self).clean()
+
+        use_as_prefix_list  = []
+
+        for form in self.forms:
+
+            if not hasattr(form, 'cleaned_data'):
+                continue
+
+            data = form.cleaned_data
+            use_as_prefix = data.get('use_as_prefix')
+            name = str(data.get("name"))
+
+            if(use_as_prefix):
+
+                use_as_prefix_list.append(name)
+
+                if len(use_as_prefix_list) > 1:
+                    raise ValidationError(
+                        "Only one FieldTemplate can be 'used as prefix': "\
+                            "check FieldTemplates %s" % str(use_as_prefix_list)
+                    )
+
+
 class FieldTemplateInline(admin.StackedInline):
     model = FieldTemplate
+    formset = FieldTemplateFormSet
     form = FieldTemplateInlineForm
     show_change_link = True
     extra = 0
 
-    fieldsets = (
-        (
-            "Options",
-            {
-                #'classes': ("collapse",),
-                'fields': ('name', 'label',
-                           ('field_type','position','css_class'),'field_set',)
-            }
-        ),
-    )
 
     def get_formset(self, request, obj, **kwargs):
+
+        fs = super(
+            FieldTemplateInline, self).get_formset(request, obj, **kwargs)
 
         # only show the fields in the common to all field types
         self.fields = [
@@ -49,11 +70,12 @@ class FieldTemplateInline(admin.StackedInline):
             "field_set",
             "label",
             "css_class",
+            "use_as_prefix",
             "position",
         ]
 
-        return super(
-            FieldTemplateInline, self).get_formset(request, obj, **kwargs)
+
+        return fs
 
 
     def get_queryset(self, request):
@@ -93,10 +115,11 @@ class FieldTemplateAdmin(admin.ModelAdmin):
     list_display = (
         'name',
         'label',
+        'field_type',
         'field_set',
         'css_class',
+        'use_as_prefix',
         'position',
-        'form_template',
         'form_template_link',
     )
 
@@ -116,11 +139,11 @@ class FieldTemplateAdmin(admin.ModelAdmin):
         #  fields common to all field types
         self.fields = [
             "name",
-            #"form_template",
             "field_type",
             "field_set",
             "label",
             "css_class",
+            "use_as_prefix",
             "position",
         ]
 
@@ -130,12 +153,12 @@ class FieldTemplateAdmin(admin.ModelAdmin):
             #  define the fields common to all FieldTemplates
             #  TODO:  Need to make this into a constant
             common = [
-                #"form_template",
                 "field_set",
                 "field_type",
                 "name",
                 "label",
                 "css_class",
+                "use_as_prefix",
                 "position",
             ]
             #  get all the availabled fields based on the value of field_type
@@ -158,7 +181,7 @@ class FieldTemplateAdmin(admin.ModelAdmin):
         link = obj.form_template.get_admin_change_url()
 
 
-        return mark_safe("<a href='%s'>Link</a>" % link)
+        return mark_safe("<a href='%s'>%s</a>" % (link, obj.form_template))
 
 
 class FieldSetFormSet(BaseInlineFormSet):
@@ -226,7 +249,7 @@ class FieldSetInline(admin.StackedInline):
 
     fieldsets = (
         (None, {
-            'fields': (('name', 'label'), ('position', 'accordion'))
+            'fields': (('name', 'label', 'position'), 'accordion'),
         }),
     )
     def get_queryset(self, request):

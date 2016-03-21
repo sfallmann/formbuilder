@@ -1,6 +1,14 @@
 {% extends "admin/change_form.html" %}
 {% load i18n admin_urls %}
 {% block object-tools-items %}
+<style>
+    .errorlist li{
+        color: white;
+        background-color: red;
+        font-size: 1.15em;
+        font-weight: bold;
+    }
+</style>
     <script>
         function popupView(loc){
         window.open(loc, "name", "width=1000,height=850");

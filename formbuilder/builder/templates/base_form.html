@@ -129,60 +129,10 @@
     {% endblock %}
     </div>
     <br/>
-    <script src="{% static 'intl-tel-input/build/js/intlTelInput.min.js' %}"></script>
-    <script src="{% static 'intl-tel-input/build/js/utils.js' %}"></script>
-    <script>
 
-        window.clearErrors = function(){
-            $("#error-div").empty();
-        }
-
-        window.displayError = function(message){
-
-            var html =  '<div class="alert alert-danger">' +
-                        '<a class="close" data-dismiss="alert">×</a>' +
-                        '<strong>' + message + '</strong>'
-                        '</div>';
-
-            console.log(message);
-            $("#error-div").append(html);
-        }
-
-        var callback = function() {
-            grecaptcha.render('id-g-recaptcha', {
-             'sitekey': "6LcyMBoTAAAAAOLSi90hQ33PFhQg6ejClya9Vv88",
-             'expired-callback': expCallback
-            });
-        };
-        var expCallback = function() {
-            grecaptcha.reset();
-        };
-
-
-        $(".accordion-toggle").addClass("collapsed").attr("aria-expanded","false");
-        $(".panel-collapse.collapse.in").removeClass("in").attr("aria-expanded","false");
-
-        var $phoneSelects = $("input[type=tel]");
-
-        $phoneSelects.each(function(index, el){
-
-            var id = "#" + $(el).attr("id");
-
-            $(id).intlTelInput();
-        });
-
-        // delay setting all elemnts to visible to allow the page to be fully loaded before displaying
-        $(document).ready(function() {
-
-            var showPage = function(){
-                document.getElementsByTagName("body")[0].style.visibility = "visible";
-            }
-
-            setTimeout(showPage, 250);
-
-        });
-
-    </script>
+<script src="{% static 'intl-tel-input/build/js/intlTelInput.min.js' %}"></script>
+<script src="{% static 'intl-tel-input/build/js/utils.js' %}"></script>
+<script src="{% static 'js/lib/fb/formbuilder.js' %}"></script>
 {% block scripts %}
 
 {% endblock %}
