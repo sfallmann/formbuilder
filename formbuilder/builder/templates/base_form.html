@@ -23,7 +23,10 @@
 
     body {
         visibility:hidden;
-        background-color: darkslategrey;
+        background-image: url("{% static 'img/form-background-8.jpg'  %}");
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-size: cover;
     }
 
     label {
@@ -40,7 +43,7 @@
     }
 
 
-    .form-style, .form-style label {
+    #fb-form, .form-style, .form-style label  {
         background-color: {{ form.helper.background_color }};
         color: {{ form.helper.text_color }};
         font-family: 'Noto Sans', sans-serif;
@@ -105,30 +108,40 @@
 </script>
 
     <br/>
-    <div class="container">
+    <div class="container-fluid">
     {% block container %}
         <div class="row">
-            <div class="col-md-12">
+            <div class="col-md-2"></div>
+            <div class="col-md-8">
                 {{ header }}
             </div>
+            <div class="col-md-2"></div>
         </div>
         <div class="row">
-            <div class="col-md-12">
+            <div class="col-md-2"></div>
+            <div class="col-md-8">
                 {% load crispy_forms_tags %}
                 {% crispy form form.helper %}
             </div>
+            <div class="col-md-2"></div>
         </div>
         <div class="row">
-            <div id="error-div" class="col-md-12"></div>
+            <div class="col-md-2"></div>
+            <div id="error-div" class="col-md-8"></div>
+            <div class="col-md-2"></div>
         </div>
         <div class="row">
-            <div class="col-md-12">
+            <div class="col-md-2"></div>
+            <div class="col-md-8">
                 {{ footer }}
             </div>
+            <div class="col-md-2"></div>
         </div>
     {% endblock %}
     </div>
     <br/>
+
+
 
 <script src="{% static 'intl-tel-input/build/js/intlTelInput.min.js' %}"></script>
 <script src="{% static 'intl-tel-input/build/js/utils.js' %}"></script>

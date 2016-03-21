@@ -52,84 +52,62 @@ def formtemplate_details(request, id):
         # Pass the FormTemplate object into Form with the posted data
         f = Form(template_, request.POST, request.FILES)
 
-        #recaptcha_passed = recaptcha_check(request)
-        recaptcha_passed = True
-        if not recaptcha_passed:
+            #  Check if the data is valid
 
-            recaptcha_error = "<hr/><h4 class='alert alert-danger'>%s</h4>"\
-                % 'reCAPTCHA failed. Please try again.'
+        if f.is_valid():
 
-            return render(
-                request, f.html_template, {
-                    "form": f,
-                    "header": mark_safe(template_.header),
-                    "footer": mark_safe(template_.footer),
-                    "recaptcha_error": recaptcha_error,
-                }
-            )
+            #  Create the FormData object with the posted data
+
+            uploaded_file_list = []
+            '''
+            data_dict = OrderedDict()
+
+            for fs in template_.fieldsets.all():
+
+                fs_dict = OrderedDict()
+                field_templates = FieldTemplate.objects.filter(field_set=fs).order_by("position")
+
+                if field_templates:
+                    for ft in field_templates:
+                        if ft.name in f.clean_data_only.keys():
+
+                            fs_dict[ft.name] = f.clean_data_only[ft.name]
+
+                if fs_dict:
+                    data_dict[fs.name] = fs_dict
+            '''
+
+            formdata = create_formdata(
+                template_,  json.dumps(clean_data_only), request.user)
+
+            for rf in request.FILES:
+
+                file_list = request.FILES.getlist(rf)
+
+                for file_ in file_list:
+                    uploaded_file_list.append(file_.name)
+
+                    if settings.DEBUG == True:
+                        handle_uploaded_file(file_, str(formdata.pk))
+
+                formdata.data.update({
+                        "files": uploaded_file_list
+                    })
+
+                formdata.save()
+
+            #  Redirect to view to display the save data
+            return redirect(formtemplate_results, formdata.id)
 
         else:
 
-            #  Check if the data is valid
-
-            if f.is_valid():
-
-                #  Create the FormData object with the posted data
-
-
-
-
-                uploaded_file_list = []
-
-                data_dict = OrderedDict()
-
-                for fs in template_.fieldsets.all():
-
-                    fs_dict = OrderedDict()
-                    field_templates = FieldTemplate.objects.filter(field_set=fs).order_by("position")
-
-                    if field_templates:
-                        for ft in field_templates:
-                            if ft.name in f.clean_data_only.keys():
-
-                                fs_dict[ft.name] = f.clean_data_only[ft.name]
-
-                    if fs_dict:
-                        data_dict[fs.name] = fs_dict
-
-                print json.dumps(data_dict)
-                formdata = create_formdata(
-                    template_,  json.dumps(data_dict), request.user)
-                print f.cleaned_data
-
-                for rf in request.FILES:
-
-                    file_list = request.FILES.getlist(rf)
-
-                    for file_ in file_list:
-                        uploaded_file_list.append(file_.name)
-
-                        if settings.DEBUG == True:
-                            handle_uploaded_file(file_, str(formdata.pk))
-
-                    formdata.data.update({
-                            "files": uploaded_file_list
-                        })
-
-                    formdata.save()
-
-                #  Redirect to view to display the save data
-                return redirect(formtemplate_results, formdata.id)
-
-            else:
-
-                return render(
-                    request, f.template, {
-                        "form": f,
-                        "header": mark_safe(template_.header),
-                        "footer": mark_safe(template_.footer),
-                    }
-                )
+            return render(
+                request, f.template, {
+                    "form": f,
+                    "header": mark_safe(template_.header),
+                    "footer": mark_safe(template_.footer),
+                }
+            )
 
     return render(
         request, f.html_template, {
@@ -174,18 +152,6 @@ def formtemplate_details_ajax(request, id):
 
             if form.is_valid():
 
-
-                for fs in form_template.fieldsets.all():
-
-                    print "------------------------"
-                    print fs.name
-
-                    for k, v in form.clean_data_only:
-
-                        if hasattr(fs, k):
-                            print k, v
-
-
                 uploaded_file_list = []
 
                 #  Create the FormData object with the posted data
@@ -207,7 +173,7 @@ def formtemplate_details_ajax(request, id):
                             "files": uploaded_file_list
                         })
 
-                formdata.save()
+                    formdata.save()
 
                 data = {
                     "message": "Submission was successful!",

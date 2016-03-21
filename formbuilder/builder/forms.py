@@ -175,7 +175,7 @@ class Form(forms.Form):
 
             attrs.update({
                 'id': f.name.lower(),
-                'class': 'form-control form-style',
+                'class': 'form-control',
                 'name': f.name.lower(),
                 'type': f.field_type
             })
