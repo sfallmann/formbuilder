@@ -1,6 +1,8 @@
 import os
 import json
+import re
 import requests
+from string import maketrans
 from collections import OrderedDict
 from django.core.files.storage import FileSystemStorage
 from django.shortcuts import render
@@ -19,6 +21,15 @@ Views for rendering forms, capturing submitted data,
 and displaying the captured\saved results
 '''
 
+def format_directory_prefix(value):
+
+    return (
+        re.sub(
+            r"[\W]", "", value.translate(
+                maketrans("@ .-", "____")
+            )
+        )
+    ).lower()
 
 
 def formtemplate_results(request, id):
@@ -32,12 +43,15 @@ def formtemplate_results(request, id):
     results = FormData.objects.get(id=id)
     form = Form(results.form_template,results.data["data"])
     form.is_valid()
+
+    form.use_as_prefix = format_directory_prefix(form.use_as_prefix)
     #return HttpResponse(json.dumps(results.data))
     return render(
         request, "results.html", {
             "form": form,
         }
     )
+
 
 def formtemplate_details(request, id):
     '''
@@ -211,6 +225,7 @@ def prepare_data_files(data_bundle):
     request = data_bundle['request']
     form_data = data_bundle['form_data']
     form_template = data_bundle['form_template']
+
 
     all_files = request.FILES
     user = request.user

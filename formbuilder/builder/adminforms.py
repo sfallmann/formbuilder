@@ -139,15 +139,12 @@ class FieldTemplateInlineForm(forms.ModelForm):
             self.fields['position'].disabled = True
 
 
-
-
     def clean(self):
 
         cleaned_data = super(FieldTemplateInlineForm, self).clean()
 
         form_template = cleaned_data["form_template"]
         field_type = cleaned_data["field_type"]
-        use_as_prefix = cleaned_data["use_as_prefix"]
 
         if form_template.dropzone and field_type == field_types.FILE:
             raise ValidationError(
@@ -205,28 +202,27 @@ class FieldTemplateForm(forms.ModelForm):
             dropzone = field_set.form_template.dropzone
             form_template = field_set.form_template
             field_type = cleaned_data['field_type']
-            use_as_prefix = cleaned_data["use_as_prefix"]
-
-            name = cleaned_data["name"]
 
             if dropzone and field_type == field_types.FILE:
                 raise ValidationError(
                     "You can't add file fields to a form with a dropzone."
                 )
 
-            if use_as_prefix:
 
-                print use_as_prefix
+            if "use_as_prefix" in cleaned_data.keys():
 
-                field_templates = FieldTemplate.objects.filter(
-                    form_template = form_template,
-                    use_as_prefix = True
-                ).exclude(name=name)
+                use_as_prefix = cleaned_data["use_as_prefix"]
+                old_name = self.initial["name"]
 
-                print field_templates
+                if use_as_prefix:
 
-                if field_templates:
+                    field_templates = FieldTemplate.objects.filter(
+                        form_template = form_template,
+                        use_as_prefix = True
+                    ).exclude(name=old_name)
 
-                    raise ValidationError(
-                        "Only one FieldTemplate can be 'used as prefix'.")
+                    if field_templates:
+
+                        raise ValidationError(
+                            "Only one FieldTemplate can be 'used as prefix'.")
 

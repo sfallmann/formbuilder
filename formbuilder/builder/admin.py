@@ -51,13 +51,13 @@ class FieldTemplateFormSet(BaseInlineFormSet):
 
 class FieldTemplateInline(admin.StackedInline):
     model = FieldTemplate
-    formset = FieldTemplateFormSet
+    #formset = FieldTemplateFormSet
     form = FieldTemplateInlineForm
     show_change_link = True
     extra = 0
     fieldsets = (
         (None, {
-            'fields': (('name', 'label'), ('field_set','field_type','position','css_class','use_as_prefix')),
+            'fields': (('name', 'label'), ('field_set','field_type','position','css_class',)),
         }),
     )
 
@@ -74,7 +74,6 @@ class FieldTemplateInline(admin.StackedInline):
             "field_set",
             "label",
             "css_class",
-            "use_as_prefix",
             "position",
         ]
 
@@ -126,9 +125,9 @@ class FieldTemplateAdmin(admin.ModelAdmin):
         'form_template_link',
     )
 
-    list_editable =('css_class', 'position', 'required')
+    list_editable =('css_class', 'position',)
     ordering = (
-        'field_set', 'form_template', 'position', 'name')
+        'form_template', 'field_set', 'position', 'css_class')
     list_filter = ('form_template', 'field_set',)
     save_on_top = True
     show_add_link = False
@@ -146,7 +145,6 @@ class FieldTemplateAdmin(admin.ModelAdmin):
             "field_set",
             "label",
             "css_class",
-            "use_as_prefix",
             "position",
         ]
 
@@ -161,14 +159,10 @@ class FieldTemplateAdmin(admin.ModelAdmin):
                 "name",
                 "label",
                 "css_class",
-                "use_as_prefix",
                 "position",
             ]
             #  get all the availabled fields based on the value of field_type
             #  and then sort them.
-
-            if obj.field_type == "email":
-                common.append("send_confirmation")
 
             field_types.ATTRS[obj.field_type].sort()
             #  add the additional fields with common

@@ -32,7 +32,9 @@ class Form(forms.Form):
         ]
 
         self.confirmation_keys = []
-
+        self.use_as_prefix_key = []
+        self.confirmation_list = []
+        self.use_as_prefix = ""
 
         self.helper = FormHelper()
 
@@ -62,7 +64,7 @@ class Form(forms.Form):
 
         layout = self.helper.layout = Layout()
 
-        self.create_fieldsets(obj)
+        self.assemble_form(obj)
 
         self.helper.attrs = {
             'enctype': 'multipart/form-data',
@@ -84,7 +86,6 @@ class Form(forms.Form):
         self.clean_files_only = {}
         self.clean_data_only = {}
         self.file_list = []
-        self.confirmation_list = []
 
         cleaned_data = super(Form, self).clean()
 
@@ -95,6 +96,9 @@ class Form(forms.Form):
         ]
 
         for key in cleaned_data.keys():
+
+            if key in self.use_as_prefix_key:
+                self.use_as_prefix = str(cleaned_data[key])
 
             if key in self.confirmation_keys:
                 self.confirmation_list.append(str(cleaned_data[key]))
@@ -116,16 +120,17 @@ class Form(forms.Form):
 
                 self.clean_data_only[key] = cleaned_data[key]
 
+        print "use_as_prefix = ", self.use_as_prefix
+
     def create_field(self, f):
 
         if f.required and f.label:
             f.label = "<span style='color: red; font-size: .95em;' "\
                 "class='glyphicon glyphicon-star'></span>" + f.label
-            #format_html(f.label)
+
         empty_choice = "No choices were added to this field!"
 
         other_tags = [
-            #field_types.PHONE,
             field_types.COUNTRY,
             field_types.CHECKBOX,
             field_types.FILE,
@@ -304,7 +309,7 @@ class Form(forms.Form):
 
 
 
-    def create_fieldsets(self, obj):
+    def assemble_form(self, obj):
 
         for fset in obj.fieldsets.all().order_by('position'):
 
@@ -319,6 +324,10 @@ class Form(forms.Form):
                 values =[str(fset.label),]
 
             for t in _templates:
+
+                if t.use_as_prefix:
+                    self.use_as_prefix_key = t.name
+
                 if t.field_type in self.exclusions:
                     values.append(HTML(self.create_html(t)))
                 else:
@@ -340,6 +349,3 @@ class Form(forms.Form):
                 )
             else:
                 self.helper.layout.append(Fieldset(*values))
-
-            #self.helper.layout.append(HTML("<hr/>"))
-

@@ -4,6 +4,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.signals import post_save, pre_save
 from django.db.models.signals import post_delete, pre_delete
 from .models import FormTemplate, FieldTemplate, FieldSet
+from helper.constants import field_types
 
 import logging
 
@@ -148,6 +149,21 @@ def intialize_fieldtemplate_values(sender, instance, **kwargs):
             form_template=instance.form_template,
             name=settings.EMPTY_FIELDSET
         )
+
+    prefix_allowed = [
+        field_types.EMAIL,
+        field_types.TEXT
+    ]
+
+    confirmation_allowed = [
+        field_types.EMAIL
+    ]
+
+    if instance.field_type not in prefix_allowed:
+        instance.use_as_prefix = False
+
+    if instance.field_type not in confirmation_allowed:
+        instance.send_confirmation = False
 
     if instance.field_set is None:
         instance.field_set = fs

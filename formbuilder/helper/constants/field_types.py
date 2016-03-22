@@ -51,10 +51,10 @@ COMMON_ATTRS = [
     "placeholder",
     "readonly",
     "required",
-    #"value",
     ]
 
 EMAIL_ATTRS = COMMON_ATTRS + [
+    "use_as_prefix",
     "send_confirmation",
 ]
 
@@ -80,6 +80,10 @@ FILE_ATTRS = [
     "help_text",
     "required",
     "maxfiles"
+]
+
+TEXT_ATTRS = COMMON_ATTRS + [
+    "use_as_prefix",
 ]
 
 TEXT_AREA_ATTRS = [
@@ -117,7 +121,7 @@ ATTRS = {
     SELECT: CHOICE_ATTRS,
     TEL: COMMON_ATTRS,
     COUNTRY: COUNTRY_ATTRS,
-    TEXT: COMMON_ATTRS,
+    TEXT: TEXT_ATTRS,
     TEXT_AREA: TEXT_AREA_ATTRS,
     URL: COMMON_ATTRS,
     FILE: FILE_ATTRS,

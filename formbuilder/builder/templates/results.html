@@ -4,9 +4,9 @@
 <head>
   <meta charset="utf-8">
 
-  <title>The HTML5 Herald</title>
-  <meta name="description" content="The HTML5 Herald">
-  <meta name="author" content="SitePoint">
+  <title>Form Data - Form Response</title>
+  <meta name="description" content="Form Data - Form Response">
+  <meta name="Sean Fallmann" content="Formbuilder">
 
   <!--[if lt IE 9]>
   <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -20,12 +20,15 @@
             <p>{{ f.label | safe }}: {{ f.value }} </p>
         {% endif %}
     {% endfor %}
-    <p> send confirmation email to:
+    <p> send confirmation email to: </p>
+    <ul>
+
+    </ul>
     {% for email in form.confirmation_list %}
-        {{ email }},
-        {% if email == form.confirmation_list|last %}
-        {{ email }}
-        {% endif %}
-        {% endfor %}</p>
+        <li>{{ email }}</li>
+    {% endfor %}
+    <br/>
+
+    <p>"use_as_prefix" = {{ form.use_as_prefix }}</p>
 </body>
 </html>
