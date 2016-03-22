@@ -23,13 +23,14 @@ and displaying the captured\saved results
 
 def format_directory_prefix(value):
 
-    return (
+    if value:
         re.sub(
             r"[\W]", "", value.translate(
                 maketrans("@ .-", "____")
             )
-        )
-    ).lower()
+        ).lower()
+    else:
+        return ""
 
 
 def formtemplate_results(request, id):
@@ -41,8 +42,12 @@ def formtemplate_results(request, id):
 
     # Get the FormData object by id
     results = FormData.objects.get(id=id)
+
     form = Form(results.form_template,results.data["data"])
     form.is_valid()
+
+    if "files" in results.data:
+        form.files = results.data["files"]
 
     form.use_as_prefix = format_directory_prefix(form.use_as_prefix)
     #return HttpResponse(json.dumps(results.data))
@@ -66,7 +71,6 @@ def formtemplate_details(request, id):
 
     #  Pass the FormTemplate object into Form
     form = Form(obj=form_template)
-
 
     if request.method == "POST":
         # Pass the FormTemplate object into Form with the posted data
@@ -217,7 +221,7 @@ def formtemplate_details_ajax(request, id):
             '''
         else:
 
-            HttpRepsone("Not an ajax request")
+            HttpResponse("Not an ajax request")
 
 
 def prepare_data_files(data_bundle):

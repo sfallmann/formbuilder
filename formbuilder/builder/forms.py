@@ -34,7 +34,7 @@ class Form(forms.Form):
         self.confirmation_keys = []
         self.use_as_prefix_key = []
         self.confirmation_list = []
-        self.use_as_prefix = ""
+        self.use_as_prefix = None
 
         self.helper = FormHelper()
 
@@ -100,7 +100,7 @@ class Form(forms.Form):
             if key in self.use_as_prefix_key:
                 self.use_as_prefix = str(cleaned_data[key])
 
-            if key in self.confirmation_keys:
+            if key in self.confirmation_keys and cleaned_data[key]:
                 self.confirmation_list.append(str(cleaned_data[key]))
 
             is_file = False
@@ -120,7 +120,6 @@ class Form(forms.Form):
 
                 self.clean_data_only[key] = cleaned_data[key]
 
-        print "use_as_prefix = ", self.use_as_prefix
 
     def create_field(self, f):
 

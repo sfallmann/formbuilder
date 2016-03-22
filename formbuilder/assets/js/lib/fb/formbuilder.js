@@ -1,5 +1,27 @@
 (function(){
 
+    String.prototype.replaceAll = function(
+        strTarget, // The substring you want to replace
+        strSubString // The string you want to replace in.
+        ){
+        var strText = this;
+        var intIndexOfMatch = strText.indexOf( strTarget );
+
+        // Keep looping while an instance of the target string
+        // still exists in the string.
+        while (intIndexOfMatch != -1){
+            // Relace out the current instance.
+            strText = strText.replace( strTarget, strSubString )
+
+            // Get the index of any next matching substring.
+            intIndexOfMatch = strText.indexOf( strTarget );
+        }
+
+        // Return the updated string with ALL the target strings
+        // replaced out with the new substring.
+        return( strText );
+    }
+
     window.callback = function() {
         grecaptcha.render('id-g-recaptcha', {
          'sitekey': "6LcyMBoTAAAAAOLSi90hQ33PFhQg6ejClya9Vv88",
@@ -27,6 +49,13 @@
         $submit: $("#submit-id-submit"),
         $errors: $("#error-div"),
         $phoneSelects: $("input[type=tel]"),
+        telReset: function($telInput){
+
+            var $errorId = "#tel-error-" + $(this).attr("id");
+            $($telInput).removeClass("error");
+            $($errorId).removeClass("hide");
+
+        },
         getCookie: function (name)
         {
             var cookieValue = null;
@@ -93,21 +122,49 @@
     $(".accordion-toggle").addClass("collapsed").attr("aria-expanded","false");
     $(".panel-collapse.collapse.in").removeClass("in").attr("aria-expanded","false");
 
+
     fb.$phoneSelects.each(function(index, el){
 
-        var id = "#" + $(el).attr("id");
 
-        $(id).intlTelInput();
+        var id = $("#" + $(el).attr("id"));
+        $(id).intlTelInput({
+            utilsScript: "/static/intl-tel-input/build/js/utils.js"
+        });
+
+        var $errorId = "tel-error-" + $(id).attr("id");
+        $(id).after('<span id="' + $errorId + '" class="tel-error hide">Invalid number</span>');
+
+        $(id).on("blur", function(){
+            fb.telReset(this);
+
+            if ($.trim($(this).val())) {
+                if (!($(this).intlTelInput("isValidNumber"))) {
+
+                    $(this).addClass("error");
+                    $("#" + $errorId).removeClass("hide");
+                }
+                else {
+                    $(this).removeClass("error");
+                    $("#" + $errorId).addClass("hide");
+                }
+            }
+        });
+
+        $(id).on("keyup change", function(){
+            fb.telReset(this);
+        });
     });
 
-    fb.$submit.on("click", function(e){
+    fb.$form.on("submit", function(e){
 
         fb.clearErrors();
 
         e.stopPropagation();
         e.preventDefault();
 
-        fb.recaptchaCheck();
+        if (!($("input").hasClass("error"))){
+            fb.recaptchaCheck();
+        }
 
     });
 
