@@ -347,6 +347,8 @@ def recaptcha_check_ajax(request):
     secret = settings.RECAPTCHA_SECRET
     ip = get_client_ip(request)
 
+    print ip
+
     recaptcha_response = request.POST["g-recaptcha-response"]
 
     print recaptcha_response

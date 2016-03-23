@@ -1,7 +1,5 @@
 (function(){
 
-    window.recaptchaSuccess = 0;
-
     String.prototype.replaceAll = function(
         strTarget, // The substring you want to replace
         strSubString // The string you want to replace in.
@@ -86,6 +84,8 @@
 
             console.log("initiate reCaptcha check");
 
+            var target = fb.$form[0];
+            fb.spinner.spin(target);
 
             $.ajax(
                 {
@@ -111,10 +111,12 @@
                         }
                     },
                     error: function(xhr){
+
+                        fb.spinner.stop();
+
                         var messsage = "There was a problem sending the recaptcha check to the server"
                         fb.displayError(message);
 
-                        //fb.$submit.removeAttr("disabled");
                     }
                 });
 
@@ -123,10 +125,34 @@
         },
 
         init: function(){
+
             $(".accordion-toggle").addClass("collapsed").attr("aria-expanded","false");
             $(".panel-collapse.collapse.in").removeClass("in").attr("aria-expanded","false");
-            //fb.$submit.removeAttr("disabled");
 
+            var spinOpts = {
+                  lines: 16 // The number of lines to draw
+                , length: 0 // The length of each line
+                , width: 8 // The line thickness
+                , radius: 60 // The radius of the inner circle
+                , scale: 1.5 // Scales overall size of the spinner
+                , corners: 1 // Corner roundness (0..1)
+                , color: '#4ba9c8' // #rgb or #rrggbb or array of colors
+                , opacity: 0.85 // Opacity of the lines
+                , rotate: 0 // The rotation offset
+                , direction: 1 // 1: clockwise, -1: counterclockwise
+                , speed: .75 // Rounds per second
+                , trail: 25 // Afterglow percentage
+                , fps: 20 // Frames per second when using setTimeout() as a fallback for CSS
+                , zIndex: 2e9 // The z-index (defaults to 2000000000)
+                , className: 'spinner' // The CSS class to assign to the spinner
+                , top: '50%' // Top position relative to parent
+                , left: '50%' // Left position relative to parent
+                , shadow: false // Whether to render a shadow
+                , hwaccel: false // Whether to use hardware acceleration
+                , position: 'absolute' // Element positioning
+                }
+
+            fb.spinner = new Spinner(spinOpts);
 
             function verifyTel(input) {
 
@@ -167,13 +193,8 @@
 
             fb.$form.on("submit", function(e){
 
-                //fb.$submit.attr("disabled", "true");
-
                 fb.clearErrors();
-
-                //e.stopPropagation();
                 e.preventDefault();
-
                 fb.recaptchaCheck();
 
             });

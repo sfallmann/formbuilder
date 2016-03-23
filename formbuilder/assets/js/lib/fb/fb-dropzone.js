@@ -33,12 +33,16 @@
 
             this.processForm = function(){
 
+                fb.$submit.attr("disabled","true");
+
                 if (self.getQueuedFiles().length > 0) {
                     self.processQueue();
                 }
                 else {
 
-                    fb.$submit.attr("disabled", "true");
+                    fb.$submit.attr("disabled","true");
+
+                    setTimeout(function(){ fb.$submit.removeAttr("disabled")}, 1000);
 
                     $.ajax({
 
@@ -52,14 +56,8 @@
                                 //fb.$submit.removeAttr("disabled");
                                 window.location = response.redirect;
                             }
-                            else if (response.status == 302) {
-
-                                alert("here!");
-
-                            }
                             else {
 
-                                fb.$submit.removeAttr("disabled");
                                 // TODO - real error logging
                                 console.log("error");
                             }
@@ -67,7 +65,7 @@
                         },
                         error: function(xhr){
                             fb.displayError("There was a problem sending the form data to the server");
-                            fb.$submit.removeAttr("disabled");
+
                         }
                     });
                 }
@@ -79,13 +77,15 @@
             fb.$form.on({
                 "recaptcha:success": function(event){
                     console.log("recaptcha:success triggered");
-                    console.log(event);
+
                     self.processForm();
                 },
                 "recaptcha:fail": function(event, response){
                     console.log("recaptcha:fail triggered");
 
-                    fb.$submit.removeAttr("disabled");
+                    fb.$submit.attr("disabled","true");
+
+                    setTimeout(function(){ fb.$submit.removeAttr("disabled")}, 500);
 
                     var errors = response["error-codes"];
 
@@ -133,7 +133,7 @@
 
             this.on("successmultiple", function(file, response, xhrObject){
 
-
+                fb.$submit.removeAttr("disabled");
 
                 console.log("Dropzone successmultiple..")
                 console.log(file, response);
