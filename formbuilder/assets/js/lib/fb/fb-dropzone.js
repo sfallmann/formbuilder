@@ -34,8 +34,6 @@
             this.processForm = function(){
 
                 if (self.getQueuedFiles().length > 0) {
-
-                    fb.$submit.attr("disabled", "true");
                     self.processQueue();
                 }
                 else {
@@ -51,8 +49,13 @@
                             console.log("success");
                             if (response.status == 200){
 
-                                fb.$submit.removeAttr("disabled");
+                                //fb.$submit.removeAttr("disabled");
                                 window.location = response.redirect;
+                            }
+                            else if (response.status == 302) {
+
+                                alert("here!");
+
                             }
                             else {
 
@@ -71,40 +74,7 @@
 
             };
 
-            this.recaptchaCheck = function(){
-
-                console.log("initiate reCaptcha check");
-
-                $.ajax(
-                    {
-                        url: "/ajax/recaptcha_check/",
-                        method: "POST",
-                        data: { "g-recaptcha-response": $("#g-recaptcha-response").val() },
-                        beforeSend: function(xhr, settings) {
-                            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                                xhr.setRequestHeader("X-CSRFToken", fb.getCookie('csrftoken'));
-                            }
-                        },
-                        success: function(response){
-
-                            if (response.success){
-                                $form.trigger("recaptcha:success");
-                            }
-                            else {
-
-                                $form.trigger("recaptcha:fail", response);
-                            }
-                        },
-                        error: function(xhr){
-                            var messsage = "There was a problem sending the recaptcha check to the server"
-                            displayError(message);
-                        }
-                    });
-            };
-
             // -------- Event Handling ---------
-
-
 
             fb.$form.on({
                 "recaptcha:success": function(event){
@@ -114,6 +84,8 @@
                 },
                 "recaptcha:fail": function(event, response){
                     console.log("recaptcha:fail triggered");
+
+                    fb.$submit.removeAttr("disabled");
 
                     var errors = response["error-codes"];
 

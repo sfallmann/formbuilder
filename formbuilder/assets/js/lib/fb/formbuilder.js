@@ -1,5 +1,7 @@
 (function(){
 
+    window.recaptchaSuccess = 0;
+
     String.prototype.replaceAll = function(
         strTarget, // The substring you want to replace
         strSubString // The string you want to replace in.
@@ -29,6 +31,7 @@
         });
     };
     window.expCallback = function() {
+
         grecaptcha.reset();
     };
 
@@ -49,13 +52,6 @@
         $submit: $("#submit-id-submit"),
         $errors: $("#error-div"),
         $phoneSelects: $("input[type=tel]"),
-        telReset: function($telInput){
-
-            var $errorId = "#tel-error-" + $(this).attr("id");
-            $($telInput).removeClass("error");
-            $($errorId).removeClass("hide");
-
-        },
         getCookie: function (name)
         {
             var cookieValue = null;
@@ -90,6 +86,7 @@
 
             console.log("initiate reCaptcha check");
 
+
             $.ajax(
                 {
                     url: "/ajax/recaptcha_check/",
@@ -102,7 +99,10 @@
                     },
                     success: function(response){
 
+
+
                         if (response.success){
+
                             fb.$form.trigger("recaptcha:success");
                         }
                         else {
@@ -113,60 +113,77 @@
                     error: function(xhr){
                         var messsage = "There was a problem sending the recaptcha check to the server"
                         fb.displayError(message);
+
+                        //fb.$submit.removeAttr("disabled");
                     }
                 });
+
+
+
+        },
+
+        init: function(){
+            $(".accordion-toggle").addClass("collapsed").attr("aria-expanded","false");
+            $(".panel-collapse.collapse.in").removeClass("in").attr("aria-expanded","false");
+            //fb.$submit.removeAttr("disabled");
+
+
+            function verifyTel(input) {
+
+                input = input.srcElement;
+
+
+                if ($.trim(input.value)) {
+                    if (!($(input).intlTelInput("isValidNumber"))) {
+
+                        console.log("invalid number");
+
+                        var pattern = $(input).attr("placeholder");
+
+                        input.setCustomValidity('Please enter the phone number like this: ' + pattern);
+
+                    } else {
+
+                        input.setCustomValidity('');
+                    }
+                }
+            }
+
+            fb.$phoneSelects.each(function(index, el){
+
+                var id = $("#" + $(el).attr("id"));
+
+                id.intlTelInput({
+                    utilsScript: "/static/intl-tel-input/build/js/utils.js"
+                });
+
+                id[0].addEventListener("blur", verifyTel);
+
+                fb.$submit.click(function(){
+                    id[0].checkValidity();
+                }); //true)
+
+            });
+
+            fb.$form.on("submit", function(e){
+
+                //fb.$submit.attr("disabled", "true");
+
+                fb.clearErrors();
+
+                //e.stopPropagation();
+                e.preventDefault();
+
+                fb.recaptchaCheck();
+
+            });
+
+
         }
 
     };
 
-    $(".accordion-toggle").addClass("collapsed").attr("aria-expanded","false");
-    $(".panel-collapse.collapse.in").removeClass("in").attr("aria-expanded","false");
-
-
-    fb.$phoneSelects.each(function(index, el){
-
-
-        var id = $("#" + $(el).attr("id"));
-        $(id).intlTelInput({
-            utilsScript: "/static/intl-tel-input/build/js/utils.js"
-        });
-
-        var $errorId = "tel-error-" + $(id).attr("id");
-        $(id).after('<span id="' + $errorId + '" class="tel-error hide">Invalid number</span>');
-
-        $(id).on("blur", function(){
-            fb.telReset(this);
-
-            if ($.trim($(this).val())) {
-                if (!($(this).intlTelInput("isValidNumber"))) {
-
-                    $(this).addClass("error");
-                    $("#" + $errorId).removeClass("hide");
-                }
-                else {
-                    $(this).removeClass("error");
-                    $("#" + $errorId).addClass("hide");
-                }
-            }
-        });
-
-        $(id).on("keyup change", function(){
-            fb.telReset(this);
-        });
-    });
-
-    fb.$form.on("submit", function(e){
-
-        fb.clearErrors();
-
-        e.stopPropagation();
-        e.preventDefault();
-
-        if (!($("input").hasClass("error"))){
-            fb.recaptchaCheck();
-        }
-
-    });
+    fb.init();
 
 }());
 

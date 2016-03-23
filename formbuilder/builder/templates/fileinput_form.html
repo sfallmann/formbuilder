@@ -6,15 +6,31 @@
 {% endblock %}
 {% block scripts %}
 <script>
+
+
     fb.$form.on({
         "recaptcha:success": function(event){
+
+            //fb.$submit.removeAttr("disabled");
+
             console.log("recaptcha:success triggered");
-            console.log(event);
-            fb.$submit.unbind("click");
+
+            fb.$form.unbind("submit");
+            //fb.$form.triggerHandler("submit");
+
+
+
+
             fb.$submit.trigger("click");
+
+            fb.$submit.attr("disabled","true");
+
+            setTimeout(function(){ fb.$submit.removeAttr("disabled")}, 1000);
         },
         "recaptcha:fail": function(event, response){
             console.log("recaptcha:fail triggered");
+
+            //fb.$submit.removeAttr("disabled");
 
             var errors = response["error-codes"];
 
@@ -28,5 +44,12 @@
 
         }
     });
+
+
+
+
+
+
+
 </script>
 {% endblock %}

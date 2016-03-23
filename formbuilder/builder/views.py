@@ -348,6 +348,9 @@ def recaptcha_check_ajax(request):
     ip = get_client_ip(request)
 
     recaptcha_response = request.POST["g-recaptcha-response"]
+
+    print recaptcha_response
+
     url = 'https://www.google.com/recaptcha/api/siteverify'
 
     data = {
@@ -357,7 +360,7 @@ def recaptcha_check_ajax(request):
     }
 
     r = requests.post(url, data=data)
-
+    print (r.text)
     response = HttpResponse(r, content_type="application/json")
 
     return response
