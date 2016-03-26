@@ -1,6 +1,5 @@
 import os
 import json, re, requests
-from string import maketrans
 from collections import OrderedDict
 from nested_dict import nested_dict
 from django.conf import settings
@@ -15,7 +14,7 @@ from django.views.decorators.http import require_http_methods
 from crispy_forms.utils import render_crispy_form
 from .models import FormTemplate, FormData, FieldTemplate, Category
 from .forms import Form
-from .formdata_utils import create_schema, prepare_files
+from .formdata_utils import create_schema, prepare_files, format_folder_prefix
 from .files import process_files, upload_ftp
 
 
@@ -29,16 +28,7 @@ Views for rendering forms, capturing submitted data,
 and displaying the captured\saved results
 '''
 
-def format_directory_prefix(value):
 
-    if value:
-        re.sub(
-            r"[\W]", "", value.translate(
-                maketrans("@ .-", "____")
-            )
-        ).lower()
-    else:
-        return ""
 
 
 def formtemplate_results(request, id):
@@ -134,7 +124,15 @@ def formtemplate_details(request, id):
 
             )
             files = prepare_files(request.FILES)
-            process_files(files["prepped_files"])
+
+            print "form.use_as_prefix %s" % form.use_as_prefix
+
+            process_files(
+                files["prepped_files"],
+                str(form_response.id),
+                format_folder_prefix(form.use_as_prefix),
+                ftp=True
+            )
             #  Redirect to view to display the save data
             return redirect(formtemplate_results, form_response.id)
 
@@ -198,7 +196,15 @@ def formtemplate_details_ajax(request, id):
             )
 
             files = prepare_files(request.FILES)
-            process_files(files["prepped_files"])
+
+            print "form.use_as_prefix %s" % form.use_as_prefix
+
+            process_files(
+                files["prepped_files"],
+                str(form_response.id),
+                format_folder_prefix(form.use_as_prefix),
+                ftp=True
+            )
 
             json = {
                 "message": "Submission was successful!",
@@ -265,8 +271,6 @@ def formresponse_query(request):
 
         category_id = request.POST.get('category_id')
         formtemplate_id = request.POST.get('formtemplate_id')
-        fieldname_exact = request.POST.get('fieldname_exact')
-        value_exact = request.POST.get('value_exact')
         fieldname = request.POST.get('fieldname')
         value = request.POST.get('value')
 

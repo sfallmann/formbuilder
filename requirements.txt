@@ -1,3 +1,7 @@
+amqp==1.4.9
+anyjson==0.3.3
+billiard==3.3.0.23
+celery==3.1.23
 Django==1.9
 django-bower==5.1.0
 django-ckeditor==5.0.3
@@ -6,12 +10,15 @@ django-crispy-forms==1.6.0
 django-debug-toolbar==1.4
 django-floppyforms==1.6.1
 docutils==0.12
+kombu==3.0.35
+nested-dict==1.61
 oauthlib==1.0.3
 Pillow==3.1.1
 psycopg2==2.6.1
 PyJWT==1.4.0
 python-openid==2.2.5
 python-social-auth==0.2.14
+pytz==2016.3
 requests==2.9.1
 requests-oauthlib==0.6.1
 simplejson==3.8.2

@@ -313,6 +313,122 @@ class FieldChoice(DictBase):
             self.field_template.name, self.key, self.value)
 
 
+class DataManager(models.Manager):
+
+    def search_fields(self, **kwargs):
+
+        qs = super(DataManager, self).get_queryset().all()
+
+        if kwargs.has_key("key_value_pair"):
+
+            key = kwargs["key_value_pair"][0].lower()
+            value = kwargs["key_value_pair"][1].lower()
+
+            found_match = 0
+
+            for q in qs:
+
+                for k, v in q.data["fields"].items():
+
+                    if key in k.lower() and value in str(v).lower():
+                        found_match = 1
+                        break
+
+                if not found_match:
+
+                    qs = qs.exclude(id=q.id)
+
+        if kwargs.has_key("key_and_value"):
+
+            key = kwargs["key_and_value"][0].lower()
+            value = kwargs["key_and_value"][1].lower()
+
+            found_key = 0
+            found_value = 0
+
+            for q in qs:
+
+                for k,v in q.data["fields"].items():
+                    if key in k.lower():
+                        found_key = 1
+
+                    if value in str(v).lower():
+                        found_value = 1
+
+                    if found_key and found_value:
+                        break
+
+                if not found_key and not found_value:
+
+                    qs = qs.exclude(id=q.id)
+
+        if kwargs.has_key("key_or_value"):
+
+            key = kwargs["key_or_value"][0].lower()
+            value = kwargs["key_or_value"][1].lower()
+
+            found_key = 0
+            found_value = 0
+
+            for q in qs:
+
+                print q
+
+                for k,v in q.data["fields"].items():
+
+                    if key in k.lower():
+                        found_key = 1
+
+                    if value in str(v).lower():
+                        found_value = 1
+
+                    if found_key or found_value:
+                        break
+
+                if not found_key or not found_value:
+
+                    qs = qs.exclude(id=q.id)
+
+        if kwargs.has_key("key"):
+
+            key = kwargs["key"].lower()
+
+            found_key = 0
+
+            for q in qs:
+
+                for k in q.data["fields"].keys():
+
+                    if key in k.lower():
+                        found_key = 1
+                        break
+
+                if not found_key:
+
+
+                    qs = qs.exclude(pk=q.pk)
+
+
+        if kwargs.has_key("value"):
+
+            value = kwargs["value"].lower()
+
+            found_value = 0
+
+            for q in qs:
+
+                for v in q.data["fields"].values():
+                    if value in str(v).lower():
+                        found_value = 1
+                        break
+
+                if not found_value:
+
+                    qs = qs.exclude(id=q.id)
+
+        return qs
+
+
 class FormData(models.Model):
 
     '''
@@ -333,6 +449,9 @@ class FormData(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 
+    objects = models.Manager()
+    data_objects = DataManager()
+
     class Meta:
         verbose_name = "Form Response"
         verbose_name_plural = "Form Responses"
@@ -346,3 +465,27 @@ class FormData(models.Model):
         return reverse(
             'builder.views.formtemplate_results',
             args=[str(self.id)])
+
+    def key_in_data_fields(self, string):
+
+        fields = self.data["fields"]
+
+        for k in fields.keys():
+            if string in k:
+                return True
+
+        return False
+
+    def value_in_data_fields(self, string):
+
+        fields = self.data["fields"]
+
+        for v in fields.values():
+            if string in v:
+                return True
+
+        return False
+
+
+
+

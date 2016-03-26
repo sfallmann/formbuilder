@@ -1,3 +1,5 @@
+import re
+from string import maketrans
 from django.template.defaulttags import register
 
 def create_schema(form_response):
@@ -71,6 +73,19 @@ def prepare_files(posted_files):
     }
 
 
+def format_folder_prefix(value):
+
+    if value:
+        return re.sub(
+            r"[\W]", "", value.translate(
+                maketrans("@ .-", "____")
+            )
+        ).lower()
+    else:
+        return ""
+
+
 @register.filter
 def get_item(dictionary, key):
     return dictionary.get(key)
+
