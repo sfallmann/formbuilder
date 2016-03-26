@@ -1,0 +1,78 @@
+<!doctype html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+
+    <title>Form Data - Form Response</title>
+    <meta name="description" content="Form Data - Form Response">
+    <meta name="Sean Fallmann" content="Formbuilder">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
+    <!--[if lt IE 9]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+
+    <form action="/query/" method="POST">
+        {% csrf_token %}
+        <select  id="category_id" name="category_id" >
+            {% for c in categories %}
+                <option value="{{ c.id }}">{{ c.name }}</option>
+            {% endfor %}
+        </select>
+        <br>
+        <select id="formtemplate_id" name="formtemplate_id" ></select>
+        <br>
+
+        <div id="div_fn" class="checkbox">
+            <label for="fieldname_exact">
+                Fieldname exact? <input name="fieldname_exact" type="checkbox"/>
+            </label>
+
+        </div>
+
+        <br>
+        <input type="text" id="fieldname"  name="fieldname"/>
+        <br>
+        <div id="div_v" class="checkbox">
+            <label for="value_exact">Value exact? <input name="value_exact" type="checkbox"/>
+            </label>
+
+        </div>
+
+        <br>
+        <input type="text" id="value"  name="value"/>
+        <br>
+        <input type="submit" value="submit"/>
+    </form>
+</body>
+<script>
+    $("#category_id").change(function(){
+        console.log("triggered change");
+        var val = $("#category_id").val();
+        console.log("val", val);
+        $("#formtemplate_id").empty();
+
+        {% for f in form_templates %}
+            console.log("f_id", {{ f.category.id }});
+            if (val == {{ f.category.id }}){
+
+
+
+                $("#formtemplate_id").append(
+                 "<option value='{{ f.id }}'>{{ f.name }}</option>"
+                );
+            }
+
+
+        {% endfor %}
+
+    });
+</script>
+</html>

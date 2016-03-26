@@ -15,22 +15,24 @@
 
 <body>
 
-    {% for f in form %}
-        {% if f.value %}
-            <p>{{ f.label | safe }}: {{ f.value }} </p>
-        {% endif %}
-    {% endfor %}
-    <p> send confirmation email to: </p>
     <ul>
+    {% for fs in field_sets %}
+        <li>
+            {{ fs.label }}
+            <ul>
+            {% for ft in fs.field_templates %}
+                <li>
+                    {{ ft.label }}: {{ fields|get_item:ft.name }}
+                </li>
+            {% endfor %}
+            </ul>
 
-    </ul>
-    {% for email in form.confirmation_list %}
-        <li>{{ email }}</li>
+        </li>
     {% endfor %}
-    <br/>
+    </ul>
 
-    <p>"use_as_prefix": {{ form.use_as_prefix }}</p>
+    <br>
 
-    <p>Files: {{ form.files }}</p>
+    {{ data }}
 </body>
 </html>

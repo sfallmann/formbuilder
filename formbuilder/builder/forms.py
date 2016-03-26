@@ -316,35 +316,37 @@ class Form(forms.Form):
 
             #values = ["<p style='font-size=2em;'>%s</p>" % str(fset.label)]
 
-            values = []
-            if fset.accordion:
-                values =[str(fset.label + " (click)"),]
-            else:
-                values =[str(fset.label),]
+            if _templates:
 
-            for t in _templates:
-
-                if t.use_as_prefix:
-                    self.use_as_prefix_key = t.name
-
-                if t.field_type in self.exclusions:
-                    values.append(HTML(self.create_html(t)))
+                values = []
+                if fset.accordion:
+                    values =[str(fset.label + " (click)"),]
                 else:
-                    if t.field_type == "email":
-                        if t.send_confirmation:
-                            self.confirmation_keys.append(t.name)
-                    values.append(
-                        Div(
-                            str(t.name),
-                            css_class=t.css_class
+                    values =[str(fset.label),]
+
+                for t in _templates:
+
+                    if t.use_as_prefix:
+                        self.use_as_prefix_key = t.name
+
+                    if t.field_type in self.exclusions:
+                        values.append(HTML(self.create_html(t)))
+                    else:
+                        if t.field_type == "email":
+                            if t.send_confirmation:
+                                self.confirmation_keys.append(t.name)
+                        values.append(
+                            Div(
+                                str(t.name),
+                                css_class=t.css_class
+                            )
+                        )
+
+                if fset.accordion:
+                    self.helper.layout.append(
+                        Accordion(
+                            AccordionGroup(*values),
                         )
                     )
-
-            if fset.accordion:
-                self.helper.layout.append(
-                    Accordion(
-                        AccordionGroup(*values),
-                    )
-                )
-            else:
-                self.helper.layout.append(Fieldset(*values))
+                else:
+                    self.helper.layout.append(Fieldset(*values))

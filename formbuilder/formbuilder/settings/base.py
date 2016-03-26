@@ -34,6 +34,26 @@ COUNTRIES_LIST = json.loads(
 
 COUNTRIES_TUPLES = [(c,c) for c in COUNTRIES_LIST]
 
+EMAIL_HOST = json.loads(
+    open(SECRETS, 'r').read())['EMAIL_HOST']
+EMAIL_HOST_USER = json.loads(
+    open(SECRETS, 'r').read())['EMAIL_HOST_USER']
+EMAIL_HOST_PASSWORD = json.loads(
+    open(SECRETS, 'r').read())['EMAIL_HOST_PASSWORD']
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+FTP_SERVER = json.loads(
+    open(SECRETS, 'r').read())['FTP_SERVER']
+FTP_USERNAME = json.loads(
+    open(SECRETS, 'r').read())['FTP_USERNAME']
+FTP_PASSWORD = json.loads(
+    open(SECRETS, 'r').read())['FTP_PASSWORD']
+
+
+DEFAULT_FROM_EMAIL = "sfallmann@pbmbrands.com"
+
+
 # Application definition
 
 INSTALLED_APPS = [
