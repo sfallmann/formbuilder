@@ -111,14 +111,14 @@ class FormTemplate(models.Model):
 
     def get_absolute_url(self):
 
-        if self.dropzone:
-            return reverse(
-                'formtemplate_details_ajax',
-                args=[str(self.id)])
-        else:
-            return reverse(
-                'formtemplate_details',
-                args=[str(self.id)])
+        #if self.dropzone:
+        #    return reverse(
+        #        'formtemplate_details_ajax',
+        #        args=[str(self.id)])
+        #else:
+        return reverse(
+            'formtemplate_details',
+            args=[str(self.id)])
 
     def get_admin_change_url(self):
         content_type = ContentType.objects.get_for_model(self.__class__)

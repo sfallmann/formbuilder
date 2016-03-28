@@ -390,3 +390,4 @@ CKEDITOR_CONFIGS = {
 
 # Builder specific
 EMPTY_FIELDSET = "no_fieldset"
+UPLOAD_FOLDER = os.path.join(os.getcwd(), "uploads")

@@ -1,27 +1,24 @@
-import os
-import json, re, requests
-from collections import OrderedDict
-from nested_dict import nested_dict
+import json
+from crispy_forms.utils import render_crispy_form
 from django.conf import settings
+
+#  May not need-depends on formtemplate_results.
 from django.utils.html import mark_safe
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
-from django.core.files.storage import FileSystemStorage
 from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
+#
+
 from django.shortcuts import redirect
 from django.views.decorators.http import require_http_methods
-from crispy_forms.utils import render_crispy_form
 from .models import FormTemplate, FormData, FieldTemplate, Category
 from .forms import Form
-from .formdata_utils import create_schema, prepare_files, format_folder_prefix
-from .files import process_files, upload_ftp
-
-
-from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit
-
-FILESTORE = FileSystemStorage(location='/uploads')
-UPLOAD_FOLDER = os.path.join(os.getcwd(), "uploads")
+from .formdata_utils import prepare_files
+from .formdata_utils import format_folder_prefix, format_formdata
+from .view_utils import recaptcha_check_ajax, ajax_response
+from .files import FileProcessor
+#from .files import process_files, upload_ftp, FileProcessor
 
 '''
 Views for rendering forms, capturing submitted data,
@@ -29,6 +26,15 @@ and displaying the captured\saved results
 '''
 
 
+def category_menu(request):
+
+    categories = Category.objects.all()
+
+    return render(
+        request, "menu.html", {
+            "categories": categories
+        }
+    )
 
 
 def formtemplate_results(request, id):
@@ -48,26 +54,9 @@ def formtemplate_results(request, id):
                  indent=4, separators=(',', ': '))
 
     '''
-    if "files" in results.data:
-
-        form.files = results.data["files"]
-
     form.use_as_prefix = format_directory_prefix(form.use_as_prefix)
     form_html = render_crispy_form(form, helper=form.helper, context=None)
 
-    tform = Form(results.form_template)
-
-    layout = tform.helper.layout
-    for field in layout.fields:
-
-        if field.__class__.__name__ == "Fieldset":
-            if field.legend:
-                print field.legend
-            else:
-                print "NO FIELDSET"
-
-            for f in field:
-                print f[0], results.data["data"][f[0]]
 
 
     msg_html = render_to_string('results.html', {'form': form })
@@ -127,24 +116,51 @@ def formtemplate_details(request, id):
 
             print "form.use_as_prefix %s" % form.use_as_prefix
 
-            process_files(
-                files["prepped_files"],
+            #process_files(
+            #    files["prepped_files"],
+            #    str(form_response.id),
+            #    format_folder_prefix(form.use_as_prefix),
+            #    ftp=True
+            #)
+
+            fp = FileProcessor(
                 str(form_response.id),
                 format_folder_prefix(form.use_as_prefix),
-                ftp=True
+                True
             )
-            #  Redirect to view to display the save data
-            return redirect(formtemplate_results, form_response.id)
+
+            fp.process_files(files["prepped_files"])
+
+            if request.is_ajax():
+
+                json = {
+                    "message": "Submission was successful!",
+                    "redirect": form_response.get_absolute_url()
+                }
+
+                return ajax_response(200, json)
+
+            else:
+
+                #  Redirect to view to display the save data
+                return redirect(formtemplate_results, form_response.id)
 
         else:
 
-            return render(
-                request, form.template, {
-                    "form": form,
-                    "header": mark_safe(form_template.header),
-                    "footer": mark_safe(form_template.footer),
-                }
-            )
+            if request.is_ajax():
+
+                data = {"message": "Form invalid. Refresh the page and try again."}
+                return ajax_response(400, data)
+
+            else:
+
+                return render(
+                    request, form.template, {
+                        "form": form,
+                        "header": mark_safe(form_template.header),
+                        "footer": mark_safe(form_template.footer),
+                    }
+                )
 
     return render(
         request, form.html_template, {
@@ -153,108 +169,6 @@ def formtemplate_details(request, id):
             "footer": mark_safe(form_template.footer),
         }
     )
-
-
-@require_http_methods(["GET", "POST"])
-def formtemplate_details_ajax(request, id):
-    '''
-    formtemplate_details(request, id):
-
-        View for displaying and capturing the form
-        created from a FormTemplate.
-    '''
-
-    #  Get the FormTemplate object by id
-    form_template = FormTemplate.objects.get(id=id)
-
-    #  Pass the FormTemplate object into Form
-    form = Form(obj=form_template)
-
-    if request.method == "GET":
-
-        return render(
-            request, form.html_template, {
-                "form": form,
-                "header": mark_safe(form_template.header),
-                "footer": mark_safe(form_template.footer),
-            }
-        )
-
-    if request.method == "POST" and request.is_ajax():
-
-        # Pass the FormTemplate object into Form with the posted data
-        form = Form(form_template, request.POST, request.FILES)
-
-        if form.is_valid():
-
-            form_response = format_formdata(
-
-                form_template=form_template,
-                request=request,
-                results=form.clean_data_only
-
-            )
-
-            files = prepare_files(request.FILES)
-
-            print "form.use_as_prefix %s" % form.use_as_prefix
-
-            process_files(
-                files["prepped_files"],
-                str(form_response.id),
-                format_folder_prefix(form.use_as_prefix),
-                ftp=True
-            )
-
-            json = {
-                "message": "Submission was successful!",
-                "redirect": form_response.get_absolute_url()
-            }
-
-            return ajax_response(200, json)
-
-        else:
-
-            data = {"message": "Form invalid. Refresh the page and try again."}
-
-            return ajax_response(400, data)
-
-    else:
-
-        HttpResponse("Not an ajax request")
-
-
-def format_formdata(**kwargs):
-
-    form_template = kwargs["form_template"]
-    request = kwargs["request"]
-    results = kwargs["results"]
-
-    fields = {}
-    for k,v in results.items():
-        fields.update({ k: v })
-
-    data = {
-        'fields': fields
-    }
-
-    if request.user.is_authenticated():
-        data.update({
-                "user": {
-                    "username":     request.user.username,
-                    "first_name":   request.user.first_name,
-                    "last_name":    request.user.last_name,
-                    "email":        request.user.email
-                }
-            })
-
-    form_response =  FormData.objects.create(form_template=form_template, data=data)
-
-    data.update({"schema": create_schema(form_response)})
-
-    form_response.save()
-
-    return form_response
 
 
 @require_http_methods(["GET", "POST"])
@@ -306,106 +220,3 @@ def formresponse_query(request):
             "form_templates": form_templates
         }
     )
-
-def ajax_response(code, data):
-
-    context = {
-        'status': code
-    }
-
-    context.update(**data)
-
-    response = HttpResponse(json.dumps(context), content_type="application/json")
-
-    response.status_code = code
-    return response
-
-
-def handle_uploaded_file(f, folder):
-
-    path = os.path.join(UPLOAD_FOLDER, ("%s/" % folder))
-
-    new_folder = make_folder(path)
-
-    if new_folder:
-
-        filepath = os.path.join(path, f._name)
-
-        try:
-            with open(filepath, 'wb+') as destination:
-                for chunk in f.chunks():
-                    destination.write(chunk)
-
-        except:
-            #TODO logging and specific exceptions
-            return False
-
-
-def make_folder(folder):
-
-    if not os.path.exists(folder):
-        try:
-            os.makedirs(folder)
-
-        except OSError:
-
-            #  TODO:  Add logging
-            #  "Error on creating file folder"
-            return False
-
-    return True
-
-def recaptcha_check_ajax(request):
-
-    secret = settings.RECAPTCHA_SECRET
-    ip = get_client_ip(request)
-
-    print ip
-
-    recaptcha_response = request.POST["g-recaptcha-response"]
-
-    print recaptcha_response
-
-    url = 'https://www.google.com/recaptcha/api/siteverify'
-
-    data = {
-        "secret": secret,
-        "remoteip": ip,
-        "response": recaptcha_response
-    }
-
-    r = requests.post(url, data=data)
-    print (r.text)
-    response = HttpResponse(r, content_type="application/json")
-
-    return response
-
-def recaptcha_check(request):
-
-    secret = settings.RECAPTCHA_SECRET
-    ip = get_client_ip(request)
-
-    response = request.POST["g-recaptcha-response"]
-    url = 'https://www.google.com/recaptcha/api/siteverify'
-
-    data = {
-        "secret": secret,
-        "remoteip": ip,
-        "response": response
-    }
-
-    r = requests.post(url, data=data)
-    r_json = json.loads(r.text)
-
-    return r_json["success"]
-
-
-def get_client_ip(request):
-
-    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-
-    if x_forwarded_for:
-        ip = x_forwarded_for.split(',')[0]
-    else:
-        ip = request.META.get('REMOTE_ADDR')
-    return ip

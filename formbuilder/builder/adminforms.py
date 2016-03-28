@@ -133,6 +133,7 @@ class FieldTemplateInlineForm(forms.ModelForm):
             #  show the initial value in the field
             self.fields['position'].show_hidden_initial = True
 
+
         else:
 
             #  new instances have position disabled
@@ -193,6 +194,8 @@ class FieldTemplateForm(forms.ModelForm):
                     'style': 'height: 300px; width: 600px; font-size: 1.15em;'
                 }
             )
+
+
     def clean(self):
 
         cleaned_data = super(FieldTemplateForm, self).clean()

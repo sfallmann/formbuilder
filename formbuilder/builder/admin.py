@@ -50,6 +50,7 @@ class FieldTemplateFormSet(BaseInlineFormSet):
 
 
 class FieldTemplateInline(admin.StackedInline):
+
     model = FieldTemplate
     #formset = FieldTemplateFormSet
     form = FieldTemplateInlineForm
@@ -65,6 +66,8 @@ class FieldTemplateInline(admin.StackedInline):
 
         fs = super(
             FieldTemplateInline, self).get_formset(request, obj, **kwargs)
+
+        print fs.form.__dict__
 
         # only show the fields in the common to all field types
         self.fields = [

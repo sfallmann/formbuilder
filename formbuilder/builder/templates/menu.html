@@ -1,0 +1,112 @@
+<!doctype html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Custom Forms</title>
+    <meta name="description" content="Custom Forms">
+    <meta name="Sean Fallmann" content="FormDeployment">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
+
+<style>
+    /* make sidebar nav vertical */
+    @media (min-width: 600px) {
+      .sidebar-nav .navbar .navbar-collapse {
+        padding: 0;
+        max-height: none;
+      }
+      .sidebar-nav .navbar ul {
+        float: none;
+      }
+      .sidebar-nav .navbar ul:not {
+        display: block;
+      }
+      .sidebar-nav .navbar li {
+        float: none;
+        display: block;
+      }
+      .sidebar-nav .navbar li a {
+        padding-top: 12px;
+        padding-bottom: 12px;
+      }
+    }
+
+    .img-responsive {
+
+        display: block;
+        width: 100%;
+
+    }
+
+</style>
+</head>
+<body>
+    <div class="container-fluid">
+        <br>
+        <br>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="sidebar-nav">
+                    <div class="navbar navbar-default" role="navigation">
+                        <div class="navbar-header">
+                            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".sidebar-navbar-collapse">
+                                <span class="sr-only">Toggle navigation</span>
+                                <span class="icon-bar"></span>
+                                <span class="icon-bar"></span>
+                                <span class="icon-bar"></span>
+                            </button>
+                            <span class="visible-xs navbar-brand">Category Menu</span>
+                        </div>
+                        <div class="navbar-collapse collapse sidebar-navbar-collapse">
+                            <ul class="nav navbar-nav">
+                                {% for category in categories %}
+                                <li>
+                                    <a href="#">
+                                        {{ category.name }}
+                                    </a>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div><!--/.nav-collapse -->
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                {% for category in categories %}
+
+                <div id="{{ category.acronym }}" class="form-list">
+                    <ul>
+                    {% for form in category.form_templates.all %}
+                            <li class="{{ category.acronym }}-content" ><a href="{{ form.get_absolute_url }}">{{ form.name }}</a></li>
+                    {% endfor %}
+                    </ul>
+                </div>
+
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+<script>
+
+    var $formLists = $(".form-list");
+
+    var $menuListItems = $("ul.nav.navbar-nav li");
+
+    $menuListItems.on("click",function(){
+        $("li.active").removeClass("active");
+        $(this).addClass("active");
+    });
+
+
+
+</script>

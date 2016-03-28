@@ -1,6 +1,8 @@
 import re
 from string import maketrans
 from django.template.defaulttags import register
+from .models import FormData
+
 
 def create_schema(form_response):
 
@@ -85,7 +87,40 @@ def format_folder_prefix(value):
         return ""
 
 
+
+def format_formdata(**kwargs):
+
+    form_template = kwargs["form_template"]
+    request = kwargs["request"]
+    results = kwargs["results"]
+
+    fields = {}
+    for k,v in results.items():
+        fields.update({ k: v })
+
+    data = {
+        'fields': fields
+    }
+
+    if request.user.is_authenticated():
+        data.update({
+                "user": {
+                    "username":     request.user.username,
+                    "first_name":   request.user.first_name,
+                    "last_name":    request.user.last_name,
+                    "email":        request.user.email
+                }
+            })
+
+    form_response =  FormData.objects.create(form_template=form_template, data=data)
+
+    data.update({"schema": create_schema(form_response)})
+
+    form_response.save()
+
+    return form_response
+
+
 @register.filter
 def get_item(dictionary, key):
     return dictionary.get(key)
-
