@@ -40,11 +40,12 @@
     }
 
     .img-responsive {
-
         display: block;
         width: 100%;
-
     }
+
+
+
 
 </style>
 </head>
@@ -68,7 +69,7 @@
                         <div class="navbar-collapse collapse sidebar-navbar-collapse">
                             <ul class="nav navbar-nav">
                                 {% for category in categories %}
-                                <li>
+                                <li class="category-list-item" data-list="{{ category.acronym }}">
                                     <a href="#">
                                         {{ category.name }}
                                     </a>
@@ -84,9 +85,15 @@
 
                 <div id="{{ category.acronym }}" class="form-list">
                     <ul>
-                    {% for form in category.form_templates.all %}
-                            <li class="{{ category.acronym }}-content" ><a href="{{ form.get_absolute_url }}">{{ form.name }}</a></li>
-                    {% endfor %}
+                    {% if category.form_templates.all %}
+                        {% for form in category.form_templates.all %}
+                                <h3>
+                                    <li class="{{ category.acronym }}-content" ><a href="{{ form.get_absolute_url }}">{{ form.name }}</a></li>
+                                </h3>
+                        {% endfor %}
+                    {% else %}
+                        <h3>There are no forms for this category</h3>
+                    {% endif %}
                     </ul>
                 </div>
 
@@ -99,12 +106,18 @@
 <script>
 
     var $formLists = $(".form-list");
-
+    $formLists.hide();
     var $menuListItems = $("ul.nav.navbar-nav li");
 
     $menuListItems.on("click",function(){
         $("li.active").removeClass("active");
         $(this).addClass("active");
+
+        var id = $(this).data("list");
+
+        $formLists.hide();
+        $("#" + id).show();
+
     });
 
 

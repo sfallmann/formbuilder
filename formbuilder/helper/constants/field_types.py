@@ -38,7 +38,7 @@ def as_list():
         TEXT,
         TEXT_AREA,
         URL,
-        FILE,
+        #FILE,
     ]
 
 COMMON_ATTRS = [

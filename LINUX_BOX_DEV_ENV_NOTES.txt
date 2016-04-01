@@ -1,0 +1,90 @@
+1.  Install postgresql-9.5:
+
+    a.  Create a source list for postgresql-9.5 packages:
+
+            $ sudo nano /etc/apt/sources.list.d/postgresql.list
+              deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main 9.5
+
+    b.  Save and close.
+
+    c.  Get and the add for the package source:
+
+            $ wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+
+    d.  Update the package list and install postgresql-9.5:
+
+            $ sudo apt-get update
+            $ sudo apt-get install postgresql-9.5
+
+
+2.  Install git
+
+    $ sudo apt-get install git
+
+
+3.  Install pip
+
+    $ sudo apt-get install python-pip
+
+
+4.  Install virtualenv
+
+    $ sudo pip install virtualenv
+
+
+5.  Install and configure virtualenvwrapper
+
+    a.  Install virtualenvwrapper
+
+            $ sudo pip install virtualenvwrapper
+
+    b.  Initialization
+
+            $ export WORKON_HOME=~/envs
+            $ mkdir -p $WORKON_HOME
+            $ source /usr/local/bin/virtualenvwrapper.sh
+            $ mkvirtualenv <name>
+
+    c.  The environment will be activated.  You can deactivate by entering deactivate in the terminal.
+
+    d.  To allow for easy activation:
+
+            i.    Edit .bashrc:
+
+                      $ sudo nano ~/.bashrc
+
+            ii.   Add the following at the end of the file:
+
+                      export WORKON_HOME=~/envs
+                      source /usr/local/bin/virtualenvwrapper.sh
+
+            iii.  Save and close the file.
+            iv.   Enter the following in the terminal:
+
+                      $ sudo source ~/.bashrc
+
+            v.    Enter workon in the termial to activate the environment
+
+## Make sure the enviroment is activate before installing python packages via pip.
+## If you do not have an environment activate, the package will install globally.
+## virtualenv and virtualenvwrapper are the only packages that should be installed globally
+## There can be other packages that will require a global install, but we aren't there right now
+
+6.  Install Pillow and it's dependencies:
+
+    $ sudo apt-get install python-dev
+    $ sudo apt-get install libtiff5-dev libjpeg8-dev zlib1g-dev libfreetype6-dev liblcms2-dev libwebp-dev tcl8.6-dev tk8.6-dev python-tk
+    $ workon <name of virtual environment>
+    $ pip install pillow
+
+7. Install Django
+
+    $ pip install django==[version] - in this case it would 1.9 so: $ pip install django==1.9
+
+
+
+
+
+
+
+

@@ -4,6 +4,13 @@ import ftplib
 from django.conf import settings
 from celery.decorators import task
 
+
+@task(name='test_celery')
+def test_celery():
+    print "testing!"
+
+    return True
+
 '''
 @task(name="remove_folder")
 def remove_folder(folder_path):
