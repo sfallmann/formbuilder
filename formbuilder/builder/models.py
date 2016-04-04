@@ -69,7 +69,7 @@ class FormTemplate(models.Model):
         max_length=30,
         validators=[is_alpha_num_words]
     )
-
+    slug = models.SlugField(max_length=100)
     category = models.ForeignKey(
         Category,
         related_name="form_templates",
@@ -102,7 +102,7 @@ class FormTemplate(models.Model):
     modified = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = (("name", "category"),)
+        unique_together = (("name", "category"),('slug','category'))
         verbose_name = "Form Template"
         verbose_name_plural = "Form Templates"
 
@@ -118,13 +118,13 @@ class FormTemplate(models.Model):
         #else:
         return reverse(
             'formtemplate_details',
-            args=[str(self.id)])
+            args=[self.category.slug, str(self.slug)])
 
     def get_admin_change_url(self):
         content_type = ContentType.objects.get_for_model(self.__class__)
         return reverse(
             "admin:%s_%s_change" % (
-                content_type.app_label, content_type.model), args=(self.id,))
+                content_type.app_label, content_type.model), args=(self.category, self.slug,))
 
     def as_dict(self):
         return get_dict(self)

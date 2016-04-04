@@ -315,6 +315,7 @@ CKEDITOR_IMAGE_BACKEND = "pillow"
 CKEDITOR_BROWSE_SHOW_DIRS= True
 CKEDITOR_CONFIGS = {
     'default': {
+        "removePlugins": "stylesheetparser",
         'skin': 'moono',
         # 'skin': 'office2013',
         'toolbar_Basic': [
@@ -361,6 +362,7 @@ CKEDITOR_CONFIGS = {
                 'autogrow',
                 # 'devtools',
                 'widget',
+                'widgetbootstrap',
                 'lineutils',
                 'clipboard',
                 'dialog',

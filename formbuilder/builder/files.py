@@ -2,7 +2,11 @@ import os
 import shutil
 import ftplib
 from django.conf import settings
-from celery.contrib.methods import task
+#from celery.contrib.methods import task
+from celery import current_app
+#from celery import chord, chain, group
+from celery.contrib.methods import task_method
+
 #from formbuilder.celery import app
 
 #from .tasks import upload_ftp
@@ -10,14 +14,14 @@ from celery.contrib.methods import task
 
 class FileProcessor(object):
 
-    def __init__(self, folder, prefix=None, ftp=False):
-
+    def __init__(self, folder, prefix=None, ftp_transfer=False):
 
         self.folder = folder
         self.prefix = prefix
-        self.ftp = ftp
+        self.ftp_transfer = ftp_transfer
         self.file_dict = {}
         self.local_path = ""
+
 
     def process_files(self, files):
 
@@ -31,10 +35,10 @@ class FileProcessor(object):
         self.local_path = os.path.join(settings.UPLOAD_FOLDER, ("%s/" % self.ftp_folder))
 
         if self.make_folder():
-            self.handle_uploaded_files(files)
+            self.save_files(files)
 
-            if self.ftp:
-                self.upload_ftp.delay()
+            if self.ftp_transfer:
+                self.ftp_uploader.delay()
 
 
     def make_folder(self):
@@ -50,7 +54,7 @@ class FileProcessor(object):
 
         return True
 
-    def handle_uploaded_files(self, files):
+    def save_files(self, files):
 
         for file in files:
 
@@ -67,52 +71,67 @@ class FileProcessor(object):
 
             self.file_dict.update({ filename: filepath })
 
-
+    @current_app.task(filter=task_method)
     def remove_folder(self):
 
         shutil.rmtree(self.local_path)
+        print "removed folder: %s" % self.local_path
+
+    @current_app.task(filter=task_method)
+    def close_ftp(self):
+
+        self.ftp.close()
+        print "close ftp connection"
 
 
-    @task()
-    def upload_ftp(self):
+    @current_app.task(filter=task_method)
+    def ftp_upload_file(self, filename, filepath):
+        ftp = ftplib.FTP(settings.FTP_SERVER)
+        ftp.login(settings.FTP_USERNAME, settings.FTP_PASSWORD)
+        ftp.cwd(self.ftp_folder)
+        print "starting transfer"
+
+        with open(filepath,'rb') as f:
+            ftp.storbinary("STOR " + filename, f, 1024)
+
+        ftp.close()
+        print "finished transfer"
+        return True
+        #self.file_dict.pop(filename)
+
+    def create_ftp_folder(self):
 
         ftp = ftplib.FTP(settings.FTP_SERVER)
         ftp.login(settings.FTP_USERNAME, settings.FTP_PASSWORD)
 
-        print "opened ftp connection"
+        print "check for %s" % self.ftp_folder
 
         if self.ftp_folder not in ftp.nlst():
             ftp.mkd(self.ftp_folder)
-            ftp.cwd(self.ftp_folder)
-
-        for k,v in self.file_dict.items():
-
-            filename = k
-            filepath = v
-
-            print "starting transfer: %s" % filename
-
-            with open(filepath,'rb') as f:
-                ftp.storbinary("STOR " + filename, f, 1024)
-
-            print "finished transfer: %s" % filename
-
-            self.file_dict.pop(k)
-
-
-        self.remove_folder()
-
-        print "removed folder: %s" % self.local_path
+            print "Had to make folder on ftp server!"
 
         ftp.close()
 
-        print "close ftp connection"
-        if self.file_dict:
-            return "The following files were not transfered: %s" % self.file_dict.keys()
-        else:
-            return "All files transferred successfully"
+
+
+    @current_app.task(filter=task_method)
+    def ftp_uploader(self):
+
+
+        print "opened ftp connection"
+
+        self.create_ftp_folder()
+
+        for filename, filepath in self.file_dict.items():
+            self.ftp_upload_file(filename, filepath)
+            print filename, filepath
+
+        #task_list.append(self.remove_folder().si())
+        #task_list.append(self.close_ftp().si())
+
 
 '''
+
 def process_files(files, folder, prefix, ftp=False):
 
     print "prefix %s" % prefix

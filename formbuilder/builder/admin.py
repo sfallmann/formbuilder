@@ -262,10 +262,12 @@ class FormTemplateAdmin(admin.ModelAdmin):
     form = FormTemplateForm
     inlines = [FieldSetInline, FieldTemplateInline, ]
     save_on_top = True
+    prepopulated_fields = {"slug": ("name",)}
     fieldsets = (
         (None, {
             'fields': (
                     'name',
+                    'slug',
                     'category',
                     'notification_list',
                     'login_required',

@@ -9,7 +9,7 @@ from django.template.loader import render_to_string
 from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
 #
-
+from django.views.decorators.clickjacking import xframe_options_exempt
 from django.shortcuts import redirect
 from django.views.decorators.http import require_http_methods
 from .models import FormTemplate, FormData, FieldTemplate, Category
@@ -36,7 +36,7 @@ def category_menu(request):
         }
     )
 
-
+@xframe_options_exempt
 def formtemplate_results(request, id):
     '''
     formtemplate_results(request, id):
@@ -79,18 +79,18 @@ def formtemplate_results(request, id):
         }
     )
 
-
+@xframe_options_exempt
 @require_http_methods(["GET", "POST"])
-def formtemplate_details(request, id):
+def formtemplate_details(request, category, slug):
     '''
-    formtemplate_details(request, id):
+    formtemplate_details(request, slug):
 
         View for displaying and capturing the form
         created from a FormTemplate.
     '''
 
     #  Get the FormTemplate object by id
-    form_template = FormTemplate.objects.get(id=id)
+    form_template = FormTemplate.objects.get(category__slug=category, slug=slug)
 
     #  Pass the FormTemplate object into Form
     form = Form(obj=form_template)
