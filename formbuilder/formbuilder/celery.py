@@ -8,3 +8,8 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "formbuilder.settings.dev")
 
 
 app = Celery("formbuilder", backend='rpc://', broker='amqp://')
+app.conf.update(
+    CELERY_TASK_SERIALIZER='pickle',
+    CELERY_RESULT_SERIALIZER='pickle',
+    CELERY_ACCEPT_CONTENT=['pickle']
+)

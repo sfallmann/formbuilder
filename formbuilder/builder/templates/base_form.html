@@ -22,11 +22,7 @@
 
 
     body {
-        visibility:hidden;
-        background-image: url("{% static 'img/form-background-8.jpg'  %}");
-        background-repeat: no-repeat;
-        background-attachment: fixed;
-        background-size: cover;
+        {{ form.helper.page_background_css|safe }}
     }
 
     label {
@@ -104,7 +100,6 @@
     }
 
 </style>
-
 {% block header_css_scripts %}
 
 {% endblock %}

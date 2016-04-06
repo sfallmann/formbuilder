@@ -1,7 +1,9 @@
 import json
 from pprint import pprint
+from datetime import datetime
 from django.contrib import admin
 from django.conf import settings
+from django.utils.text import slugify
 from django.utils.html import mark_safe
 from django import forms
 from django.db import models
@@ -14,6 +16,37 @@ from .models import FieldTemplate, FieldChoice
 from .adminforms import FieldTemplateInlineForm, FieldTemplateForm
 from .adminforms import FieldSetInlineForm, FormTemplateForm
 from helper.constants import field_types
+
+
+def copy_form(modeladmin, request, queryset):
+
+    for obj in queryset:
+
+        now = datetime.now()
+        now_string = now.strftime("%y%d%m%h%M%S")
+        new_form = FormTemplate.objects.get(pk=obj.pk)
+        new_form.name = obj.name + now_string
+        new_form.slug = slugify(new_form.name)
+        new_form.pk = None
+        new_form.save()
+
+        for fs in obj.fieldsets.all():
+
+            if fs.name != 'no_fieldset':
+                new_fs = FieldSet.objects.get(pk=fs.pk)
+                new_fs.pk = None
+                new_fs.form_template = new_form
+                new_fs.save()
+            else:
+                new_fs = FieldSet.objects.get(form_template=new_form, name='no_fieldset')
+
+            for ft in fs.field_templates.all():
+                new_ft = FieldTemplate.objects.get(pk=ft.pk)
+                new_ft.pk = None
+                new_ft.form_template = new_form
+                new_ft.field_set = new_fs
+                new_ft.save()
+copy_form.short_description = "Copy Form Template"
 
 
 class CategoryAdmin(admin.ModelAdmin):
@@ -261,6 +294,7 @@ class FieldSetInline(admin.StackedInline):
 class FormTemplateAdmin(admin.ModelAdmin):
     form = FormTemplateForm
     inlines = [FieldSetInline, FieldTemplateInline, ]
+    actions = [copy_form]
     save_on_top = True
     prepopulated_fields = {"slug": ("name",)}
     fieldsets = (
@@ -276,7 +310,7 @@ class FormTemplateAdmin(admin.ModelAdmin):
         }),
         ('Advanced options', {
             'classes': ('collapse',),
-            'fields': (('background_color', 'text_color'),'header', 'footer'),
+            'fields': ('page_background_css',('background_color', 'text_color'),'header', 'footer'),
         }),
     )
 
@@ -304,6 +338,9 @@ class FormDataAdmin(admin.ModelAdmin):
             indent=4,
             separators=(',', ': ')
         )
+
+
+
 
 
 

@@ -91,6 +91,8 @@ class FormTemplate(models.Model):
         default=False,
         help_text="A dropzone is an area on the form where files can be dropped for upload"
     )
+
+    page_background_css = models.TextField(blank=True)
     background_color = RGBColorField(default="#FFFFFF")
     text_color = RGBColorField(default="#000000")
 
@@ -102,6 +104,7 @@ class FormTemplate(models.Model):
     modified = models.DateTimeField(auto_now=True)
 
     class Meta:
+        #unique_together = (("name", "category"),('slug','category'))
         unique_together = (("name", "category"),('slug','category'))
         verbose_name = "Form Template"
         verbose_name_plural = "Form Templates"

@@ -27,7 +27,6 @@ urlpatterns = [
     url('', include('social.apps.django_app.urls', namespace='social')),
     url('', include('builder.urls')),
     url('', include('login.urls')),
-    url(r'^markitup/', include('markitup.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 
