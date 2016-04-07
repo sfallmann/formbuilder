@@ -23,9 +23,9 @@ def copy_form(modeladmin, request, queryset):
     for obj in queryset:
 
         now = datetime.now()
-        now_string = now.strftime("%y%d%m%h%M%S")
+        now_string = now.strftime("%y%d%m%H%M%S%f")
         new_form = FormTemplate.objects.get(pk=obj.pk)
-        new_form.name = obj.name + now_string
+        new_form.name = "FT_" + now_string
         new_form.slug = slugify(new_form.name)
         new_form.pk = None
         new_form.save()
