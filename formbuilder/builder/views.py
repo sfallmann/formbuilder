@@ -116,20 +116,15 @@ def formtemplate_details(request, category, slug):
 
             print "form.use_as_prefix %s" % form.use_as_prefix
 
-            #process_files(
-            #    files["prepped_files"],
-            #    str(form_response.id),
-            #    format_folder_prefix(form.use_as_prefix),
-            #    ftp=True
-            #)
 
-            fp = FileProcessor(
-                str(form_response.id),
-                format_folder_prefix(form.use_as_prefix),
-                True
-            )
+            if files["prepped_files"]:
+                fp = FileProcessor(
+                    str(form_response.id),
+                    format_folder_prefix(form.use_as_prefix),
+                    True
+                )
 
-            fp.process_files(files["prepped_files"])
+                fp.process_files(files["prepped_files"])
 
             if request.is_ajax():
 

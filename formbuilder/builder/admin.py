@@ -1,4 +1,7 @@
 import json
+import csv
+from StringIO import StringIO
+from zipfile import ZipFile
 from pprint import pprint
 from datetime import datetime
 from django.contrib import admin
@@ -16,37 +19,6 @@ from .models import FieldTemplate, FieldChoice
 from .adminforms import FieldTemplateInlineForm, FieldTemplateForm
 from .adminforms import FieldSetInlineForm, FormTemplateForm
 from helper.constants import field_types
-
-
-def copy_form(modeladmin, request, queryset):
-
-    for obj in queryset:
-
-        now = datetime.now()
-        now_string = now.strftime("%y%d%m%H%M%S%f")
-        new_form = FormTemplate.objects.get(pk=obj.pk)
-        new_form.name = "FT_" + now_string
-        new_form.slug = slugify(new_form.name)
-        new_form.pk = None
-        new_form.save()
-
-        for fs in obj.fieldsets.all():
-
-            if fs.name != 'no_fieldset':
-                new_fs = FieldSet.objects.get(pk=fs.pk)
-                new_fs.pk = None
-                new_fs.form_template = new_form
-                new_fs.save()
-            else:
-                new_fs = FieldSet.objects.get(form_template=new_form, name='no_fieldset')
-
-            for ft in fs.field_templates.all():
-                new_ft = FieldTemplate.objects.get(pk=ft.pk)
-                new_ft.pk = None
-                new_ft.form_template = new_form
-                new_ft.field_set = new_fs
-                new_ft.save()
-copy_form.short_description = "Copy Form Template"
 
 
 class CategoryAdmin(admin.ModelAdmin):
@@ -212,8 +184,6 @@ class FieldTemplateAdmin(admin.ModelAdmin):
     def form_template_link(self, obj):
 
         link = obj.form_template.get_admin_change_url()
-
-
         return mark_safe("<a href='%s'>%s</a>" % (link, obj.form_template))
 
 
@@ -294,7 +264,7 @@ class FieldSetInline(admin.StackedInline):
 class FormTemplateAdmin(admin.ModelAdmin):
     form = FormTemplateForm
     inlines = [FieldSetInline, FieldTemplateInline, ]
-    actions = [copy_form]
+    actions = ["copy_form", "export_to_zipped_csv"]
     save_on_top = True
     prepopulated_fields = {"slug": ("name",)}
     fieldsets = (
@@ -313,6 +283,88 @@ class FormTemplateAdmin(admin.ModelAdmin):
             'fields': ('page_background_css',('background_color', 'text_color'),'header', 'footer'),
         }),
     )
+
+
+    def copy_form(self, request, queryset):
+
+        for obj in queryset:
+
+            now = datetime.now()
+            now_string = now.strftime("%y%d%m%H%M%S%f")
+            new_form = FormTemplate.objects.get(pk=obj.pk)
+            new_form.name = "FT_" + now_string
+            new_form.slug = slugify(new_form.name)
+            new_form.pk = None
+            new_form.save()
+
+            for fs in obj.fieldsets.all():
+
+                if fs.name != 'no_fieldset':
+                    new_fs = FieldSet.objects.get(pk=fs.pk)
+                    new_fs.pk = None
+                    new_fs.form_template = new_form
+                    new_fs.save()
+                else:
+                    new_fs = FieldSet.objects.get(form_template=new_form, name='no_fieldset')
+
+                for ft in fs.field_templates.all():
+                    new_ft = FieldTemplate.objects.get(pk=ft.pk)
+                    new_ft.pk = None
+                    new_ft.form_template = new_form
+                    new_ft.field_set = new_fs
+                    new_ft.save()
+
+    def export_to_zipped_csv(self, request, queryset):
+
+        in_memory = StringIO()
+        zip = ZipFile(in_memory, "a")
+
+        for obj in queryset:
+
+
+            form_data = FormData.data_objects.filter(form_template=obj)
+
+
+            fieldnames = []
+
+            for ft in obj.field_templates.all():
+
+                fieldnames.append(str(ft.name))
+
+            fieldnames.sort()
+            now = datetime.now()
+            now_string = now.strftime("%y%d%m%H%M%S%f")
+
+
+            csvfile = StringIO()
+            writer = csv.DictWriter(csvfile,fieldnames=fieldnames,dialect='excel')
+
+            writer.writeheader()
+
+            for data in form_data:
+                fields = data.data["fields"]
+                writer.writerow(data.data["fields"])
+
+            zip.writestr(now_string + '.csv', csvfile.getvalue())
+
+        # fix for Linux zip files read in Windows
+        for file in zip.filelist:
+            file.create_system = 0
+
+        zip.close()
+
+        response = HttpResponse(content_type="application/zip")
+        response["Content-Disposition"] = "attachment; filename=exports.zip"
+
+        in_memory.seek(0)
+        response.write(in_memory.read())
+
+        return response
+
+    export_to_zipped_csv.short_description = "Export to CSV (zipped)"
+    copy_form.short_description = "Copy Form Template"
+
+
 
 
 class FormDataAdmin(admin.ModelAdmin):

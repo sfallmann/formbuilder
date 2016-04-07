@@ -127,7 +127,7 @@ class FormTemplate(models.Model):
         content_type = ContentType.objects.get_for_model(self.__class__)
         return reverse(
             "admin:%s_%s_change" % (
-                content_type.app_label, content_type.model), args=(self.category, self.slug,))
+                content_type.app_label, content_type.model), args=(self.id,))
 
     def as_dict(self):
         return get_dict(self)
