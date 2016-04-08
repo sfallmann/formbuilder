@@ -2,14 +2,22 @@
 {% if user and not user.is_anonymous %}
   <a>Hello, {{ user.get_full_name }}!</a>
   <br>
-	{% if user.is_superuser %}
+    {% if user.is_superuser %}
   <a href="/admin">Admin Panel</a>
-	{% endif %}
-	<br>
+    {% endif %}
+    <br>
   <a href="/logout">Logout</a>
 {% else %}
 <br>
 <br>
+
+<form method="post" action="/login/">
+    {% csrf_token %}
+<input type="text" name="username" id="username"/>
+<input type="password" name="password" id="password"/>
+<input type="submit" value="Login">
+</form>
+
   <a href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.path }}">Login with Google</a>
 <br>
 <br>

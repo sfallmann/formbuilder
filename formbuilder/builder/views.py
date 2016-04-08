@@ -1,5 +1,6 @@
 import json
 from crispy_forms.utils import render_crispy_form
+from guardian.shortcuts import get_perms
 from django.conf import settings
 
 #  May not need-depends on formtemplate_results.
@@ -92,6 +93,13 @@ def formtemplate_details(request, category, slug):
     #  Get the FormTemplate object by id
     form_template = FormTemplate.objects.get(category__slug=category, slug=slug)
 
+    if form_template.login_required:
+        print request.user
+        if not request.user.is_authenticated():
+
+            request.session['form'] = form_template.get_absolute_url()
+
+            return HttpResponseRedirect("/login")
     #  Pass the FormTemplate object into Form
     form = Form(obj=form_template)
 

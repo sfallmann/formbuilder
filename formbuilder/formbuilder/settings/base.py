@@ -73,6 +73,7 @@ INSTALLED_APPS = [
     'ckeditor_uploader',
     'social.apps.django_app.default',
     'djangobower',
+    'guardian',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -105,6 +106,8 @@ TEMPLATES = [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
+                "django.core.context_processors.i18n",
+                "django.core.context_processors.media",
                 'django.contrib.messages.context_processors.messages',
                 'social.apps.django_app.context_processors.backends',
                 'social.apps.django_app.context_processors.login_redirect',
@@ -135,6 +138,7 @@ AUTHENTICATION_BACKENDS = (
 'social.backends.google.GoogleOAuth2',
 'social.backends.twitter.TwitterOAuth',
 'social.backends.amazon.AmazonOAuth2',
+'guardian.backends.ObjectPermissionBackend',
 )
 
 # Password validation

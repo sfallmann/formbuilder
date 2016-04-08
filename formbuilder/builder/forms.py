@@ -40,7 +40,7 @@ class Form(forms.Form):
 
         self.helper.form_id = "fb-form"
         self.helper.form_method = 'post'
-
+        self.login_required = obj.login_required
         self.helper.page_background_css = obj.page_background_css
         self.helper.background_color = obj.background_color
         self.helper.text_color = obj.text_color

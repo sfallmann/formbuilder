@@ -108,6 +108,10 @@ class FormTemplate(models.Model):
         unique_together = (("name", "category"),('slug','category'))
         verbose_name = "Form Template"
         verbose_name_plural = "Form Templates"
+        permissions = (
+            ('view_form_template', 'View Form Template'),
+        )
+
 
     def __str__(self):
         return self.name

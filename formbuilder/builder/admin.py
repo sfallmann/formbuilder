@@ -4,6 +4,7 @@ from StringIO import StringIO
 from zipfile import ZipFile
 from pprint import pprint
 from datetime import datetime
+from guardian.admin import GuardedModelAdmin
 from django.contrib import admin
 from django.conf import settings
 from django.utils.text import slugify
@@ -261,7 +262,7 @@ class FieldSetInline(admin.StackedInline):
             ).get_queryset(request).order_by('position')
 
 
-class FormTemplateAdmin(admin.ModelAdmin):
+class FormTemplateAdmin(GuardedModelAdmin):
     form = FormTemplateForm
     inlines = [FieldSetInline, FieldTemplateInline, ]
     actions = ["copy_form", "export_to_zipped_csv"]
