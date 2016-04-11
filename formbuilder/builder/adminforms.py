@@ -21,7 +21,11 @@ class FormTemplateForm(forms.ModelForm):
                 "type": "email",
                 "style": "width: 400px;"
             })
-
+        self.fields["ftp_password"].widget = forms.TextInput(
+            attrs={
+                "type": "password",
+            }
+        )
         #  changing the widget from the default
         self.fields['header'].widget = CKEditorUploadingWidget(
             config_name="default",

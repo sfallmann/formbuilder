@@ -30,6 +30,38 @@ class CategoryAdmin(admin.ModelAdmin):
 
 class FieldTemplateFormSet(BaseInlineFormSet):
 
+    def add_fields(self, form, index):
+
+        try:
+            instance = self.get_queryset()[index]
+            pk_value = instance.pk
+            fields = form.fields
+
+            #  define the fields common to all FieldTemplates
+            #  TODO:  Need to make this into a constant
+            common = [
+                "field_set",
+                "field_type",
+                "name",
+                "label",
+                "css_class",
+                "position",
+            ]
+            #  get all the availabled fields based on the value of field_type
+            #  and then sort them.
+
+            field_types.ATTRS[instance.field_type].sort()
+            visible_fields = common + field_types.ATTRS[instance.field_type]
+
+            for f in form.fields:
+                if f not in visible_fields:
+                    form.fields[f].disabled = True
+        except (TypeError, IndexError, KeyError):
+            instance=None
+            pk_value = hash(form.prefix)
+
+        super(FieldTemplateFormSet, self).add_fields(form, index)
+    '''
     def clean(self):
         super(FieldTemplateFormSet, self).clean()
 
@@ -53,15 +85,16 @@ class FieldTemplateFormSet(BaseInlineFormSet):
                         "Only one FieldTemplate can be 'used as prefix': "\
                             "check FieldTemplates %s" % str(use_as_prefix_list)
                     )
-
+    '''
 
 class FieldTemplateInline(admin.StackedInline):
 
     model = FieldTemplate
-    #formset = FieldTemplateFormSet
+    formset = FieldTemplateFormSet
     form = FieldTemplateInlineForm
     show_change_link = True
     extra = 0
+    '''
     fieldsets = (
         (None, {
             'fields': (('name', 'label'), ('field_set','field_type','position','css_class',)),
@@ -72,8 +105,6 @@ class FieldTemplateInline(admin.StackedInline):
 
         fs = super(
             FieldTemplateInline, self).get_formset(request, obj, **kwargs)
-
-        print fs.form.__dict__
 
         # only show the fields in the common to all field types
         self.fields = [
@@ -88,7 +119,7 @@ class FieldTemplateInline(admin.StackedInline):
 
 
         return fs
-
+    '''
 
     def get_queryset(self, request):
             return super(
@@ -276,12 +307,21 @@ class FormTemplateAdmin(GuardedModelAdmin):
                     'category',
                     'notification_list',
                     'login_required',
-                    'dropzone',
+                    ('dropzone','maxfiles_dropzone'),
                 )
         }),
-        ('Advanced options', {
+        ('FTP Transfer Options', {
             'classes': ('collapse',),
-            'fields': ('page_background_css',('background_color', 'text_color'),'header', 'footer'),
+            'fields': (
+                    'ftp_transfer',
+                    ('ftp_server','ftp_username','ftp_password'),)
+
+        }),
+        ('HTML & CSS Options', {
+            'classes': ('collapse',),
+            'fields': (
+                    ('background_color', 'text_color'),
+                    'page_background_css','header', 'footer'),
         }),
     )
 

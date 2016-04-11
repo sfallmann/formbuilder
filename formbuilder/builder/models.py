@@ -84,14 +84,38 @@ class FormTemplate(models.Model):
     notification_list = ArrayField(
         models.EmailField(max_length=100, blank=True),
         help_text="List of comma seperated email addresses that will be sent"\
-            " a notification when the form has been submitted"
+            " a notification when the form has been submitted",
+        blank=True
     )
 
     dropzone = models.BooleanField(
         default=False,
         help_text="A dropzone is an area on the form where files can be dropped for upload"
     )
+    maxfiles_dropzone = models.IntegerField(
+        default=10,
+        validators=[max_files],
+        help_text="Maximum files a dropzone will allow selected (1-10)",
+        verbose_name="Maximum dropzone files",
+    )
 
+    ftp_transfer = models.BooleanField(
+        default=True,
+        help_text="Transfer uploaded files to another server via ftp"
+    )
+
+    ftp_server = models.CharField(
+        max_length=100,
+        default=settings.FTP_SERVER
+    )
+    ftp_username = models.CharField(
+        max_length=100,
+        default=settings.FTP_USERNAME
+    )
+    ftp_password = models.CharField(
+        max_length=100,
+        default=settings.FTP_PASSWORD
+    )
     page_background_css = models.TextField(blank=True)
     background_color = RGBColorField(default="#FFFFFF")
     text_color = RGBColorField(default="#000000")
