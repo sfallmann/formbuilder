@@ -1,4 +1,4 @@
-{% extends "admin/change_form.html" %}
+{% extends "admin/guardian/model/change_form.html" %}
 {% load i18n admin_urls %}
 {% block object-tools-items %}
 <style>
@@ -14,6 +14,8 @@
         window.open(loc, "name", "width=1000,height=850");
         }
     </script>
+    {% url opts|admin_urlname:'permissions' original.pk|admin_urlquote as history_url %}
+    <li><a href="{% add_preserved_filters history_url %}" class="permissionslink">{% trans "Object permissions" %}</a></li>
     <li>
         <a href="{% url opts|admin_urlname:'history' original.pk|admin_urlquote %}" class="historylink">{% trans "History" %}</a>
     </li>
@@ -22,5 +24,51 @@
             <a target="popup" href="#" onclick=popupView("{% url 'admin:view_on_site' content_type_id original.pk %}"); class="historylink">{% trans "View on Site" %}</a>
         </li>
     {% endif %}
+<script>
 
+    $(document).ready(function(){
+        var elements = $("*");
+        var divs = $("div");
+
+        for (var i=0; i<elements.length; i++){
+
+            if ($(elements[i]).is(":disabled")){
+
+                var id = $(elements[i]).attr("id");
+                var res = id.split("-")
+
+                var divClass = "field-" + res[res.length-1];
+               if ($(elements[i]).closest('div[class^="form-row"]').hasClass(divClass)){
+                   $(elements[i]).closest('div[class^="form-row"]').hide();
+               }
+
+            }
+
+        }
+
+        var fieldChoices = $(".add-handler.grp-add-handler.djnesting-icon.fieldchoice");
+        var optEl = elements.filter("option");
+
+
+        for (var i=0; i<optEl.length; i++){
+
+           if ($(optEl[i]).attr("selected")){
+               var val = console.log($(optEl[i]).val());
+
+               if (val !== "radio"){
+
+                   var top = $(optEl[i]).parent().parent().parent().parent().parent();
+
+
+               }
+           }
+
+        }
+
+
+
+    });
+
+
+</script>
 {% endblock %}

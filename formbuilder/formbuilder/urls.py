@@ -24,6 +24,7 @@ urlpatterns = [
     url(r'^ckeditor/', include('ckeditor_uploader.urls')),
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^admin/', admin.site.urls),
+    url(r'^nested_admin/', include('nested_admin.urls')),
     url('', include('social.apps.django_app.urls', namespace='social')),
     url('', include('builder.urls')),
     url('', include('login.urls')),

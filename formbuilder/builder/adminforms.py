@@ -1,6 +1,7 @@
 from ckeditor.widgets import CKEditorWidget
 from ckeditor_uploader.widgets import CKEditorUploadingWidget
 from django import forms
+from django.forms import modelform_factory
 from django.conf import settings
 from django.db.models.query_utils import Q
 from django.core.exceptions import ValidationError
@@ -103,9 +104,9 @@ class FieldSetInlineForm(forms.ModelForm):
 
 class FieldTemplateInlineForm(forms.ModelForm):
 
+
     model = FieldTemplate
 
-    # del self.fields['field_for_item'] for dynamic fields
 
     def __init__(self, *args, **kwargs):
 

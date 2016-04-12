@@ -22,6 +22,8 @@ from .adminforms import FieldSetInlineForm, FormTemplateForm
 from helper.constants import field_types
 
 
+from nested_admin import NestedModelAdmin, NestedStackedInline
+
 class CategoryAdmin(admin.ModelAdmin):
 
     # Autofills the slug field based on the name field
@@ -56,6 +58,8 @@ class FieldTemplateFormSet(BaseInlineFormSet):
             for f in form.fields:
                 if f not in visible_fields:
                     form.fields[f].disabled = True
+                    form.fields[f].label = ""
+
         except (TypeError, IndexError, KeyError):
             instance=None
             pk_value = hash(form.prefix)
@@ -64,22 +68,15 @@ class FieldTemplateFormSet(BaseInlineFormSet):
     '''
     def clean(self):
         super(FieldTemplateFormSet, self).clean()
-
         use_as_prefix_list  = []
-
         for form in self.forms:
-
             if not hasattr(form, 'cleaned_data'):
                 continue
-
             data = form.cleaned_data
             use_as_prefix = data.get('use_as_prefix')
             name = str(data.get("name"))
-
             if(use_as_prefix):
-
                 use_as_prefix_list.append(name)
-
                 if len(use_as_prefix_list) > 1:
                     raise ValidationError(
                         "Only one FieldTemplate can be 'used as prefix': "\
@@ -87,25 +84,29 @@ class FieldTemplateFormSet(BaseInlineFormSet):
                     )
     '''
 
-class FieldTemplateInline(admin.StackedInline):
+
+class FieldChoiceInline(NestedStackedInline):
+    model = FieldChoice
+    extra = 0
+
+
+class FieldTemplateInline(NestedStackedInline):
 
     model = FieldTemplate
     formset = FieldTemplateFormSet
     form = FieldTemplateInlineForm
     show_change_link = True
     extra = 0
+    inlines = [FieldChoiceInline, ]
     '''
     fieldsets = (
         (None, {
             'fields': (('name', 'label'), ('field_set','field_type','position','css_class',)),
         }),
     )
-
     def get_formset(self, request, obj, **kwargs):
-
         fs = super(
             FieldTemplateInline, self).get_formset(request, obj, **kwargs)
-
         # only show the fields in the common to all field types
         self.fields = [
             "name",
@@ -116,10 +117,9 @@ class FieldTemplateInline(admin.StackedInline):
             "css_class",
             "position",
         ]
-
-
         return fs
     '''
+
 
     def get_queryset(self, request):
             return super(
@@ -144,12 +144,6 @@ class FieldTemplateInline(admin.StackedInline):
 
         return super(FieldTemplateInline, self).formfield_for_foreignkey(
             db_field, request, **kwargs)
-
-
-
-class FieldChoiceInline(admin.StackedInline):
-    model = FieldChoice
-    extra = 1
 
 
 class FieldTemplateAdmin(admin.ModelAdmin):
@@ -273,7 +267,7 @@ class FieldSetFormSet(BaseInlineFormSet):
                     )
 
 
-class FieldSetInline(admin.StackedInline):
+class FieldSetInline(NestedStackedInline):
 
     model = FieldSet
     form = FieldSetInlineForm
@@ -293,8 +287,9 @@ class FieldSetInline(admin.StackedInline):
             ).get_queryset(request).order_by('position')
 
 
-class FormTemplateAdmin(GuardedModelAdmin):
+class FormTemplateAdmin(NestedModelAdmin, GuardedModelAdmin):
     form = FormTemplateForm
+    change_form_template = 'admin/builder/formtemplate/change_form.html'
     inlines = [FieldSetInline, FieldTemplateInline, ]
     actions = ["copy_form", "export_to_zipped_csv"]
     save_on_top = True

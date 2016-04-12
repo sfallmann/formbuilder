@@ -10,10 +10,13 @@ django-crispy-forms==1.6.0
 django-debug-toolbar==1.4
 django-floppyforms==1.6.1
 django-guardian==1.4.4
+django-markitup==2.3.1
+django-nested-admin==2.2.6
 docutils==0.12
 et-xmlfile==1.0.1
 jdcal==1.2
 kombu==3.0.35
+Markdown==2.6.6
 nested-dict==1.61
 oauthlib==1.0.3
 Pillow==3.1.1
@@ -28,4 +31,3 @@ simplejson==3.8.2
 six==1.10.0
 sqlparse==0.1.19
 uWSGI==2.0.12
-wheel==0.29.0
