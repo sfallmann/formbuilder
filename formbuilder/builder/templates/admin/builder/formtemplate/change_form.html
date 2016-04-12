@@ -26,46 +26,20 @@
     {% endif %}
 <script>
 
-    $(document).ready(function(){
-        var elements = $("*");
-        var divs = $("div");
 
+    $(document).ready(function(){
+        var elements = $(".inline-related.dynamic-field_templates");
         for (var i=0; i<elements.length; i++){
 
-            if ($(elements[i]).is(":disabled")){
+            var fieldTypeEl = $(elements[i]).find("div.field-box.field-field_type");
+            var fieldTypeVal = $(fieldTypeEl).find("select").val();
 
-                var id = $(elements[i]).attr("id");
-                var res = id.split("-")
+            if (fieldTypeVal !== "radio" && fieldTypeVal !== "select"){
 
-                var divClass = "field-" + res[res.length-1];
-               if ($(elements[i]).closest('div[class^="form-row"]').hasClass(divClass)){
-                   $(elements[i]).closest('div[class^="form-row"]').hide();
-               }
-
+                var choices = $(elements[i]).find("div.inline-group.field_templates-nested-inline");
+                $(choices).hide();
             }
-
         }
-
-        var fieldChoices = $(".add-handler.grp-add-handler.djnesting-icon.fieldchoice");
-        var optEl = elements.filter("option");
-
-
-        for (var i=0; i<optEl.length; i++){
-
-           if ($(optEl[i]).attr("selected")){
-               var val = console.log($(optEl[i]).val());
-
-               if (val !== "radio"){
-
-                   var top = $(optEl[i]).parent().parent().parent().parent().parent();
-
-
-               }
-           }
-
-        }
-
-
 
     });
 

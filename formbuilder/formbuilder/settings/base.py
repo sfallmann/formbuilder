@@ -73,8 +73,8 @@ INSTALLED_APPS = [
     'ckeditor_uploader',
     'social.apps.django_app.default',
     'djangobower',
-    'nested_admin',
     'guardian',
+    'nested_inline',
 ]
 
 MIDDLEWARE_CLASSES = [

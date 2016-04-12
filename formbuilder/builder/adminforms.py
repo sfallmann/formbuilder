@@ -41,6 +41,18 @@ class FormTemplateForm(forms.ModelForm):
                 'style': 'height: 300px; width: 600px; font-size: 1.15em;'
             }
         )
+        if "instance" in kwargs:
+            ft = kwargs["instance"]
+
+            if not ft.dropzone:
+                self.fields["maxfiles_dropzone"].disabled = True
+
+            if not ft.ftp_transfer:
+                self.fields["ftp_server"].disabled = True
+                self.fields["ftp_username"].disabled = True
+                self.fields["ftp_password"].disabled = True
+        else:
+            self.fields["maxfiles_dropzone"].disabled = True
 
     def clean(self):
 

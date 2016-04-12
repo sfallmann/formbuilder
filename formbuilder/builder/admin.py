@@ -22,7 +22,7 @@ from .adminforms import FieldSetInlineForm, FormTemplateForm
 from helper.constants import field_types
 
 
-from nested_admin import NestedModelAdmin, NestedStackedInline
+from nested_inline.admin import NestedStackedInline, NestedModelAdmin
 
 class CategoryAdmin(admin.ModelAdmin):
 
@@ -34,6 +34,15 @@ class FieldTemplateFormSet(BaseInlineFormSet):
 
     def add_fields(self, form, index):
 
+        common = [
+            "field_set",
+            "field_type",
+            "name",
+            "label",
+            "css_class",
+            "position",
+        ]
+
         try:
             instance = self.get_queryset()[index]
             pk_value = instance.pk
@@ -41,14 +50,6 @@ class FieldTemplateFormSet(BaseInlineFormSet):
 
             #  define the fields common to all FieldTemplates
             #  TODO:  Need to make this into a constant
-            common = [
-                "field_set",
-                "field_type",
-                "name",
-                "label",
-                "css_class",
-                "position",
-            ]
             #  get all the availabled fields based on the value of field_type
             #  and then sort them.
 
@@ -58,14 +59,22 @@ class FieldTemplateFormSet(BaseInlineFormSet):
             for f in form.fields:
                 if f not in visible_fields:
                     form.fields[f].disabled = True
-                    form.fields[f].label = ""
+                    #form.fields[f].label = ""
 
         except (TypeError, IndexError, KeyError):
             instance=None
             pk_value = hash(form.prefix)
+            for f in form.fields:
+                form.fields[f].disabled = False
+                if f not in common:
+                    form.fields[f].disabled = True
+                    #form.fields[f].label = ""
+
+            form.fields["position"].disabled = True
+            #form.fields["position"].label = ""
 
         super(FieldTemplateFormSet, self).add_fields(form, index)
-    '''
+
     def clean(self):
         super(FieldTemplateFormSet, self).clean()
         use_as_prefix_list  = []
@@ -82,12 +91,13 @@ class FieldTemplateFormSet(BaseInlineFormSet):
                         "Only one FieldTemplate can be 'used as prefix': "\
                             "check FieldTemplates %s" % str(use_as_prefix_list)
                     )
-    '''
+
 
 
 class FieldChoiceInline(NestedStackedInline):
     model = FieldChoice
     extra = 0
+    fk_name = 'field_template'
 
 
 class FieldTemplateInline(NestedStackedInline):
@@ -97,13 +107,36 @@ class FieldTemplateInline(NestedStackedInline):
     form = FieldTemplateInlineForm
     show_change_link = True
     extra = 0
+    fk_name = 'form_template'
     inlines = [FieldChoiceInline, ]
-    '''
+
     fieldsets = (
         (None, {
-            'fields': (('name', 'label'), ('field_set','field_type','position','css_class',)),
+            'fields': (('name', 'label'), ('field_set','field_type','css_class','position') ,),
         }),
+        ("Input Options", {
+            'classes': ('collapse',),
+            'fields': (
+                    ("autocomplete","autofocus","disabled"),
+                    ("maxlength","pattern","help_text"),
+                    ("readonly","required"),
+                    "placeholder",)
+
+        }),
+        ("Text and Email Options",{
+            'classes': ("collapse",),
+            'fields': ('send_confirmation','use_as_prefix'),
+        }),
+        ("TextArea Options",{
+            'classes': ("collapse",),
+            'fields': ('cols','rows'),
+        }),
+        ("Number Options",{
+            'classes': ("collapse",),
+            'fields': ('minvalue','maxvalue'),
+        })
     )
+    '''
     def get_formset(self, request, obj, **kwargs):
         fs = super(
             FieldTemplateInline, self).get_formset(request, obj, **kwargs)
@@ -272,6 +305,7 @@ class FieldSetInline(NestedStackedInline):
     model = FieldSet
     form = FieldSetInlineForm
     formset = FieldSetFormSet
+    fk_name = 'form_template'
     show_change_link = False
 
     extra = 0
@@ -433,6 +467,6 @@ class FormDataAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Category, CategoryAdmin)
-admin.site.register(FieldTemplate, FieldTemplateAdmin)
+#admin.site.register(FieldTemplate, FieldTemplateAdmin)
 admin.site.register(FormTemplate, FormTemplateAdmin)
 admin.site.register(FormData, FormDataAdmin)
