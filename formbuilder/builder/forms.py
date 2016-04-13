@@ -50,7 +50,7 @@ class Form(forms.Form):
         if obj.dropzone:
             self.html_template = "dropzone_form.html"
             self.helper.form_class = "form-style dropzone"
-
+            self.maxfiles_dropzone = obj.maxfiles_dropzone
         else:
             self.html_template = "fileinput_form.html"
             self.helper.form_class = "form-style"

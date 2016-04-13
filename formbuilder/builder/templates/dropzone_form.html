@@ -43,5 +43,6 @@
 {% endblock %}
 
 {% block scripts %}
+<input type="hidden" id="dzMaxFiles" value='{{ form.maxfiles_dropzone }}' />
 <script src="{% static 'js/lib/fb/fb-dropzone.js' %}"></script>
 {% endblock %}

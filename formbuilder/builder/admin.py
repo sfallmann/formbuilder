@@ -65,13 +65,10 @@ class FieldTemplateFormSet(BaseInlineFormSet):
             instance=None
             pk_value = hash(form.prefix)
             for f in form.fields:
-                form.fields[f].disabled = False
+                if f != "position":
+                    form.fields[f].disabled = False
                 if f not in common:
                     form.fields[f].disabled = True
-                    #form.fields[f].label = ""
-
-            form.fields["position"].disabled = True
-            #form.fields["position"].label = ""
 
         super(FieldTemplateFormSet, self).add_fields(form, index)
 
@@ -134,6 +131,10 @@ class FieldTemplateInline(NestedStackedInline):
         ("Number Options",{
             'classes': ("collapse",),
             'fields': ('minvalue','maxvalue'),
+        }),
+        ("HTML Options",{
+            'classes': ("collapse",),
+            'fields': ('html',),
         })
     )
     '''

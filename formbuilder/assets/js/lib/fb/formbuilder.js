@@ -40,7 +40,7 @@
             document.getElementsByTagName("body")[0].style.visibility = "visible";
         }
 
-        setTimeout(showPage, 250);
+        setTimeout(showPage, 500);
 
     });
 
@@ -50,6 +50,13 @@
         $submit: $("#submit-id-submit"),
         $errors: $("#error-div"),
         $phoneSelects: $("input[type=tel]"),
+        $popupTarget: $("#popupTarget"),
+        $popup: $("<div/>", { id: "popup" }),
+        maxFiles: function(){
+
+            return parseInt($("#dzMaxFiles").val());
+
+        },
         getCookie: function (name)
         {
             var cookieValue = null;
@@ -80,11 +87,25 @@
             console.log(message);
             fb.$errors.append(html);
         },
+        initPopup: function(){
+
+            fb.$popupTarget.append(fb.$popup);
+
+            fb.$popup.bPopup({
+
+                escClose: false,
+                modalClose: false
+
+            });
+
+        },
         recaptchaCheck: function(){
 
             console.log("initiate reCaptcha check");
 
-            var target = fb.$form[0];
+            var target = fb.$popup[0];
+
+            fb.initPopup();
             fb.spinner.spin(target);
 
             $.ajax(
@@ -112,9 +133,10 @@
                     },
                     error: function(xhr){
 
+                        fb.$popup.close();
                         fb.spinner.stop();
 
-                        var messsage = "There was a problem sending the recaptcha check to the server"
+                        var messsage = "There was a problem sending the recaptcha check to the server";
                         fb.displayError(message);
 
                     }
@@ -131,17 +153,17 @@
 
             var spinOpts = {
                   lines: 16 // The number of lines to draw
-                , length: 0 // The length of each line
+                , length: 10 // The length of each line
                 , width: 8 // The line thickness
                 , radius: 60 // The radius of the inner circle
                 , scale: 1.5 // Scales overall size of the spinner
                 , corners: 1 // Corner roundness (0..1)
-                , color: '#4ba9c8' // #rgb or #rrggbb or array of colors
-                , opacity: 0.85 // Opacity of the lines
+                , color: '#FFFFFF' // #rgb or #rrggbb or array of colors
+                , opacity: 0.50 // Opacity of the lines
                 , rotate: 0 // The rotation offset
                 , direction: 1 // 1: clockwise, -1: counterclockwise
-                , speed: .75 // Rounds per second
-                , trail: 25 // Afterglow percentage
+                , speed: 1.0 // Rounds per second
+                , trail: 60 // Afterglow percentage
                 , fps: 20 // Frames per second when using setTimeout() as a fallback for CSS
                 , zIndex: 2e9 // The z-index (defaults to 2000000000)
                 , className: 'spinner' // The CSS class to assign to the spinner

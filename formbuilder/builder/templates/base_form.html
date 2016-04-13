@@ -104,6 +104,18 @@
         color: black;
     }
 
+    #popup {
+        height: 100vh;
+        width: 100vw;
+        position: absolute;
+        left: 0px;
+        top: 0px;
+
+    }
+
+
+
+
 </style>
 {% block header_css_scripts %}
 
@@ -154,9 +166,10 @@
     {% endblock %}
     </div>
     <br/>
-
+    <div id="popupTarget"></div>
 
 <script src="{% static 'js/lib/spin/spin.js' %}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bPopup/0.11.0/jquery.bpopup.min.js"></script>
 <script src="{% static 'intl-tel-input/build/js/intlTelInput.min.js' %}"></script>
 <script src="{% static 'intl-tel-input/build/js/utils.js' %}"></script>
 <script src="{% static 'js/lib/fb/formbuilder.js' %}"></script>

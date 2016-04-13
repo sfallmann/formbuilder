@@ -4,7 +4,6 @@ import ftplib
 from django.conf import settings
 #from celery.contrib.methods import task
 from celery import current_app
-from celery import chord
 from celery.contrib.methods import task_method
 
 #from formbuilder.celery import app
@@ -38,8 +37,8 @@ class FileProcessor(object):
             self.save_files(files)
 
             if self.ftp_transfer:
-                res = self.ftp_uploader.delay()
-                print res.get()
+                self.ftp_uploader.delay()
+
     def make_folder(self):
 
         if not os.path.exists(self.local_path):
