@@ -175,7 +175,7 @@
 
                 var complete = function(){
 
-                    //fb.$submit.removeAttr("disabled");
+                    fb.$submit.removeAttr("disabled");
                     window.location = response.redirect;
                 }
 

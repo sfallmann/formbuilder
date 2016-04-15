@@ -147,7 +147,7 @@
         },
 
         init: function(){
-
+            fb.$submit.removeAttr("disabled");
             $(".accordion-toggle").addClass("collapsed").attr("aria-expanded","false");
             $(".panel-collapse.collapse.in").removeClass("in").attr("aria-expanded","false");
 
